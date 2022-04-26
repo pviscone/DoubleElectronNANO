@@ -109,10 +109,10 @@ class CandMCMatchTableProducerBPark : public edm::global::EDProducer<> {
                 };
             }    
             
-            tab->addColumn<int>(branchName_+"Idx",  key, "Index into genParticle list for "+doc_, nanoaod::FlatTable::IntColumn);
+            tab->addColumn<int>(branchName_+"Idx",  key, "Index into genParticle list for "+doc_);
 	    //for(auto ij : flav) std::cout << " flav = " << ij << " " << (uint8_t)ij << std::endl;
-            //tab->addColumn<uint8_t>(branchName_+"Flav", flav, "Flavour of genParticle for "+doc_+": "+flavDoc_, nanoaod::FlatTable::UInt8Column);
-	    tab->addColumn<int>(branchName_+"Flav", flav, "Flavour of genParticle for "+doc_+": "+flavDoc_, nanoaod::FlatTable::IntColumn);
+            //tab->addColumn<uint8_t>(branchName_+"Flav", flav, "Flavour of genParticle for "+doc_+": "+flavDoc_);
+	    tab->addColumn<int>(branchName_+"Flav", flav, "Flavour of genParticle for "+doc_+": "+flavDoc_);
 
             iEvent.put(std::move(tab));
         }
