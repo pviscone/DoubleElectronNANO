@@ -23,28 +23,22 @@ public:
 
       // LPT regression stuff                                                                                                         
       if( cfg.existsAs<edm::ParameterSet>("lowPtRegressionConfig") ) {
-	const edm::ParameterSet& iconf = cfg.getParameterSet("lowPtRegressionConfig");
-	const std::string& mname = iconf.getParameter<std::string>("modifierName");
-	ModifyObjectValueBase* plugin =
-	  ModifyObjectValueFactory::get()->create(mname,iconf);
-	regression_.reset(plugin);
-	edm::ConsumesCollector sumes = consumesCollector();
-	regression_->setConsumes(sumes);
+	auto const& iconf = cfg.getParameterSet("lowPtRegressionConfig");
+	auto const& mname = iconf.getParameter<std::string>("modifierName");
+	auto cc = consumesCollector();
+	regression_ = ModifyObjectValueFactory::get()->create(mname,iconf,cc);
       } else {
-	regression_.reset(nullptr);
+	regression_ = nullptr;
       }
 
       // PF regression                                                                                                           
       if( cfg.existsAs<edm::ParameterSet>("gsfRegressionConfig") ) {
-	const edm::ParameterSet& iconf = cfg.getParameterSet("gsfRegressionConfig");
-	const std::string& mname = iconf.getParameter<std::string>("modifierName");
-      ModifyObjectValueBase* plugin =
-        ModifyObjectValueFactory::get()->create(mname,iconf);
-      regressionGsf_.reset(plugin);
-      edm::ConsumesCollector sumes = consumesCollector();
-      regressionGsf_->setConsumes(sumes);
+	auto const& iconf = cfg.getParameterSet("gsfRegressionConfig");
+	auto const& mname = iconf.getParameter<std::string>("modifierName");
+	auto cc = consumesCollector();
+	regressionGsf_ = ModifyObjectValueFactory::get()->create(mname,iconf,cc);
       } else {
-	regressionGsf_.reset(nullptr);
+	regressionGsf_ = nullptr;
       }
 
       produces<pat::ElectronCollection>("regressedElectrons");
