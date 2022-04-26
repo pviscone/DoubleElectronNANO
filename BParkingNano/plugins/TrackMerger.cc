@@ -11,6 +11,7 @@
 #include "DataFormats/Common/interface/RefToPtr.h"
 #include "DataFormats/Common/interface/View.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "MagneticField/Engine/interface/MagneticField.h"

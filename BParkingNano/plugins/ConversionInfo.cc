@@ -1,4 +1,5 @@
 #include "ConversionInfo.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Matched to any conversion (without selections)
