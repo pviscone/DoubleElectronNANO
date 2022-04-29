@@ -7,23 +7,6 @@ from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
     import mvaEleID_BParkRetrain_producer_config
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 
-
-# The producer to compute the MVA input variables which are not accessible with the cut parser
-electronMVAVariableHelper = cms.EDProducer('GsfElectronMVAVariableHelper',
-  # The module automatically detects AOD vs miniAOD, so we configure both
-  # AOD case
-  src = cms.InputTag('gedGsfElectrons'),
-  vertexCollection = cms.InputTag("offlinePrimaryVertices"),
-  beamSpot         = cms.InputTag("offlineBeamSpot"),
-conversions = cms.InputTag("allConversions"),
-  # miniAOD case
-  #srcMiniAOD              = cms.InputTag('slimmedElectrons',processName=cms.InputTag.skipCurrentProcess()),  
-  srcMiniAOD              = cms.InputTag('regressionForEle:regressedElectrons'),
-  vertexCollectionMiniAOD = cms.InputTag("offlineSlimmedPrimaryVertices"),
-  beamSpotMiniAOD         = cms.InputTag("offlineBeamSpot"),
-  conversionsMiniAOD      = cms.InputTag("reducedEgamma:reducedConversions"),
-)
-
 electronMVAValueMapProducer = cms.EDProducer(
   'ElectronMVAValueMapProducer',
   # AOD case
@@ -43,7 +26,6 @@ egmGsfElectronIDs = cms.EDProducer(
 )
 
 egmGsfElectronIDTask = cms.Task(
-    electronMVAVariableHelper,
     electronMVAValueMapProducer,
     egmGsfElectronIDs,
 )
@@ -51,149 +33,51 @@ egmGsfElectronIDTask = cms.Task(
 egmGsfElectronIDSequence = cms.Sequence(egmGsfElectronIDTask)
 
 # regression stuff
-from RecoEgamma.EgammaTools.regressionModifierNew_cfi import regressionModifier106XUL
-from RecoEgamma.EgammaTools.regressionModifierNew_cfi import regressionModifier106XULLP
+from RecoEgamma.EgammaTools.regressionModifier_cfi import regressionModifier106XUL
+_gsfRegressionModifier = regressionModifier106XUL.clone(
+    modifierName = 'EGRegressionModifierV3',
+    rhoTag = 'fixedGridRhoFastjetAll', # this is ...Tmp in 10_2_X
+    eleRegs = dict(
+        ecalOnlyMean = dict(
+            ebLowEtForestName = "gsfElectron_eb_ecalOnly_05To50_mean",
+            ebHighEtForestName = "gsfElectron_eb_ecalOnly_05To50_mean",
+            eeLowEtForestName = "gsfElectron_ee_ecalOnly_05To50_mean",
+            eeHighEtForestName = "gsfElectron_ee_ecalOnly_05To50_mean",
+        ),
+        ecalOnlySigma = dict(
+            ebLowEtForestName = "gsfElectron_eb_ecalOnly_05To50_sigma",
+            ebHighEtForestName = "gsfElectron_eb_ecalOnly_05To50_sigma",
+            eeLowEtForestName = "gsfElectron_ee_ecalOnly_05To50_sigma",
+            eeHighEtForestName = "gsfElectron_ee_ecalOnly_05To50_sigma",
+        ),
+        epComb = dict(
+            ecalTrkRegressionConfig = dict(
+                ebLowEtForestName = "gsfElectron_eb_ecalTrk_05To50_mean",
+                ebHighEtForestName = "gsfElectron_eb_ecalTrk_05To50_mean",
+                eeLowEtForestName = "gsfElectron_ee_ecalTrk_05To50_mean",
+                eeHighEtForestName = "gsfElectron_ee_ecalTrk_05To50_mean",
+            ),
+            ecalTrkRegressionUncertConfig = dict(
+                ebLowEtForestName = "gsfElectron_eb_ecalTrk_05To50_sigma",
+                ebHighEtForestName = "gsfElectron_eb_ecalTrk_05To50_sigma",
+                eeLowEtForestName = "gsfElectron_ee_ecalTrk_05To50_sigma",
+                eeHighEtForestName = "gsfElectron_ee_ecalTrk_05To50_sigma",
+            ),
+        ),
+    ),
+)
 
 regressionForEle = cms.EDProducer(
-  'ElectronRegresser',
-  lowptSrc = cms.InputTag('slimmedLowPtElectrons'),
-  pfSrc    = cms.InputTag('slimmedElectrons'),
-    lowPtRegressionConfig = cms.PSet(
-      modifierName = cms.string('EGRegressionModifierLPV1'),
-      rhoTag = cms.string('fixedGridRhoFastjetAll'),
-      useClosestToCentreSeedCrysDef = cms.bool(False),
-      maxRawEnergyForLowPtEBSigma = cms.double(-1),
-      maxRawEnergyForLowPtEESigma = cms.double(1200.),
-      eleRegs = cms.PSet(
-        ecalOnlyMean = cms.PSet(
-            rangeMinLowEt = cms.double(0.2),
-            rangeMaxLowEt = cms.double(2.0),
-            rangeMinHighEt = cms.double(-1.),
-            rangeMaxHighEt = cms.double(3.0),
-            forceHighEnergyTrainingIfSaturated = cms.bool(True),
-            lowEtHighEtBoundary = cms.double(20.),
-            ebLowEtForestName = cms.string("lowPtElectron_eb_ecalOnly_05To20_mean"),
-            ebHighEtForestName = cms.string("lowPtElectron_eb_ecalOnly_20To50_mean"),
-            eeLowEtForestName = cms.string("lowPtElectron_ee_ecalOnly_05To20_mean"),
-            eeHighEtForestName = cms.string("lowPtElectron_ee_ecalOnly_20To50_mean"),
-            ),
-        ecalOnlySigma = cms.PSet(
-            rangeMinLowEt = cms.double(0.0002),
-            rangeMaxLowEt = cms.double(0.5),
-            rangeMinHighEt = cms.double(0.0002),
-            rangeMaxHighEt = cms.double(0.5),
-            forceHighEnergyTrainingIfSaturated = cms.bool(True),
-            lowEtHighEtBoundary = cms.double(20.),
-            ebLowEtForestName = cms.string("lowPtElectron_eb_ecalOnly_05To20_sigma"),
-            ebHighEtForestName = cms.string("lowPtElectron_eb_ecalOnly_20To50_sigma"),
-            eeLowEtForestName = cms.string("lowPtElectron_ee_ecalOnly_05To20_sigma"),
-            eeHighEtForestName = cms.string("lowPtElectron_ee_ecalOnly_20To50_sigma"),
-            ),
-        epComb = cms.PSet(
-            ecalTrkRegressionConfig = cms.PSet(
-                rangeMinLowEt = cms.double(0.2),
-                rangeMaxLowEt = cms.double(2.0),
-                rangeMinHighEt = cms.double(0.2),
-                rangeMaxHighEt = cms.double(2.0),
-                lowEtHighEtBoundary = cms.double(20.),
-                forceHighEnergyTrainingIfSaturated = cms.bool(False),
-                ebLowEtForestName = cms.string('lowPtElectron_eb_ecalTrk_05To20_mean'),
-                ebHighEtForestName = cms.string('lowPtElectron_eb_ecalTrk_20To50_mean'),
-                eeLowEtForestName = cms.string('lowPtElectron_ee_ecalTrk_05To20_mean'),
-                eeHighEtForestName = cms.string('lowPtElectron_ee_ecalTrk_20To50_mean'),
-                ),
-            ecalTrkRegressionUncertConfig = cms.PSet(
-                rangeMinLowEt = cms.double(0.0002),
-                rangeMaxLowEt = cms.double(0.5),
-                rangeMinHighEt = cms.double(0.0002),
-                rangeMaxHighEt = cms.double(0.5),
-                lowEtHighEtBoundary = cms.double(20.),
-                forceHighEnergyTrainingIfSaturated = cms.bool(False),
-                ebLowEtForestName = cms.string('lowPtElectron_eb_ecalTrk_05To20_sigma'),
-                ebHighEtForestName = cms.string('lowPtElectron_eb_ecalTrk_20To50_sigma'),
-                eeLowEtForestName = cms.string('lowPtElectron_ee_ecalTrk_05To20_sigma'),
-                eeHighEtForestName = cms.string('lowPtElectron_ee_ecalTrk_20To50_sigma'),
-                ),
-            maxEcalEnergyForComb=cms.double(200.),
-            minEOverPForComb=cms.double(0.025),
-            maxEPDiffInSigmaForComb=cms.double(15.),
-            maxRelTrkMomErrForComb=cms.double(10.),
-            )
-        ),
-      phoRegs = regressionModifier106XUL.phoRegs.clone()
-    ),
-    gsfRegressionConfig = cms.PSet(
-      modifierName = cms.string('EGRegressionModifierV3'),
-      rhoTag = cms.string('fixedGridRhoFastjetAll'),
-      useClosestToCentreSeedCrysDef = cms.bool(False),
-      maxRawEnergyForLowPtEBSigma = cms.double(-1),
-      maxRawEnergyForLowPtEESigma = cms.double(1200.),
-      eleRegs = cms.PSet(
-        ecalOnlyMean = cms.PSet(
-            rangeMinLowEt = cms.double(0.2),
-            rangeMaxLowEt = cms.double(2.0),
-            rangeMinHighEt = cms.double(-1.),
-            rangeMaxHighEt = cms.double(3.0),
-            forceHighEnergyTrainingIfSaturated = cms.bool(True),
-            lowEtHighEtBoundary = cms.double(999999.),
-            ebLowEtForestName = cms.string("gsfElectron_eb_ecalOnly_05To50_mean"),
-            ebHighEtForestName = cms.string("gsfElectron_eb_ecalOnly_05To50_mean"),
-            eeLowEtForestName = cms.string("gsfElectron_ee_ecalOnly_05To50_mean"),
-            eeHighEtForestName = cms.string("gsfElectron_ee_ecalOnly_05To50_mean"),
-            ),
-        ecalOnlySigma = cms.PSet(
-            rangeMinLowEt = cms.double(0.0002),
-            rangeMaxLowEt = cms.double(0.5),
-            rangeMinHighEt = cms.double(0.0002),
-            rangeMaxHighEt = cms.double(0.5),
-            forceHighEnergyTrainingIfSaturated = cms.bool(True),
-            lowEtHighEtBoundary = cms.double(999999.),
-            ebLowEtForestName = cms.string("gsfElectron_eb_ecalOnly_05To50_sigma"),
-            ebHighEtForestName = cms.string("gsfElectron_eb_ecalOnly_05To50_sigma"),
-            eeLowEtForestName = cms.string("gsfElectron_ee_ecalOnly_05To50_sigma"),
-            eeHighEtForestName = cms.string("gsfElectron_ee_ecalOnly_05To50_sigma"),
-            ),
-        epComb = cms.PSet(
-            ecalTrkRegressionConfig = cms.PSet(
-                rangeMinLowEt = cms.double(0.2),
-                rangeMaxLowEt = cms.double(2.0),
-                rangeMinHighEt = cms.double(0.2),
-                rangeMaxHighEt = cms.double(2.0),
-                lowEtHighEtBoundary = cms.double(999999.),
-                forceHighEnergyTrainingIfSaturated = cms.bool(False),
-                ebLowEtForestName = cms.string('gsfElectron_eb_ecalTrk_05To50_mean'),
-                ebHighEtForestName = cms.string('gsfElectron_eb_ecalTrk_05To50_mean'),
-                eeLowEtForestName = cms.string('gsfElectron_ee_ecalTrk_05To50_mean'),
-                eeHighEtForestName = cms.string('gsfElectron_ee_ecalTrk_05To50_mean'),
-                ),
-            ecalTrkRegressionUncertConfig = cms.PSet(
-                rangeMinLowEt = cms.double(0.0002),
-                rangeMaxLowEt = cms.double(0.5),
-                rangeMinHighEt = cms.double(0.0002),
-                rangeMaxHighEt = cms.double(0.5),
-                lowEtHighEtBoundary = cms.double(999999.),
-                forceHighEnergyTrainingIfSaturated = cms.bool(False),
-                ebLowEtForestName = cms.string('gsfElectron_eb_ecalTrk_05To50_sigma'),
-                ebHighEtForestName = cms.string('gsfElectron_eb_ecalTrk_05To50_sigma'),
-                eeLowEtForestName = cms.string('gsfElectron_ee_ecalTrk_05To50_sigma'),
-                eeHighEtForestName = cms.string('gsfElectron_ee_ecalTrk_05To50_sigma'),
-                ),
-            maxEcalEnergyForComb=cms.double(200.),
-            minEOverPForComb=cms.double(0.025),
-            maxEPDiffInSigmaForComb=cms.double(15.),
-            maxRelTrkMomErrForComb=cms.double(10.),
-            )
-        ),
-      phoRegs = regressionModifier106XUL.phoRegs.clone()
-    )
-
+    'ElectronRegresser',
+    pfSrc = cms.InputTag('slimmedElectrons'),
+    gsfRegressionConfig = _gsfRegressionModifier,
 )
 
 #Everything can be done here, in one loop and save time :)
 electronsForAnalysis = cms.EDProducer(
   'ElectronMerger',
   trgMuon = cms.InputTag('muonTrgSelector:trgMuons'),
-  lowptSrc = cms.InputTag('regressionForEle:regressedLowPtElectrons'),
+  lowptSrc = cms.InputTag('slimmedLowPtElectrons'),
   pfSrc    = cms.InputTag('regressionForEle:regressedElectrons'),
   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
@@ -250,8 +134,8 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         trkRelIso = Var("trackIso/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
         isPF = Var("userInt('isPF')",bool,doc="electron is PF candidate"),
         isLowPt = Var("userInt('isLowPt')",bool,doc="electron is LowPt candidate"),
-        ptBiased = Var("userFloat('ptBiased')",float,doc="ptBiased from seed BDT 20 for pfEle"), 
-        unBiased = Var("userFloat('unBiased')",float,doc="unBiased from seed BDT 20 for pfEle"), 
+        ptBiased = Var("userFloat('ptBiased')",float,doc="ptBiased from seed BDT 20 for pfEle"),
+        unBiased = Var("userFloat('unBiased')",float,doc="unBiased from seed BDT 20 for pfEle"),
         mvaId = Var("userFloat('mvaId')",float,doc="MVA ID for low pT, 20 for pfEle"),
         pfmvaId = Var("userFloat('pfmvaId')",float,doc="MVA ID for pfEle, 20 for low pT"),
         fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
