@@ -134,14 +134,18 @@ bool ConversionInfo::match(const edm::Handle<reco::BeamSpot>& beamSpot,
     info.ntracks = conv.tracks().size(); // (=2)
     info.min_trk_pt = -1.; // (>0.5)
     for ( const auto& trk : conv.tracks() ) {
-      if ( info.min_trk_pt < 0. || trk->pt() < info.min_trk_pt ) { info.min_trk_pt = trk->pt(); }
+      if ( trk.isNonnull() && trk.isAvailable() &&
+	   ( info.min_trk_pt < 0. || trk->pt() < info.min_trk_pt ) ) { info.min_trk_pt = trk->pt(); }
     }
     info.ilead = -1; info.itrail = -1;
     if ( conv.tracks().size() == 2 ) {
       edm::RefToBase<reco::Track> trk1 = conv.tracks().front();
       edm::RefToBase<reco::Track> trk2 = conv.tracks().back();
-      if      ( trk1->pt() > trk2->pt() ) { info.ilead = 0; info.itrail = 1; }
-      else if ( trk1->pt() < trk2->pt() ) { info.ilead = 1; info.itrail = 0; }
+      if ( trk1.isNonnull() && trk1.isAvailable() &&
+	   trk2.isNonnull() && trk2.isAvailable() ) {
+	if ( trk1->pt() > trk2->pt() ) { info.ilead = 0; info.itrail = 1; }
+	else                           { info.ilead = 1; info.itrail = 0; }
+      }
     }
 
     // Transverse displacement (with respect to beamspot) and vertex radius
@@ -155,7 +159,8 @@ bool ConversionInfo::match(const edm::Handle<reco::BeamSpot>& beamSpot,
     info.mass_from_conv = conv.pairInvariantMass();
     
     // Invariant mass from Pin before fit to common vertex 
-    if ( conv.tracksPin().size() >= 2 ) {
+    if ( conv.tracksPin().size() >= 2 &&
+	 info.ilead > -1 && info.itrail > -1 ) {
       math::XYZVectorF lead_Pin = conv.tracksPin().at(info.ilead);
       math::XYZVectorF trail_Pin = conv.tracksPin().at(info.itrail);
       info.mass_from_Pin = mee( lead_Pin.x(), lead_Pin.y(), lead_Pin.z(),
@@ -165,7 +170,8 @@ bool ConversionInfo::match(const edm::Handle<reco::BeamSpot>& beamSpot,
     }
 
     // Invariant mass before fit to common vertex
-    if ( conv.tracks().size() >= 2 ) {
+    if ( conv.tracks().size() >= 2 &&
+	 info.ilead > -1 && info.itrail > -1 ) {
       edm::RefToBase<reco::Track> lead_before_vtx_fit = conv.tracks().at(info.ilead);
       edm::RefToBase<reco::Track> trail_before_vtx_fit = conv.tracks().at(info.itrail);
       info.mass_before_fit = mee( lead_before_vtx_fit->px(), lead_before_vtx_fit->py(), lead_before_vtx_fit->pz(),
@@ -173,7 +179,8 @@ bool ConversionInfo::match(const edm::Handle<reco::BeamSpot>& beamSpot,
     }
 
     // Invariant mass after the fit to common vertex
-    if ( conv.conversionVertex().refittedTracks().size() >=2 ) {
+    if ( conv.conversionVertex().refittedTracks().size() >=2 &&
+	 info.ilead > -1 && info.itrail > -1 ) {
       const reco::Track lead_after_vtx_fit = conv.conversionVertex().refittedTracks().at(info.ilead);
       const reco::Track trail_after_vtx_fit = conv.conversionVertex().refittedTracks().at(info.itrail);
       info.mass_after_fit = mee( lead_after_vtx_fit.px(), lead_after_vtx_fit.py(), lead_after_vtx_fit.pz(),
@@ -185,15 +192,17 @@ bool ConversionInfo::match(const edm::Handle<reco::BeamSpot>& beamSpot,
     }
     
     // Hits prior to vertex
-    info.lead_nhits_before_vtx  = conv.nHitsBeforeVtx().size() > 1 ? conv.nHitsBeforeVtx().at(info.ilead) : 0;
-    info.trail_nhits_before_vtx = conv.nHitsBeforeVtx().size() > 1 ? conv.nHitsBeforeVtx().at(info.itrail) : 0;
-    info.max_nhits_before_vtx = conv.nHitsBeforeVtx().size() > 1 ?
-      ( conv.nHitsBeforeVtx().at(0) > conv.nHitsBeforeVtx().at(1) ?
-	conv.nHitsBeforeVtx().at(0) :
-	conv.nHitsBeforeVtx().at(1) ) : 0;
-    info.sum_nhits_before_vtx = conv.nHitsBeforeVtx().size() > 1 ?
-      conv.nHitsBeforeVtx().at(0) +
-      conv.nHitsBeforeVtx().at(1) : 0;
+    if ( info.ilead > -1 && info.itrail > -1 ) {
+      info.lead_nhits_before_vtx  = conv.nHitsBeforeVtx().size() > 1 ? conv.nHitsBeforeVtx().at(info.ilead) : 0;
+      info.trail_nhits_before_vtx = conv.nHitsBeforeVtx().size() > 1 ? conv.nHitsBeforeVtx().at(info.itrail) : 0;
+      info.max_nhits_before_vtx = conv.nHitsBeforeVtx().size() > 1 ?
+	( conv.nHitsBeforeVtx().at(0) > conv.nHitsBeforeVtx().at(1) ?
+	  conv.nHitsBeforeVtx().at(0) :
+	  conv.nHitsBeforeVtx().at(1) ) : 0;
+      info.sum_nhits_before_vtx = conv.nHitsBeforeVtx().size() > 1 ?
+	conv.nHitsBeforeVtx().at(0) +
+	conv.nHitsBeforeVtx().at(1) : 0;
+    }
     
     // Attempt to match conversion track to electron
     for ( uint itrk = 0; itrk < conv.tracks().size(); ++itrk ) {
@@ -205,14 +214,9 @@ bool ConversionInfo::match(const edm::Handle<reco::BeamSpot>& beamSpot,
       if ( gsf.isNull() ) { continue; }
 
       if ( gsf.id() == trk.id() && gsf.key() == trk.key() )  { 
-	if ( (int)itrk == info.ilead ) {
-	  info.matched = true;
-	  info.matched_lead = trk;
-	}
-	if ( (int)itrk == info.itrail ) {
-	  info.matched = true;
-	  info.matched_trail = trk;
-	}
+	info.matched = true;
+	if ( (int)itrk == info.ilead ) { info.matched_lead = trk; }
+	if ( (int)itrk == info.itrail ) { info.matched_trail = trk; }
       }
       
     } // track loop
