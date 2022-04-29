@@ -73,7 +73,7 @@ inline GlobalPoint FlightDistVector (const reco::BeamSpot & bm, GlobalPoint Bvtx
    GlobalPoint Dispbeamspot(-1*( (bm.x0()-Bvtx.x()) + (Bvtx.z()-bm.z0()) * bm.dxdz()),
 			   -1*( (bm.y0()-Bvtx.y()) + (Bvtx.z()-bm.z0()) * bm.dydz()), 
                             0);                    
-   return std::move(Dispbeamspot);
+   return Dispbeamspot;
 }
 
 
@@ -81,7 +81,7 @@ inline float CosA(GlobalPoint & dist, ROOT::Math::LorentzVector<ROOT::Math::PxPy
 {
     math::XYZVector vperp(dist.x(),dist.y(),0);
     math::XYZVector pperp(Bp4.Px(),Bp4.Py(),0); 
-    return std::move(vperp.Dot(pperp)/(vperp.R()*pperp.R()));
+    return vperp.Dot(pperp)/(vperp.R()*pperp.R());
 }
 
 
