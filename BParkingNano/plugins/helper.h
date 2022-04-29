@@ -7,6 +7,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/GlobalError.h"
+#include "DataFormats/Provenance/interface/ProductID.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "DataFormats/GeometryVector/interface/PV3DBase.h"
 #include "Math/LorentzVector.h"
@@ -101,14 +102,16 @@ inline std::pair<double,double> computeDCA(const reco::TransientTrack& trackTT,
 }
 
 
-inline bool track_to_lepton_match(edm::Ptr<reco::Candidate> l_ptr, auto iso_tracks_id, unsigned int iTrk)
+//inline bool track_to_lepton_match(edm::Ptr<reco::Candidate> l_ptr, auto iso_tracks_id, unsigned int iTrk)
+inline bool track_to_lepton_match(edm::Ptr<reco::Candidate> l_ptr, edm::ProductIndex iso_tracks_id, unsigned int iTrk)
 {
   for (unsigned int i = 0; i < l_ptr->numberOfSourceCandidatePtrs(); ++i) {
     if (! ((l_ptr->sourceCandidatePtr(i)).isNonnull() && 
            (l_ptr->sourceCandidatePtr(i)).isAvailable())
            )   continue;
     const edm::Ptr<reco::Candidate> & source = l_ptr->sourceCandidatePtr(i);
-    if (source.id() == iso_tracks_id && source.key() == iTrk){
+    if (source.id().id() == iso_tracks_id // check ProductIndex
+	&& source.key() == iTrk){
       return true;
     }        
   }
