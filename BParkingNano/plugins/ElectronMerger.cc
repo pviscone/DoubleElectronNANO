@@ -39,9 +39,6 @@ public:
     triggerMuons_{ consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("trgMuon") )},
     lowpt_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
-    ptBiased_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("ptbiasedSeeding") )},
-    unBiased_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("unbiasedSeeding") )},
-    mvaId_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("mvaId") )},
     pf_mvaId_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("pfmvaId") )},
     vertexSrc_{ consumes<reco::VertexCollection> ( cfg.getParameter<edm::InputTag>("vertexCollection") )},
     conversions_{ consumes<edm::View<reco::Conversion> > ( cfg.getParameter<edm::InputTag>("conversions") )},
@@ -76,9 +73,6 @@ private:
   const edm::EDGetTokenT<pat::MuonCollection> triggerMuons_;
   const edm::EDGetTokenT<pat::ElectronCollection> lowpt_src_;
   const edm::EDGetTokenT<pat::ElectronCollection> pf_src_;
-  const edm::EDGetTokenT<edm::ValueMap<float>> ptBiased_src_;
-  const edm::EDGetTokenT<edm::ValueMap<float>> unBiased_src_;
-  const edm::EDGetTokenT<edm::ValueMap<float>> mvaId_src_;
   const edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
   const edm::EDGetTokenT<edm::View<reco::Conversion> > conversions_;
@@ -109,12 +103,6 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   evt.getByToken(lowpt_src_, lowpt);
   edm::Handle<pat::ElectronCollection> pf;
   evt.getByToken(pf_src_, pf);
-  edm::Handle<edm::ValueMap<float> > ptBiased;
-  evt.getByToken(ptBiased_src_, ptBiased);
-  edm::Handle<edm::ValueMap<float> > unBiased;
-  evt.getByToken(unBiased_src_, unBiased);
-  edm::Handle<edm::ValueMap<float> > mvaId;  
-  evt.getByToken(mvaId_src_, mvaId);
   edm::Handle<edm::ValueMap<float> > pfmvaId;  
   evt.getByToken(pf_mvaId_src_, pfmvaId);
   // 
@@ -246,8 +234,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    if (!ele.passConversionVeto()) continue;
 
    //assigning BDT values
-   edm::Ref<pat::ElectronCollection> ref(lowpt,iele);
-   float mva_id = float((*mvaId)[ref]);
+   float mva_id = ( ele.isElectronIDAvailable("ID") ? ele.electronID("ID") : -100. );
  //  if ( unbiased_seedBDT <bdtMin_) continue; //extra cut for low pT e on BDT
    if ( mva_id <bdtMin_) continue; //extra cut for low pT e on BDT
 
@@ -280,9 +267,8 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    else if(clean_out) ele.addUserInt("isPFoverlap", 1);
    else ele.addUserInt("isPFoverlap", 0);
 
-   const reco::GsfTrackRef gsfTrk = ele.gsfTrack();
-   float unbiased_seedBDT = float((*unBiased)[gsfTrk]);
-   float ptbiased_seedBDT = float((*ptBiased)[gsfTrk]);
+   float unbiased_seedBDT = ( ele.isElectronIDAvailable("unbiased") ? ele.electronID("unbiased") : -100. );
+   float ptbiased_seedBDT = ( ele.isElectronIDAvailable("ptbiased") ? ele.electronID("ptbiased") : -100. );
    ele.addUserInt("isPF", 0);
    ele.addUserInt("isLowPt", 1);
    ele.addUserFloat("chargeMode", ele.gsfTrack()->chargeMode());

@@ -1,11 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
-from RecoEgamma.EgammaElectronProducers.lowPtGsfElectronIDExtra_cff import lowPtGsfElectronIDExtra
-lowPtGsfElectronExtraID = lowPtGsfElectronIDExtra.clone()
-lowPtGsfElectronExtraID.electrons = 'regressionForEle:regressedLowPtElectrons'
-lowPtGsfElectronExtraID.rho = 'fixedGridRhoFastjetAll'
-
 mvaConfigsForEleProducer = cms.VPSet( )
 # Import and add all desired MVAs
 from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
@@ -200,9 +195,6 @@ electronsForAnalysis = cms.EDProducer(
   trgMuon = cms.InputTag('muonTrgSelector:trgMuons'),
   lowptSrc = cms.InputTag('regressionForEle:regressedLowPtElectrons'),
   pfSrc    = cms.InputTag('regressionForEle:regressedElectrons'),
-  ptbiasedSeeding = cms.InputTag("lowPtGsfElectronSeedValueMaps","ptbiased","RECO"),
-  unbiasedSeeding = cms.InputTag("lowPtGsfElectronSeedValueMaps","unbiased","RECO"),
-  mvaId = cms.InputTag("lowPtGsfElectronExtraID"),
   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger muon [-1 == no cut]
@@ -328,7 +320,6 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 
 electronsBParkSequence = cms.Sequence(
   regressionForEle
-  +lowPtGsfElectronExtraID
   +egmGsfElectronIDSequence
   +electronsForAnalysis
 )
