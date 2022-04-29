@@ -4,7 +4,6 @@
 // system include files
 #include <memory>
 
-
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -46,6 +45,7 @@ public:
 
  
  explicit TrgBitTableProducer(const edm::ParameterSet &cfg):
+    l1GtMenuToken_(esConsumes<L1TUtmTriggerMenu, L1TUtmTriggerMenuRcd>()),
     hltresultsToken_(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag> ("hltresults"))),
     l1resultsToken_(consumes<GlobalAlgBlkBxCollection>(cfg.getParameter<edm::InputTag> ("l1results"))),
     hltpaths_( cfg.getParameter< std::vector<std::string> >( "paths" ) ),
@@ -65,6 +65,7 @@ public:
 
 private:
 
+  const edm::ESGetToken<L1TUtmTriggerMenu, L1TUtmTriggerMenuRcd> l1GtMenuToken_;
   const edm::EDGetTokenT< edm::TriggerResults >    hltresultsToken_;
   const edm::EDGetTokenT<GlobalAlgBlkBxCollection> l1resultsToken_;
   // l1 seeds not implemented yet but can be added with litle effort
@@ -106,9 +107,8 @@ TrgBitTableProducer::produce( edm::Event &evt, edm::EventSetup const &stp)
 
   } else{
     if (!loaded){
-      edm::ESHandle<L1TUtmTriggerMenu> menu;
-      stp.get<L1TUtmTriggerMenuRcd>().get(menu);
-      for (auto const & keyval: menu->getAlgorithmMap()) {
+      const auto& menu = stp.getData(l1GtMenuToken_);
+      for (auto const & keyval: menu.getAlgorithmMap()) {
         std::string const & trigName = keyval.second.getName();
         algoBitToName[ int( keyval.second.getIndex() ) ] = TString( trigName );
       }

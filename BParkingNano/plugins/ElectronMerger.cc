@@ -35,6 +35,7 @@ public:
   bool debug=false; 
 
   explicit ElectronMerger(const edm::ParameterSet &cfg):
+    ttbToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>()),
     triggerMuons_{ consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("trgMuon") )},
     lowpt_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
@@ -71,6 +72,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
 private:
+  const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbToken_;
   const edm::EDGetTokenT<pat::MuonCollection> triggerMuons_;
   const edm::EDGetTokenT<pat::ElectronCollection> lowpt_src_;
   const edm::EDGetTokenT<pat::ElectronCollection> pf_src_;
@@ -116,8 +118,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   edm::Handle<edm::ValueMap<float> > pfmvaId;  
   evt.getByToken(pf_mvaId_src_, pfmvaId);
   // 
-  edm::ESHandle<TransientTrackBuilder> theB ;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
+  const auto& theB = iSetup.getData(ttbToken_);
   //
   edm::Handle<reco::VertexCollection> vertexHandle;
   evt.getByToken(vertexSrc_, vertexHandle);
@@ -322,7 +323,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   for(auto &ele : *ele_out){
     float regErrorRatio = std::abs(ele.corrections().combinedP4Error/ele.p()/ele.gsfTrack()->qoverpModeError()*ele.gsfTrack()->qoverpMode());
     const reco::TransientTrack eleTT = use_regression_for_p4_ ?
-      (*theB).buildfromReg(ele.gsfTrack(), math::XYZVector(ele.corrections().combinedP4), regErrorRatio) : (*theB).buildfromGSF( ele.gsfTrack() );
+      theB.buildfromReg(ele.gsfTrack(), math::XYZVector(ele.corrections().combinedP4), regErrorRatio) : theB.buildfromGSF( ele.gsfTrack() );
     trans_ele_out -> emplace_back(eleTT);
 
     if(ele.userInt("isPF")) continue;

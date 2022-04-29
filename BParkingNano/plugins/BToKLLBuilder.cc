@@ -32,6 +32,8 @@ public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
   explicit BToKLLBuilder(const edm::ParameterSet &cfg):
+    bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
+    //ttbToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>()),
     k_selection_{cfg.getParameter<std::string>("kaonSelection")},
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
@@ -60,6 +62,8 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
 private:
+  const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
+  //const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbToken_;
   const StringCutObjectSelector<pat::CompositeCandidate> k_selection_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-lepton before the SV fit
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-lepton after the SV fit
@@ -106,13 +110,10 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   edm::Handle<reco::VertexCollection> pvtxs;
   evt.getByToken(vertex_src_, pvtxs);
 
-  edm::ESHandle<MagneticField> fieldHandle;
-  iSetup.get<IdealMagneticFieldRecord>().get(fieldHandle);
-  const MagneticField *fMagneticField = fieldHandle.product();
-  AnalyticalImpactPointExtrapolator extrapolator(fMagneticField);
+  const auto& bField = iSetup.getData(bFieldToken_);
+  AnalyticalImpactPointExtrapolator extrapolator(&bField);
 
-  edm::ESHandle<TransientTrackBuilder> theB ;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
+  //const auto& theB = iSetup.getData(ttbToken_);
 
   //for isolation
   edm::Handle<pat::PackedCandidateCollection> iso_tracks;

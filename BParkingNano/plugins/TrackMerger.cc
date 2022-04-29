@@ -33,6 +33,7 @@ public:
 
   //would it be useful to give this a bit more standard structure?
   explicit TrackMerger(const edm::ParameterSet &cfg):
+    bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
     beamSpotSrc_(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamSpot"))),
     tracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     lostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
@@ -63,6 +64,7 @@ public:
   
 
 private:
+  const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> tracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksToken_;
@@ -98,9 +100,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     edm::LogError("BToKstllProducer") << "No beam spot available from Event" ;
   }  
   const reco::BeamSpot& beamSpot = *beamSpotHandle;
-
-  edm::ESHandle<MagneticField> bFieldHandle;
-  stp.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  const auto& bField = stp.getData(bFieldToken_);
   edm::Handle<pat::PackedCandidateCollection> tracks;
   evt.getByToken(tracksToken_, tracks);
   edm::Handle<pat::PackedCandidateCollection> lostTracks;
@@ -172,7 +172,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 
     // high purity requirment applied only in packedCands
     if( iTrk < nTracks && !trk.trackHighPurity()) continue;
-    const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
+    const reco::TransientTrack trackTT( (*trk.bestTrack()) , &bField);
     //distance closest approach in x,y wrt beam spot
     std::pair<double,double> DCA = computeDCA(trackTT, beamSpot);
     float DCABS = DCA.first;

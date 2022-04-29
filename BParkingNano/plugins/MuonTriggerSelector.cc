@@ -48,6 +48,7 @@ private:
 
     virtual void produce(edm::Event&, const edm::EventSetup&);
 
+    const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
     edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
     edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
     edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
@@ -68,6 +69,7 @@ private:
 
 
 MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
+  bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
   muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>( "muonCollection" ) ) ),
   triggerBits_(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))),
   triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(iConfig.getParameter<edm::InputTag>("objects"))),
@@ -90,8 +92,7 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
 
 void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     
-    edm::ESHandle<MagneticField> bFieldHandle;
-    iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+    const auto& bField = iSetup.getData(bFieldToken_);
     edm::Handle<reco::VertexCollection> vertexHandle;
     iEvent.getByToken(vertexSrc_, vertexHandle);
 //    const reco::Vertex & PV = vertexHandle->front();
@@ -240,7 +241,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
             SkipMuon=false;
         }
         if(SkipMuon) continue;      
-        const reco::TransientTrack muonTT((*(muon.bestTrack())),&(*bFieldHandle)); //sara:check,why not using inner track for muons? GM: What is this and why do we need this???
+        const reco::TransientTrack muonTT((*(muon.bestTrack())),&bField); //sara:check,why not using inner track for muons? GM: What is this and why do we need this???
         if(!muonTT.isValid()) continue; // GM: and why do we skip this muon if muonTT is invalid? This seems to have no effect so I kept it.
 
         muons_out->emplace_back(muon);
