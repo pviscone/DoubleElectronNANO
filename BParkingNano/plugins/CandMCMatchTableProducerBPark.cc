@@ -118,7 +118,7 @@ class CandMCMatchTableProducerBPark : public edm::global::EDProducer<> {
         }
 
         static int getParentHadronFlag(const reco::GenParticleRef match) {
-            bool has4 = false;
+	    //bool has4 = false;
             for (unsigned int im = 0, nm = match->numberOfMothers(); im < nm; ++im) {
                 reco::GenParticleRef mom = match->motherRef(im);
                 assert(mom.isNonnull() && mom.isAvailable()); // sanity
