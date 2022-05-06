@@ -7,8 +7,6 @@ from PhysicsTools.NanoAOD.vertices_cff import *
 from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
 from PhysicsTools.BParkingNano.trgbits_cff import *
 
-
-
 ##for gen and trigger muon
 from PhysicsTools.BParkingNano.genparticlesBPark_cff import *
 from PhysicsTools.BParkingNano.particlelevelBPark_cff import *
@@ -27,12 +25,12 @@ from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
 
 nanoSequence = cms.Sequence(nanoMetadata + 
-                            vertexSequence +           
-                            globalTables + vertexTables + 
+                            cms.Sequence(vertexTask) +
+                            cms.Sequence(globalTablesTask) + cms.Sequence(vertexTablesTask) +
                             triggerObjectBParkTables + l1bits)
 
 nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
-                              globalTablesMC + genWeightsTable + genParticleBParkTables + lheInfoTable) 
+                              cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable)
 
 
 
