@@ -9,58 +9,37 @@ Below is the original recipe for 10_2_X. To be updated ...
 ### Getting started
 
 ```shell
-cmsrel CMSSW_10_2_15
-cd CMSSW_10_2_15/src
+export SCRAM_ARCH=slc7_amd64_gcc10
+scram list CMSSW
+cmsrel CMSSW_12_4_0_pre3
+cd CMSSW_12_4_0_pre3/src
 cmsenv
-git cms-init
 ```
 
-### Add low-pT energy ID and regression
-
-The ID model is `2020Sept15` (depth=15, ntrees=1000).
+### Add modifications needed to use post-fit quantities for electrons
 
 ```shell
-git cms-merge-topic -u CMSBParking:from-CMSSW_10_2_15_2020Sept15_v1
-git clone --single-branch --branch from-CMSSW_10_2_15_2020Sept15 git@github.com:CMSBParking/RecoEgamma-ElectronIdentification.git $CMSSW_BASE/external/$SCRAM_ARCH/data/RecoEgamma/ElectronIdentification/data
+git cms-merge-topic -u CMSRKR3:GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
 ```
 
-To run on CRAB, the following three lines __must__ be executed:
+### Add modifications to KinematicParticleVertexFitter
 
 ```shell
-git cms-addpkg RecoEgamma/ElectronIdentification
-mkdir -p $CMSSW_BASE/src/RecoEgamma/ElectronIdentification/data/LowPtElectrons
-cp $CMSSW_BASE/external/$SCRAM_ARCH/data/RecoEgamma/ElectronIdentification/data/LowPtElectrons/LowPtElectrons_ID_2020Sept15.root $CMSSW_BASE/src/RecoEgamma/ElectronIdentification/data/LowPtElectrons
+git cms-merge-topic -u CMSRKR3:fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
 ```
 
-### Add support for GBRForest to parse ROOT files
+### Add the BParkingNano package
 
 ```shell
-git cms-merge-topic -u CMSBParking:convertXMLToGBRForestROOT
-```
-
-### Add the modification needed to use post-fit quantities for electrons  
-
-```shell
-git cms-merge-topic -u CMSBParking:GsfTransientTracks # unsafe checkout (no checkdeps), but suggested here
-```
-
-### Add the modification needed to use the KinematicParticleVertexFitter  
-
-```shell
-git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter # unsafe checkout (no checkdeps), but suggested here
-```
-
-### Add the BParkingNano package and build everything
-
-```shell
-git clone git@github.com:CMSBParking/BParkingNANO.git ./PhysicsTools
+git clone git@github.com:CMSRKR3/BParkingNANO.git ./PhysicsTools
 git cms-addpkg PhysicsTools/NanoAOD
 scram b
 ```
 
-### To run on a test file
+### Build and run on a test file
 
 ```shell
+scram b
 cd PhysicsTools/BParkingNano/test/
 cmsenv 
 cmsRun run_nano_cfg.py
