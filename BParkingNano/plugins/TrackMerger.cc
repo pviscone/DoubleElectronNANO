@@ -41,7 +41,8 @@ public:
     muonToken_(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons"))),
     eleToken_(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("pfElectrons"))),
     vertexToken_(consumes<reco::VertexCollection> (cfg.getParameter<edm::InputTag>( "vertices" ))), 
-    lowptele_(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("lowPtElectrons"))),
+    lowptele_(),
+    lowpteleTag_(cfg.getParameter<edm::InputTag>("lowPtElectrons")),
     trkPtCut_(cfg.getParameter<double>("trkPtCut")),
     trkEtaCut_(cfg.getParameter<double>("trkEtaCut")),
     dzTrg_cleaning_(cfg.getParameter<double>("dzTrg_cleaning")),
@@ -50,6 +51,9 @@ public:
     trkNormChiMin_(cfg.getParameter<int>("trkNormChiMin")),
     trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")) 
 {
+  if ( !lowpteleTag_.label().empty() ) {
+    lowptele_ = consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("lowPtElectrons"));
+  }
     produces<pat::CompositeCandidateCollection>("SelectedTracks");  
     produces<TransientTrackCollection>("SelectedTransientTracks");  
 }
@@ -70,7 +74,8 @@ private:
   const edm::EDGetTokenT<pat::MuonCollection> muonToken_;
   const edm::EDGetTokenT<pat::ElectronCollection> eleToken_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
-  const edm::EDGetTokenT<pat::ElectronCollection> lowptele_;
+  edm::EDGetTokenT<pat::ElectronCollection> lowptele_;
+  const edm::InputTag lowpteleTag_;
 
   //selections                                                                 
   const double trkPtCut_;
@@ -113,7 +118,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   const reco::Vertex & PV = vertexHandle->front();
 
   edm::Handle<pat::ElectronCollection> lowptele;
-  evt.getByToken(lowptele_, lowptele);
+  if ( !lowpteleTag_.label().empty() ) { evt.getByToken(lowptele_, lowptele); }
 
   //for lost tracks / pf discrimination
   unsigned int nTracks = tracks->size();
@@ -216,16 +221,18 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     if ( iTrk < nTracks ) { track = edm::Ptr<pat::PackedCandidate>(tracks,iTrk); }
     else { track = edm::Ptr<pat::PackedCandidate>(lostTracks,iTrk-nTracks); }
     int matchedToLowPtEle = 0;
-    for ( auto const& ele : *lowptele ) {
-      reco::GsfTrackRef gsf = ele.gsfTrack();
-      if ( iTrk < nTracks ) {
-	const edm::Ptr<pat::PackedCandidate>* packed = ele.hasUserData("ele2packed") ?
-	  ele.userData<edm::Ptr<pat::PackedCandidate> >("ele2packed") : NULL;
-	if ( packed != NULL && track == *packed ) { matchedToLowPtEle = 1; break; }
-      } else {
-	const edm::Ptr<pat::PackedCandidate>* lost = ele.hasUserData("ele2lost") ?
-	  ele.userData<edm::Ptr<pat::PackedCandidate> >("ele2lost") : NULL;
-	if ( lost != NULL && track == *lost ) { matchedToLowPtEle = 1; break; }
+    if ( !lowpteleTag_.label().empty() ) {
+      for ( auto const& ele : *lowptele ) {
+	reco::GsfTrackRef gsf = ele.gsfTrack();
+	if ( iTrk < nTracks ) {
+	  const edm::Ptr<pat::PackedCandidate>* packed = ele.hasUserData("ele2packed") ?
+	    ele.userData<edm::Ptr<pat::PackedCandidate> >("ele2packed") : NULL;
+	  if ( packed != NULL && track == *packed ) { matchedToLowPtEle = 1; break; }
+	} else {
+	  const edm::Ptr<pat::PackedCandidate>* lost = ele.hasUserData("ele2lost") ?
+	    ele.userData<edm::Ptr<pat::PackedCandidate> >("ele2lost") : NULL;
+	  if ( lost != NULL && track == *lost ) { matchedToLowPtEle = 1; break; }
+	}
       }
     }
 
