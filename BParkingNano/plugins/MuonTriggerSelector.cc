@@ -129,6 +129,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     std::vector<std::vector<float>> matcher; 
     std::vector<std::vector<float>> DR;
     std::vector<std::vector<float>> DPT;    
+    if(debug)std::cout<<std::endl;
     for(const pat::Muon &muon : *muons){
         if(debug)std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi()  <<endl;
 
@@ -172,10 +173,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                         temp_dr[i]=dr;
                         temp_dpt[i]=dpt;
                         temp_pt[i]=muon.triggerObjectMatch(i)->pt();                   
-                        if(debug)std::cout <<"Path=" <<cstr << endl;
-                        if(debug)std::cout <<"HLT  Pt="<<muon.triggerObjectMatch(i)->pt() <<" Eta="<<muon.triggerObjectMatch(i)->eta() <<" Phi="<<muon.triggerObjectMatch(i)->phi() << endl;
-                        if(debug)std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi()  <<endl;
-                        if(debug)std::cout <<"DR = " << temp_dr[i] <<endl;
+                        if(debug)std::cout <<" Path=" <<cstr << endl;
+                        if(debug)std::cout <<" HLT  Pt="<<muon.triggerObjectMatch(i)->pt() <<" Eta="<<muon.triggerObjectMatch(i)->eta() <<" Phi="<<muon.triggerObjectMatch(i)->phi() << endl;
+                        if(debug)std::cout <<" Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi()  <<endl;
+                        if(debug)std::cout <<" DR = " << temp_dr[i] <<endl;
                     }
                 }
                 // and now we find the real minimum between the reco muon and all its matched HLT objects. 
