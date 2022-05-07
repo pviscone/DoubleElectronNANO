@@ -4,7 +4,7 @@ The focus is on RK/K*/phi analyses.
 
 ## Recipe
 
-Below is the original recipe for 10_2_X. To be updated ...
+This recipe is for 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
 
 ### Getting started
 
