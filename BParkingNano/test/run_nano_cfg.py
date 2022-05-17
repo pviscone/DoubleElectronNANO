@@ -34,7 +34,7 @@ options.register('skip', 0,
     "skip first N events"
 )
 
-options.setDefault('maxEvents', 100)
+options.setDefault('maxEvents', 1000)
 options.setDefault('tag', '124X')
 options.parseArguments()
 
@@ -54,7 +54,8 @@ if not options.inputFiles:
         #'file:///eos/cms/store/cmst3/group/bpark/BToKmumu_1000Events_MINIAOD.root' # original
         #'file:///eos/cms/store/group/phys_bphys/ec/RKR3/test/test_files/MINIAOD_BuToKJpsi_Toee_Skim_1000events_102X.root'
         #'file:///eos/cms/store/group/phys_bphys/ec/RKR3/test/test_files/MINIAOD_BuToKMuMu_Skim_1000events_102X.root'
-        'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/40000/43F82832-A9A2-5D45-950F-BC7D8DAC9C9B.root'
+        #'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/40000/43F82832-A9A2-5D45-950F-BC7D8DAC9C9B.root'
+        'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_ToMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/120000/028A5AEE-90AD-7448-A186-A86AA85E1881.root'
         #'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_Toee_Mufilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15_ext1-v2/100000/041EF22D-69F5-914D-AD60-F2D1187B0842.root'
     ]
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
