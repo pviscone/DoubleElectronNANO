@@ -3,7 +3,7 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 
 Path=["HLT_DoubleMu4_JpsiTrk_Displaced",
-      #"HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"
+      "HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"
 ]
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
