@@ -42,7 +42,9 @@ scram b
 scram b
 cd PhysicsTools/BParkingNano/test/
 cmsenv 
-cmsRun run_nano_cfg.py
+cmsRun run_nano_cfg.py        # by default, runs over data
+cmsRun run_nano_cfg.py isMC=1 # runs over MC
+
 ```
 
 ## Provenance and branches
