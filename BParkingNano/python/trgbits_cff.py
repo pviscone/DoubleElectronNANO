@@ -8,7 +8,7 @@ trgTable = cms.EDProducer( "TrgBitTableProducer",
                           l1results  = cms.InputTag("gtStage2Digis::RECO"),
                           #add interesting paths
                           paths      = cms.vstring(
-                                             "HLT_DoubleMu4_JpsiTrk_Displaced"
+                                             "HLT_DoubleMu4_JpsiTrk_Displaced",
                                              "HLT_Mu7_IP4",
                                              "HLT_Mu8_IP6",
                                              "HLT_Mu8_IP5",
@@ -31,7 +31,7 @@ trgTable = cms.EDProducer( "TrgBitTableProducer",
                                              "L1_SingleMu9er1p5",
                                              "L1_SingleMu10er1p5",
                                              "L1_SingleMu12er1p5",
-                                             "L1_SingleMu22"
+                                             "L1_SingleMu22",
                                               ),
                             
 )
