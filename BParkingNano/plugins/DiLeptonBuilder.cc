@@ -30,6 +30,7 @@ public:
   explicit DiLeptonBuilder(const edm::ParameterSet &cfg):
     l1_selection_{cfg.getParameter<std::string>("lep1Selection")},
     l2_selection_{cfg.getParameter<std::string>("lep2Selection")},
+    filter_by_selection_{cfg.getParameter<bool>("filterBySelection")},
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     src_{consumes<LeptonCollection>( cfg.getParameter<edm::InputTag>("src") )},
@@ -47,6 +48,7 @@ public:
 private:
   const StringCutObjectSelector<Lepton> l1_selection_; // cut on leading lepton
   const StringCutObjectSelector<Lepton> l2_selection_; // cut on sub-leading lepton
+  const bool filter_by_selection_;
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-lepton before the SV fit
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-lepton after the SV fit
   const edm::EDGetTokenT<LeptonCollection> src_;
@@ -90,7 +92,10 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       lepton_pair.addUserCand("l1", l1_ptr );
       lepton_pair.addUserCand("l2", l2_ptr );
       lepton_pair.addUserInt("nlowpt", nlowpt );
-      if( !pre_vtx_selection_(lepton_pair) ) continue; // before making the SV, cut on the info we have
+
+      bool pre_vtx_sel = pre_vtx_selection_(lepton_pair); // before making the SV, cut on the info we have
+      lepton_pair.addUserInt("pre_vtx_sel",pre_vtx_sel);
+      if( filter_by_selection_ && !pre_vtx_sel ) continue;
 
       KinVtxFitter fitter(
         {ttracks->at(l1_idx), ttracks->at(l2_idx)},
@@ -105,7 +110,10 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       // if needed, add here more stuff
 
       // cut on the SV info
-      if( !post_vtx_selection_(lepton_pair) ) continue;
+      bool post_vtx_sel = post_vtx_selection_(lepton_pair);
+      lepton_pair.addUserInt("post_vtx_sel",post_vtx_sel);
+      if( filter_by_selection_ && !post_vtx_sel ) continue;
+
       ret_value->push_back(lepton_pair);
       kinVtx_out->push_back(fitter);
     }

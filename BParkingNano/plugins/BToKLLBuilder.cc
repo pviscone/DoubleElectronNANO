@@ -35,6 +35,7 @@ public:
     bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
     //ttbToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>()),
     k_selection_{cfg.getParameter<std::string>("kaonSelection")},
+    filter_by_selection_{cfg.getParameter<bool>("filterBySelection")},
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     dileptons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dileptons") )},
@@ -65,6 +66,7 @@ private:
   const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
   //const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbToken_;
   const StringCutObjectSelector<pat::CompositeCandidate> k_selection_; 
+  const bool filter_by_selection_;
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-lepton before the SV fit
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-lepton after the SV fit
 
@@ -166,7 +168,9 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("max_dr", dr_info.second);
       // TODO add meaningful variables
       
-      if( !pre_vtx_selection_(cand) ) continue;
+      bool pre_vtx_sel = pre_vtx_selection_(cand);
+      cand.addUserInt("pre_vtx_sel",pre_vtx_sel);
+      if( filter_by_selection_ && !pre_vtx_sel ) continue;
     
       KinVtxFitter fitter(
         {leptons_ttracks->at(l1_idx), leptons_ttracks->at(l2_idx), kaons_ttracks->at(k_idx)},
@@ -233,7 +237,9 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("k_svip3d" , cur3DIP.second.value());
       cand.addUserFloat("k_svip3d_err" , cur3DIP.second.error());
 
-      if( !post_vtx_selection_(cand) ) continue;        
+      bool post_vtx_sel = post_vtx_selection_(cand);
+      cand.addUserInt("post_vtx_sel",post_vtx_sel);
+      if( filter_by_selection_ && !post_vtx_sel ) continue;
 
       //compute isolation
       float l1_iso03 = 0;
