@@ -97,6 +97,7 @@ electronsForAnalysis = cms.EDProducer(
   useGsfModeForP4 = cms.bool(False),
   sortOutputCollections = cms.bool(True),
   saveLowPtE = cms.bool(True),
+  filterEle = cms.bool(True),
     # conversions
     conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
     beamSpot = cms.InputTag("offlineBeamSpot"),
@@ -146,6 +147,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         convLead = Var("userInt('convLead')",bool,doc="Matched to leading track from conversion"),
         convTrail = Var("userInt('convTrail')",bool,doc="Matched to trailing track from conversion"),
         convExtra = Var("userInt('convExtra')",bool,doc="Flag to indicate if all conversion variables are stored"),
+        skipEle = Var("userInt('skipEle')",bool,doc="Is ele skipped (due to small dR or large dZ w.r.t. trigger)?"),
         )
 )
 
@@ -210,4 +212,20 @@ electronsBParkSequence = cms.Sequence(
 electronBParkMC = cms.Sequence(electronsBParkSequence + electronsBParkMCMatchForTable + selectedElectronsMCMatchEmbedded + electronBParkMCTable)
 electronBParkTables = cms.Sequence(electronBParkTable)
 
+###########
+# Modifiers
+###########
 
+from PhysicsTools.BParkingNano.modifiers_cff import *
+
+BToKEE_OpenConfig.toModify(electronsForAnalysis,
+                           pf_ptMin=0.5,
+                           ptMin=0.5,
+                           etaMax=2.5,
+                           bdtMin=-1.e3,
+                           flagAndclean=False,
+                           #drForCleaning_wrtTrgMuon=-1.,
+                           #dzForCleaning_wrtTrgMuon=-1.,
+                           #drForCleaning=-1.,
+                           #dzForCleaning=-1.,
+                           filterEle=False)

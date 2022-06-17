@@ -56,6 +56,7 @@ public:
     use_regression_for_p4_{cfg.getParameter<bool>("useRegressionModeForP4")},
     sortOutputCollections_{cfg.getParameter<bool>("sortOutputCollections")},
     saveLowPtE_{cfg.getParameter<bool>("saveLowPtE")},
+    filterEle_{cfg.getParameter<bool>("filterEle")},
     addUserVarsExtra_{cfg.getParameter<bool>("addUserVarsExtra")}
     {
        produces<pat::ElectronCollection>("SelectedElectrons");
@@ -90,6 +91,7 @@ private:
   const bool use_regression_for_p4_;
   const bool sortOutputCollections_;
   const bool saveLowPtE_;
+  const bool filterEle_;
   const bool addUserVarsExtra_;
 
 };
@@ -162,7 +164,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
      break; // one trg muon to pass is enough :)
    }
    // we skip evts without trg muon
-   if (skipEle) continue;
+   if (filterEle_ && skipEle) continue;
 
    // for PF e we set BDT outputs to much higher number than the max
    edm::Ref<pat::ElectronCollection> ref(pf,ipfele);
@@ -176,6 +178,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserFloat("chargeMode", ele.charge());
    ele.addUserInt("isPFoverlap", 0);
    ele.addUserFloat("dzTrg", dzTrg);
+   ele.addUserInt("skipEle",skipEle);
 
    // Attempt to match electrons to conversions in "gsfTracksOpenConversions" collection (NO MATCHES EXPECTED)
    ConversionInfo info;
@@ -251,8 +254,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
      break;  // one trg muon is enough 
    }
    // same here Do we need evts without trg muon? now we skip them
-   if (skipEle) continue;   
-   
+   if (filterEle_ && skipEle) continue;
 
    //pf cleaning    
    bool clean_out = false;
@@ -277,6 +279,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserFloat("mvaId", mva_id);
    ele.addUserFloat("pfmvaId", 20.);
    ele.addUserFloat("dzTrg", dzTrg);
+   ele.addUserInt("skipEle",skipEle);
 
    // Attempt to match electrons to conversions in "gsfTracksOpenConversions" collection
    ConversionInfo info;
