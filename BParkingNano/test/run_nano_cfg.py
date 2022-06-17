@@ -62,10 +62,10 @@ filesDict = {
         'BuToKMuMu':'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/40000/43F82832-A9A2-5D45-950F-BC7D8DAC9C9B.root',
         # example BuToKJpsi_ToMuMu file
         'BuToKJpsi_ToMuMu':'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_ToMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/120000/028A5AEE-90AD-7448-A186-A86AA85E1881.root',
-        # example BuToKJpsi_Toee file
-        'BuToKJpsi_Toee':'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_Toee_Mufilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15_ext1-v2/100000/041EF22D-69F5-914D-AD60-F2D1187B0842.root',
+        # example BuToKJpsi_Toee file from RK analysis
+        'example_BuToKJpsi_Toee':'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_Toee_Mufilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15_ext1-v2/100000/041EF22D-69F5-914D-AD60-F2D1187B0842.root',
         # Jay's BuToKJpsi_ToMuMu "x2" sample, example file, 1000 events
-        'test':'root://cms-xrd-global.cern.ch//store/user/jodedra/BKMUMUMC_20222805_MiniAOD/BKMUMUMC20222805/SUMMER22_MiniAOD/220529_182116/0000/EGM-Run3Winter21DRMiniAOD-00021_inMINIAODSIM_12.root'
+        'example_BuToKJpsi_ToMuMu':'root://cms-xrd-global.cern.ch//store/user/jodedra/BKMUMUMC_20222805_MiniAOD/BKMUMUMC20222805/SUMMER22_MiniAOD/220529_182116/0000/EGM-Run3Winter21DRMiniAOD-00021_inMINIAODSIM_12.root'
     }
 }
 
@@ -76,13 +76,13 @@ if not options.inputFiles:
     options.inputFiles = [
         filesDict['data']['charmonium_jay']
     ] if not options.isMC else [
-        filesDict['mc']['test'] # BuToKJpsi_ToMuMu
+        filesDict['mc']['example_BuToKJpsi_Toee']
     ]
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
-process = cms.Process('BParkNANO',eras.Run2_2018)#,BToKMuMu_DiMuon)
+process = cms.Process('BParkNANO',eras.Run2_2018)#@@,BToKMuMu_DiMuon)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -290,7 +290,7 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 # Schedule definition
 process.schedule = cms.Schedule(
                                 process.nanoAOD_KMuMu_step,
-                                #process.nanoAOD_Kee_step,
+                                process.nanoAOD_Kee_step,
                                 #process.nanoAOD_KstarMuMu_step,
                                 #process.nanoAOD_KstarEE_step,
                                 process.endjob_step, 
@@ -299,7 +299,7 @@ process.schedule = cms.Schedule(
 if options.wantFullRECO:
     process.schedule = cms.Schedule(
                                     process.nanoAOD_KMuMu_step,
-                                    #process.nanoAOD_Kee_step,
+                                    process.nanoAOD_Kee_step,
                                     #process.nanoAOD_KstarMuMu_step,
                                     #process.nanoAOD_KstarEE_step,
                                     process.endjob_step, 
@@ -312,7 +312,7 @@ associatePatAlgosToolsTask(process)
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring(
                                    'nanoAOD_KMuMu_step', 
-                                   #'nanoAOD_Kee_step',
+                                   'nanoAOD_Kee_step',
                                    #'nanoAOD_KstarMuMu_step',
                                    #'nanoAOD_KstarEE_step',
                                    )
