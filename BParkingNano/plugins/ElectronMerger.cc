@@ -35,7 +35,7 @@ public:
   bool debug=false; 
 
   explicit ElectronMerger(const edm::ParameterSet &cfg):
-    ttbToken_(esConsumes<TransientTrackBuilder, TransientTrackRecord>()),
+    ttbToken_(esConsumes(edm::ESInputTag{"","TransientTrackBuilder"})),
     triggerMuons_{ consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("trgMuon") )},
     lowpt_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
