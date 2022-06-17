@@ -37,9 +37,9 @@ public:
   explicit ElectronMerger(const edm::ParameterSet &cfg):
     ttbToken_(esConsumes(edm::ESInputTag{"","TransientTrackBuilder"})),
     triggerMuons_{ consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("trgMuon") )},
-    lowpt_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
+    lowpt_src_{},//@@ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
-    pf_mvaId_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("pfmvaId") )},
+    pf_mvaId_src_{},//@@ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("pfmvaId") )},
     vertexSrc_{ consumes<reco::VertexCollection> ( cfg.getParameter<edm::InputTag>("vertexCollection") )},
     conversions_{ consumes<edm::View<reco::Conversion> > ( cfg.getParameter<edm::InputTag>("conversions") )},
     beamSpot_{ consumes<reco::BeamSpot> ( cfg.getParameter<edm::InputTag>("beamSpot") )},
@@ -102,11 +102,11 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   edm::Handle<pat::MuonCollection> trgMuon;
   evt.getByToken(triggerMuons_, trgMuon);
   edm::Handle<pat::ElectronCollection> lowpt;
-  evt.getByToken(lowpt_src_, lowpt);
+  //@@evt.getByToken(lowpt_src_, lowpt);
   edm::Handle<pat::ElectronCollection> pf;
   evt.getByToken(pf_src_, pf);
   edm::Handle<edm::ValueMap<float> > pfmvaId;  
-  evt.getByToken(pf_mvaId_src_, pfmvaId);
+  //@@evt.getByToken(pf_mvaId_src_, pfmvaId);
   // 
   const auto& theB = iSetup.getData(ttbToken_);
   //
@@ -182,7 +182,10 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
    // for PF e we set BDT outputs to much higher number than the max
    edm::Ref<pat::ElectronCollection> ref(pf,ipfele);
-   float pf_mva_id = float((*pfmvaId)[ref]);
+   //@@float pf_mva_id = float((*pfmvaId)[ref]);
+   float pf_mva_id = 1. * ( 1 * ref->electronID("mvaEleID-Fall17-noIso-V1-wpLoose") +
+			    2 * ref->electronID("mvaEleID-Fall17-noIso-V2-wp90") +
+			    4 * ref->electronID("mvaEleID-Fall17-noIso-V2-wp80") ); //@@ hack for electron ID
    ele.addUserInt("isPF", 1);
    ele.addUserInt("isLowPt", 0);
    ele.addUserFloat("ptBiased", 20.);

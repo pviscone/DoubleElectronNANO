@@ -1,36 +1,45 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
-mvaConfigsForEleProducer = cms.VPSet( )
-# Import and add all desired MVAs
-from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
-    import mvaEleID_BParkRetrain_producer_config
-mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
+## DataFormat changes to 106X so use egamma updators to read older releases
+#from RecoEgamma.EgammaTools.egammaObjectModificationsInMiniAOD_cff import egamma9X105XUpdateModifier
+#ele9X105XUpdateModifier=egamma9X105XUpdateModifier.clone(
+#    phoPhotonIso = "",
+#    phoNeutralHadIso = "",
+#    phoChargedHadIso = "",
+#    phoChargedHadWorstVtxIso = "",
+#    phoChargedHadWorstVtxConeVetoIso = "",
+#    phoChargedHadPFPVIso = ""
+#)
+#slimmedElectronsTo106X = cms.EDProducer("ModifiedElectronProducer",
+#    src = cms.InputTag("slimmedElectrons"),
+#    modifierConfig = cms.PSet( modifications = cms.VPSet(ele9X105XUpdateModifier) )
+#)
 
-electronMVAValueMapProducer = cms.EDProducer(
-  'ElectronMVAValueMapProducer',
-  # AOD case
-  src = cms.InputTag('gedGsfElectrons'),  
-  # miniAOD case
-  #srcMiniAOD = cms.InputTag('slimmedElectrons',processName=cms.InputTag.skipCurrentProcess()),  
-  srcMiniAOD = cms.InputTag('regressionForEle:regressedElectrons'),
-    
-  # MVA configurations
-  mvaConfigurations = mvaConfigsForEleProducer
-)
-
-egmGsfElectronIDs = cms.EDProducer(
-    "VersionedGsfElectronIdProducer",
-    physicsObjectSrc = cms.InputTag('gedGsfElectrons'),
-    physicsObjectIDs = cms.VPSet( )
-)
-
-egmGsfElectronIDTask = cms.Task(
-    electronMVAValueMapProducer,
-    egmGsfElectronIDs,
-)
-
-egmGsfElectronIDSequence = cms.Sequence(egmGsfElectronIDTask)
+## Import and add all desired MVAs
+#mvaConfigsForEleProducer = cms.VPSet( )
+#from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
+#    import mvaEleID_BParkRetrain_producer_config
+#mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
+#
+#electronMVAValueMapProducer = cms.EDProducer(
+#  'ElectronMVAValueMapProducer',
+#  src = cms.InputTag('slimmedElectrons'), # 'regressionForEle:regressedElectrons'
+#  mvaConfigurations = mvaConfigsForEleProducer
+#)
+#
+#egmGsfElectronIDs = cms.EDProducer(
+#    "VersionedGsfElectronIdProducer",
+#    physicsObjectSrc = cms.InputTag('gedGsfElectrons'),
+#    physicsObjectIDs = cms.VPSet( )
+#)
+#
+#egmGsfElectronIDTask = cms.Task(
+#    electronMVAValueMapProducer,
+#    egmGsfElectronIDs,
+#)
+#
+#egmGsfElectronIDSequence = cms.Sequence(egmGsfElectronIDTask)
 
 # regression stuff
 from RecoEgamma.EgammaTools.regressionModifier_cfi import regressionModifier106XUL
@@ -65,6 +74,7 @@ _gsfRegressionModifier = regressionModifier106XUL.clone(
             ),
         ),
     ),
+    phoRegs = regressionModifier106XUL.phoRegs.clone(),
 )
 
 regressionForEle = cms.EDProducer(
@@ -77,8 +87,8 @@ regressionForEle = cms.EDProducer(
 electronsForAnalysis = cms.EDProducer(
   'ElectronMerger',
   trgMuon = cms.InputTag('muonTrgSelector:trgMuons'),
-  lowptSrc = cms.InputTag('slimmedLowPtElectrons'),
-  pfSrc    = cms.InputTag('regressionForEle:regressedElectrons'),
+  #lowptSrc = cms.InputTag('slimmedLowPtElectrons'),
+  pfSrc    = cms.InputTag('slimmedElectrons'), #@@ regressionForEle:regressedElectrons
   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger muon [-1 == no cut]
@@ -92,16 +102,16 @@ electronsForAnalysis = cms.EDProducer(
   pf_ptMin = cms.double(1.),
   ptMin = cms.double(0.5),
   etaMax = cms.double(2.5),
-  bdtMin = cms.double(-2.5), #this cut can be used to deactivate low pT e if set to >12
+  bdtMin = cms.double(-20.), #@@ was -2.5, this cut can be used to deactivate low pT e if set to >12
   useRegressionModeForP4 = cms.bool(False),
-  useGsfModeForP4 = cms.bool(False),
+  useGsfModeForP4 = cms.bool(True), #@@
   sortOutputCollections = cms.bool(True),
   saveLowPtE = cms.bool(False),
   filterEle = cms.bool(True),
     # conversions
     conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
     beamSpot = cms.InputTag("offlineBeamSpot"),
-    addUserVarsExtra = cms.bool(True),
+    addUserVarsExtra = cms.bool(False),
 )
 
 electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -205,9 +215,10 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 )
 
 electronsBParkSequence = cms.Sequence(
-  regressionForEle
-  +egmGsfElectronIDSequence
-  +electronsForAnalysis
+    #slimmedElectronsTo106X+
+    #regressionForEle+
+    #egmGsfElectronIDSequence+
+    electronsForAnalysis
 )
 electronBParkMC = cms.Sequence(electronsBParkSequence + electronsBParkMCMatchForTable + selectedElectronsMCMatchEmbedded + electronBParkMCTable)
 electronBParkTables = cms.Sequence(electronBParkTable)
