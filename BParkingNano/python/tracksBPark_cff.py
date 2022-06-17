@@ -12,6 +12,7 @@ tracksBPark = cms.EDProducer('TrackMerger',
                              vertices   = cms.InputTag("offlineSlimmedPrimaryVertices"),
                              lowPtElectrons=cms.InputTag(""), # remove "slimmedLowPtElectrons" for now
                              trkEtaCut = cms.double(2.5),
+                             filterTrack = cms.bool(True),
                              dzTrg_cleaning = cms.double(1.),
                              drTrg_Cleaning = cms.double(0.03),
                              dcaSig = cms.double(-100000),
@@ -50,6 +51,7 @@ trackBParkTable = cms.EDProducer(
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
         #dEdXStrip=Var("userFloat('dEdXStrip')", float,doc="dE/dX from strips of associated isolated track"),
         #dEdXPixel=Var("userFloat('dEdXPixel')", float,doc="dE/dX from pixels of associated isolated track"),
+        skipTrack = Var("userInt('skipTrack')",bool,doc="Is track skipped (due to small dR or large dZ w.r.t. trigger)?"),
         ),
 )
 
@@ -86,4 +88,19 @@ tracksBParkSequence = cms.Sequence(tracksBPark)
 tracksBParkTables = cms.Sequence(trackBParkTable)
 tracksBParkMC = cms.Sequence(tracksBParkSequence + tracksBParkMCMatchForTable + tracksBParkMCMatchEmbedded + tracksBParkMCTable)
 
+###########
+# Modifiers
+###########
 
+from PhysicsTools.BParkingNano.modifiers_cff import *
+
+_modifiers = BToKMuMu_OpenConfig | BToKEE_OpenConfig
+_modifiers.toModify(tracksBPark,
+                    trkPtCut=0.5,
+                    trkEtaCut=2.5,
+                    trkNormChiMin=-1,
+                    trkNormChiMax=-1,
+                    dcaSig=-100000,
+                    #dzTrg_cleaning=-1.,
+                    #drTrg_Cleaning=-1.,
+                    filterTrack=False)

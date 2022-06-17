@@ -49,7 +49,8 @@ public:
     drTrg_Cleaning_(cfg.getParameter<double>("drTrg_Cleaning")),
     dcaSig_(cfg.getParameter<double>("dcaSig")),
     trkNormChiMin_(cfg.getParameter<int>("trkNormChiMin")),
-    trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")) 
+    trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")),
+    filterTrack_(cfg.getParameter<bool>("filterTrack"))
 {
   if ( !lowpteleTag_.label().empty() ) {
     lowptele_ = consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("lowPtElectrons"));
@@ -85,6 +86,7 @@ private:
   const double dcaSig_;
   const int trkNormChiMin_;
   const int trkNormChiMax_;
+  const bool filterTrack_;
 };
 
 
@@ -164,8 +166,10 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
       dzTrg = trk.vz() - mu.vz();
       break; // at least for one trg muon to pass this cuts
     }
+    // if (trgMuons->empty()) { skipTrack=false; } //@@ needed???
+
     // if track is closer to at least a triggering muon keep it
-    if (skipTrack) continue;
+    if (filterTrack_ && skipTrack ) continue;
 
     // high purity requirment applied only in packedCands
     if( iTrk < nTracks && !trk.trackHighPurity()) continue;
@@ -257,6 +261,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     pcand.addUserInt("isMatchedToLowPtEle", matchedToLowPtEle);
     pcand.addUserInt("nValidHits", trk.bestTrack()->found());
     pcand.addUserInt("keyPacked", iTrk);
+    pcand.addUserInt("skipTrack",skipTrack);
     //adding the candidate in the composite stuff for fit (need to test)
     if ( iTrk < nTracks )
       pcand.addUserCand( "cand", edm::Ptr<pat::PackedCandidate> ( tracks, iTrk ));
