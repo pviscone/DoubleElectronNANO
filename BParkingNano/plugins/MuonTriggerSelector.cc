@@ -59,6 +59,7 @@ private:
 
     //for filter wrt trigger
     const double dzTrg_cleaning_; // selects primary vertex
+    const bool filterMuon_;
 
     const double ptMin_;          // min pT in all muons for B candidates
     const double absEtaMax_;      //max eta ""
@@ -77,6 +78,7 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   vertexSrc_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ), 
   maxdR_(iConfig.getParameter<double>("maxdR_matching")),
   dzTrg_cleaning_(iConfig.getParameter<double>("dzForCleaning_wrtTrgMuon")),
+  filterMuon_(iConfig.getParameter<bool>("filterMuon")),
   ptMin_(iConfig.getParameter<double>("ptMin")),
   absEtaMax_(iConfig.getParameter<double>("absEtaMax")), 
   softMuonsOnly_(iConfig.getParameter<bool>("softMuonsOnly")),   /////////Comma
@@ -234,14 +236,16 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         if(muon.pt()<ptMin_) continue;
         if(fabs(muon.eta())>absEtaMax_) continue;
         if(muon.isLooseMuon()){loose_id[iMuo] = 1;}
+
         bool SkipMuon=true;
         if(dzTrg_cleaning_<0) SkipMuon=false;
-        if(debug && trgmuons_out->size()==0) std::cout <<"HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE" << endl;
+        if(debug && trgmuons_out->size()==0) std::cout <<"HERE!!" << endl;
         for(const pat::Muon & trgmu : *trgmuons_out){
             if(fabs(muon.vz()-trgmu.vz())> dzTrg_cleaning_ && dzTrg_cleaning_>0) continue;
             SkipMuon=false;
         }
-        if(SkipMuon) continue;      
+        if(filterMuon_ && SkipMuon) continue;
+
         const reco::TransientTrack muonTT((*(muon.bestTrack())),&bField); //sara:check,why not using inner track for muons? GM: What is this and why do we need this???
         if(!muonTT.isValid()) continue; // GM: and why do we skip this muon if muonTT is invalid? This seems to have no effect so I kept it.
 
@@ -250,6 +254,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         muons_out->back().addUserFloat("DR",muonDR[iMuo]);
         muons_out->back().addUserFloat("DPT",muonDPT[iMuo]);
         muons_out->back().addUserInt("looseId",loose_id[iMuo]);
+        muons_out->back().addUserInt("skipMuon",SkipMuon);
+
         for(unsigned int i=0; i<HLTPaths_.size(); i++){muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);}
         trans_muons_out->emplace_back(muonTT);
 

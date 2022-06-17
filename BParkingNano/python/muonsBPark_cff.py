@@ -2,9 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
 
-Path=["HLT_DoubleMu4_JpsiTrk_Displaced",
-      "HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"
-]
+Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
@@ -17,6 +15,7 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  maxdR_matching = cms.double(0.1),
                                  
                                  ## for the output selected collection (tag + all compatible in dZ)
+                                 filterMuon = cms.bool(True),
                                  dzForCleaning_wrtTrgMuon = cms.double(1.),
 
                                  ptMin = cms.double(0.5),
@@ -79,8 +78,8 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 #        toWhichHLTisMatched = Var("userInt('ToWhichHLTisMatched')",int,doc="To which HLT muons is the reco muon matched, -1 for probe" ),
         matched_dr = Var("userFloat('DR')",float,doc="dr with the matched triggering muon" ),
         matched_dpt = Var("userFloat('DPT')",float,doc="dpt/pt with the matched triggering muon" ),        #comma
+        skipMuon = Var("userInt('skipMuon')",bool,doc="Is muon skipped (due to large dZ w.r.t. trigger)?"),
         looseId = Var("userInt('looseId')",int,doc="reco muon is Loose"),
-        fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco muon fired this trigger"),
         fired_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4')",int,doc="reco muon fired this trigger"),
         fired_HLT_Mu8_IP6 = Var("userInt('HLT_Mu8_IP6')",int,doc="reco muon fired this trigger"),
         fired_HLT_Mu8_IP5 = Var("userInt('HLT_Mu8_IP5')",int,doc="reco muon fired this trigger"),
@@ -140,3 +139,32 @@ muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
 muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable)
 muonBParkTables = cms.Sequence(muonBParkTable)
 muonTriggerMatchedTables = cms.Sequence(muonTriggerMatchedTable)   ####
+
+###########
+# Modifiers
+###########
+
+from PhysicsTools.BParkingNano.modifiers_cff import *
+
+BToKMuMu_OpenConfig.toModify(muonTrgSelector,filterMuon=False)
+BToKMuMu_OpenConfig.toModify(countTrgMuons,minNumber=0)
+
+BToKMuMu_DiMuon.toModify(muonTrgSelector,
+                         ptMin=4.0,
+                         HLTPaths=["HLT_DoubleMu4_JpsiTrk_Displaced"]
+)
+BToKMuMu_DiMuon.toModify(muonBParkTable,
+                         variables = dict(
+                             fired_HLT_DoubleMu4_JpsiTrk_Displaced = Var("userInt('HLT_DoubleMu4_JpsiTrk_Displaced')",int,doc="reco muon fired this trigger"),
+                             fired_HLT_Mu7_IP4 = None,
+                             fired_HLT_Mu8_IP6 = None,
+                             fired_HLT_Mu8_IP5 = None,
+                             fired_HLT_Mu8_IP3 = None,
+                             fired_HLT_Mu8p5_IP3p5 = None,
+                             fired_HLT_Mu9_IP6 = None,
+                             fired_HLT_Mu9_IP5 = None,
+                             fired_HLT_Mu9_IP4 = None,
+                             fired_HLT_Mu10p5_IP3p5 = None,
+                             fired_HLT_Mu12_IP6 = None,
+                         )
+)
