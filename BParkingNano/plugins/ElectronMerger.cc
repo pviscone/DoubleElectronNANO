@@ -142,14 +142,28 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    // apply conversion veto unless we want conversions
    if (!ele.passConversionVeto()) continue;
 
-   // Fix the mass to the proper one
-   reco::Candidate::PolarLorentzVector p4( 
-					  ele.pt(),
-					  ele.eta(),
-					  ele.phi(),
-					  ELECTRON_MASS
-					   );
-   ele.setP4(p4);     
+   // take modes?
+   if (use_regression_for_p4_) {
+     // pt from regression, eta and phi from gsf track mode
+     reco::Candidate::PolarLorentzVector p4(ele.pt(),
+					    ele.gsfTrack()->etaMode(),
+					    ele.gsfTrack()->phiMode(),
+					    ELECTRON_MASS);
+     ele.setP4(p4);
+   }else if(use_gsf_mode_for_p4_) {
+     reco::Candidate::PolarLorentzVector p4(ele.gsfTrack()->ptMode(),
+					    ele.gsfTrack()->etaMode(),
+					    ele.gsfTrack()->phiMode(),
+					    ELECTRON_MASS);
+     ele.setP4(p4);
+   } else {
+     // Fix the mass to the proper one
+     reco::Candidate::PolarLorentzVector p4(ele.pt(),
+					    ele.eta(),
+					    ele.phi(),
+					    ELECTRON_MASS);
+     ele.setP4(p4);
+   }
 
    // skip electrons inside tag's jet or from different PV
    bool skipEle=true;
@@ -205,31 +219,29 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 			 << ", ele gsf track chi2 = " << ele.gsfTrack()->normalizedChi2()
 			 << ", ele.p = " << ele.p() << std::endl;
    
-    //take modes
+   // take modes?
    if (use_regression_for_p4_) {
      // pt from regression, eta and phi from gsf track mode
-     reco::Candidate::PolarLorentzVector p4( ele.pt(),
-                                             ele.gsfTrack()->etaMode(),
-                                             ele.gsfTrack()->phiMode(),
-                                             ELECTRON_MASS    );
+     reco::Candidate::PolarLorentzVector p4(ele.pt(),
+					    ele.gsfTrack()->etaMode(),
+					    ele.gsfTrack()->phiMode(),
+					    ELECTRON_MASS);
      ele.setP4(p4);
    }else if(use_gsf_mode_for_p4_) {
-     reco::Candidate::PolarLorentzVector p4( ele.gsfTrack()->ptMode(),
-                                             ele.gsfTrack()->etaMode(),
-                                             ele.gsfTrack()->phiMode(),
-                                             ELECTRON_MASS    );
+     reco::Candidate::PolarLorentzVector p4(ele.gsfTrack()->ptMode(),
+					    ele.gsfTrack()->etaMode(),
+					    ele.gsfTrack()->phiMode(),
+					    ELECTRON_MASS);
      ele.setP4(p4);
    } else {
      // Fix the mass to the proper one
-     reco::Candidate::PolarLorentzVector p4( 
-       ele.pt(),
-       ele.eta(),
-       ele.phi(),
-       ELECTRON_MASS
-       );
-     ele.setP4(p4);     
+     reco::Candidate::PolarLorentzVector p4(ele.pt(),
+					    ele.eta(),
+					    ele.phi(),
+					    ELECTRON_MASS);
+     ele.setP4(p4);
    }
-  
+
    //same cuts as in PF
    if (ele.pt()<ptMin_) continue;
    if (fabs(ele.eta())>etaMax_) continue;
