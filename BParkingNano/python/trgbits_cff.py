@@ -8,7 +8,6 @@ trgTable = cms.EDProducer( "TrgBitTableProducer",
                           l1results  = cms.InputTag("gtStage2Digis::RECO"),
                           #add interesting paths
                           paths      = cms.vstring(
-                                             "HLT_DoubleMu4_JpsiTrk_Displaced",
                                              "HLT_Mu7_IP4",
                                              "HLT_Mu8_IP6",
                                              "HLT_Mu8_IP5",
@@ -22,10 +21,6 @@ trgTable = cms.EDProducer( "TrgBitTableProducer",
                                               ),
                            #add interesting seeds
                            seeds     = cms.vstring(
-                                             "L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4",
-                                             "L1_DoubleMu0er1p4_SQ_OS_dR_Max1p4",
-                                             "L1_DoubleMu4p5_SQ_OS_dR_Max1p2",
-                                             "L1_DoubleMu4_SQ_OS_dR_Max1p2",
                                              "L1_SingleMu7er1p5",
                                              "L1_SingleMu8er1p5",
                                              "L1_SingleMu9er1p5",
@@ -38,5 +33,16 @@ trgTable = cms.EDProducer( "TrgBitTableProducer",
 
 trgTables = cms.Sequence(trgTable)
 
+###########
+# Modifiers
+###########
 
+from PhysicsTools.BParkingNano.modifiers_cff import *
 
+BToKMuMu_DiMuon.toModify(trgTable,
+                         paths = ["HLT_DoubleMu4_JpsiTrk_Displaced"],
+                         seeds = ["L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4",
+                                  "L1_DoubleMu0er1p4_SQ_OS_dR_Max1p4",
+                                  "L1_DoubleMu4p5_SQ_OS_dR_Max1p2",
+                                  "L1_DoubleMu4_SQ_OS_dR_Max1p2",],
+)
