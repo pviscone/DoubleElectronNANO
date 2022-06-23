@@ -33,6 +33,11 @@ options.register('skip', 0,
     VarParsing.varType.int,
     "skip first N events"
 )
+options.register('dimuon', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Use dimuon trigger (if data, Charmonium data set)"
+)
 
 options.setDefault('maxEvents', 1000)
 options.setDefault('tag', '124X')
@@ -74,7 +79,7 @@ outputFileNANO = cms.untracked.string('_'.join(['BParkNANO', extension[options.i
 outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles:
     options.inputFiles = [
-        filesDict['data']['charmonium_jay']
+        filesDict['data']['charmonium_jay'] if options.dimuon is True else filesDict['data']['test_orig']
     ] if not options.isMC else [
         filesDict['mc']['example_BuToKJpsi_Toee']
     ]
@@ -82,7 +87,9 @@ annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
-process = cms.Process('BParkNANO',eras.Run2_2018)#@@,BToKMuMu_DiMuon)
+process = None
+if options.dimuon is False : process = cms.Process('BParkNANO',eras.Run2_2018)
+else : process = cms.Process('BParkNANO',eras.Run2_2018,BToKMuMu_DiMuon)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
