@@ -19,19 +19,19 @@ cmsenv
 ### Add modifications needed to use post-fit quantities for electrons
 
 ```shell
-git cms-merge-topic -u CMSRKR3:GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
+git cms-merge-topic -u DiElectronX:GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
 ```
 
 ### Add modifications to KinematicParticleVertexFitter
 
 ```shell
-git cms-merge-topic -u CMSRKR3:fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
+git cms-merge-topic -u DiElectronX:fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
 ```
 
 ### Add the BParkingNano package
 
 ```shell
-git clone git@github.com:CMSRKR3/BParkingNANO.git ./PhysicsTools
+git clone git@github.com:DiElectronX/BParkingNANO.git ./PhysicsTools
 git cms-addpkg PhysicsTools/NanoAOD
 scram b
 ```
@@ -51,42 +51,42 @@ cmsRun run_nano_cfg.py isMC=1 # runs over MC
 
 - This repo is forked from https://github.com/CMSBParking/BParkingNANO 
 - The fork was made at revision https://github.com/CMSBParking/BParkingNANO/tree/b9bcad0b9b
-- This revision is tagged as https://github.com/CMSRKR3/BParkingNANO/tree/from-BParkingNANO
+- This revision is tagged as https://github.com/DiElectronX/BParkingNANO/tree/from-BParkingNANO
    - Tag also available as https://github.com/CMSBParking/BParkingNANO/tree/from-BParkingNANO
 
 **Default branches:**
 - The default branch in CMSBParking is https://github.com/CMSBParking/BParkingNANO/tree/master
-- The default branch in CMSRKR3 is https://github.com/CMSRKR3/BParkingNANO/tree/main
+- The default branch in DiElectronX is https://github.com/DiElectronX/BParkingNANO/tree/main
 
 The default branch has been renamed for two reasons:
 
 1) To promote more inclusive terminology, as per the GitHub guidelines
 2) To clearly differentiate between the different development thread of the two repositories, namely:
    - CMSBParking/BParkingNANO:master targets the CMSSW development cycle CMSSW_10_2_X
-   - CMSRKR3/BParkingNANO:main targets the CMSSW development cycle CMSSW_12_4_X
+   - DiElectronX/BParkingNANO:main targets the CMSSW development cycle CMSSW_12_4_X
 
 Further, two additional branches have been produced based on the revision above:
 
 - CMSBParking/BParkingNANO:CMSSW_10_2_X and CMSBParking/BParkingNANO:CMSSW_12_4_X
-- CMSRKR3/BParkingNANO:CMSSW_10_2_X and CMSRKR3/BParkingNANO:CMSSW_12_4_X
+- DiElectronX/BParkingNANO:CMSSW_10_2_X and DiElectronX/BParkingNANO:CMSSW_12_4_X
 
 which may be of use. For example:
 
 - CMSSW_10_2_X developments in CMSBParking/BParkingNANO should be merged into the master (and CMSSW_10_2_X) branch 
 - CMSSW_12_4_X developments in CMSBParking/BParkingNANO should be merged into the CMSSW_12_4_X branch
-- CMSSW_10_2_X developments in CMSRKR3/BParkingNANO should be merged into the CMSSW_10_2_X branch 
-- CMSSW_12_4_X developments in CMSRKR3/BParkingNANO should be merged into the main (and CMSSW_12_4_X) branch
+- CMSSW_10_2_X developments in DiElectronX/BParkingNANO should be merged into the CMSSW_10_2_X branch 
+- CMSSW_12_4_X developments in DiElectronX/BParkingNANO should be merged into the main (and CMSSW_12_4_X) branch
 
 ## Contributing
 
 We use the _fork and pull_ model:
 
-- Fork this repository https://github.com/CMSRKR3/BParkingNANO (top right _Fork_ button)
+- Fork this repository https://github.com/DiElectronX/BParkingNANO (top right _Fork_ button)
 
 - If you haven't done so yet, clone this repository:
 
 ```shell
-git clone git@github.com:CMSRKR3/BParkingNANO.git  ./PhysicsTools
+git clone git@github.com:DiElectronX/BParkingNANO.git  ./PhysicsTools
 ```
 
 - Add your fork of the repository as remote:
