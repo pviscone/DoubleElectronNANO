@@ -32,14 +32,22 @@ nanoSequence = cms.Sequence(nanoMetadata +
 nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
                               cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable)
 
-
+from PhysicsTools.BParkingNano.electronsTrigger_cff import *
+def nanoAOD_customizeDiEle(process):
+    process.nanoDiEleSequence = cms.Sequence(
+        myUnpackedPatTrigger
+        +myTriggerMatches
+        +mySlimmedElectronsWithEmbeddedTrigger
+        +electronTrgSelector
+        +countTrgElectrons)
+    return process
 
 def nanoAOD_customizeMuonTriggerBPark(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)#+ muonTriggerMatchedTables)   ###comment in this extra table in case you want to create the TriggerMuon collection again.
     return process
 
 def nanoAOD_customizeTrackFilteredBPark(process):
-    process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence + tracksBParkTables)
+    process.nanoTracksSequence = cms.Sequence( tracksBParkSequence + tracksBParkTables)
     return process
 
 def nanoAOD_customizeElectronFilteredBPark(process):
@@ -74,6 +82,7 @@ def nanoAOD_customizeMC(process):
     for name, path in process.paths.iteritems():
         # replace all the non-match embedded inputs with the matched ones
         massSearchReplaceAnyInputTag(path, 'muonTrgSelector:SelectedMuons', 'selectedMuonsMCMatchEmbedded')
+        #massSearchReplaceAnyInputTag(path, 'electronTrgSelector:SelectedElectrons', 'selectedElectronsMCMatchEmbedded') # Is this needed if the trigger is emulated ???
         massSearchReplaceAnyInputTag(path, 'electronsForAnalysis:SelectedElectrons', 'selectedElectronsMCMatchEmbedded')
         massSearchReplaceAnyInputTag(path, 'tracksBPark:SelectedTracks', 'tracksBParkMCMatchEmbedded')
 
