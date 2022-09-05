@@ -1,99 +1,17 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
-## DataFormat changes to 106X so use egamma updators to read older releases
-#from RecoEgamma.EgammaTools.egammaObjectModificationsInMiniAOD_cff import egamma9X105XUpdateModifier
-#ele9X105XUpdateModifier=egamma9X105XUpdateModifier.clone(
-#    phoPhotonIso = "",
-#    phoNeutralHadIso = "",
-#    phoChargedHadIso = "",
-#    phoChargedHadWorstVtxIso = "",
-#    phoChargedHadWorstVtxConeVetoIso = "",
-#    phoChargedHadPFPVIso = ""
-#)
-#slimmedElectronsTo106X = cms.EDProducer("ModifiedElectronProducer",
-#    src = cms.InputTag("slimmedElectrons"),
-#    modifierConfig = cms.PSet( modifications = cms.VPSet(ele9X105XUpdateModifier) )
-#)
-
-## Import and add all desired MVAs
-#mvaConfigsForEleProducer = cms.VPSet( )
-#from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
-#    import mvaEleID_BParkRetrain_producer_config
-#mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
-#
-#electronMVAValueMapProducer = cms.EDProducer(
-#  'ElectronMVAValueMapProducer',
-#  src = cms.InputTag('slimmedElectrons'), # 'regressionForEle:regressedElectrons'
-#  mvaConfigurations = mvaConfigsForEleProducer
-#)
-#
-#egmGsfElectronIDs = cms.EDProducer(
-#    "VersionedGsfElectronIdProducer",
-#    physicsObjectSrc = cms.InputTag('gedGsfElectrons'),
-#    physicsObjectIDs = cms.VPSet( )
-#)
-#
-#egmGsfElectronIDTask = cms.Task(
-#    electronMVAValueMapProducer,
-#    egmGsfElectronIDs,
-#)
-#
-#egmGsfElectronIDSequence = cms.Sequence(egmGsfElectronIDTask)
-
-# regression stuff
-from RecoEgamma.EgammaTools.regressionModifier_cfi import regressionModifier106XUL
-_gsfRegressionModifier = regressionModifier106XUL.clone(
-    modifierName = 'EGRegressionModifierV3',
-    rhoTag = 'fixedGridRhoFastjetAll', # this is ...Tmp in 10_2_X
-    eleRegs = dict(
-        ecalOnlyMean = dict(
-            ebLowEtForestName = ":gsfElectron_eb_ecalOnly_05To50_mean",
-            ebHighEtForestName = ":gsfElectron_eb_ecalOnly_05To50_mean",
-            eeLowEtForestName = ":gsfElectron_ee_ecalOnly_05To50_mean",
-            eeHighEtForestName = ":gsfElectron_ee_ecalOnly_05To50_mean",
-        ),
-        ecalOnlySigma = dict(
-            ebLowEtForestName = ":gsfElectron_eb_ecalOnly_05To50_sigma",
-            ebHighEtForestName = ":gsfElectron_eb_ecalOnly_05To50_sigma",
-            eeLowEtForestName = ":gsfElectron_ee_ecalOnly_05To50_sigma",
-            eeHighEtForestName = ":gsfElectron_ee_ecalOnly_05To50_sigma",
-        ),
-        epComb = dict(
-            ecalTrkRegressionConfig = dict(
-                ebLowEtForestName = ":gsfElectron_eb_ecalTrk_05To50_mean",
-                ebHighEtForestName = ":gsfElectron_eb_ecalTrk_05To50_mean",
-                eeLowEtForestName = ":gsfElectron_ee_ecalTrk_05To50_mean",
-                eeHighEtForestName = ":gsfElectron_ee_ecalTrk_05To50_mean",
-            ),
-            ecalTrkRegressionUncertConfig = dict(
-                ebLowEtForestName = ":gsfElectron_eb_ecalTrk_05To50_sigma",
-                ebHighEtForestName = ":gsfElectron_eb_ecalTrk_05To50_sigma",
-                eeLowEtForestName = ":gsfElectron_ee_ecalTrk_05To50_sigma",
-                eeHighEtForestName = ":gsfElectron_ee_ecalTrk_05To50_sigma",
-            ),
-        ),
-    ),
-    phoRegs = regressionModifier106XUL.phoRegs.clone(),
-)
-
-regressionForEle = cms.EDProducer(
-    'ElectronRegresser',
-    pfSrc = cms.InputTag('slimmedElectrons'),
-    gsfRegressionConfig = _gsfRegressionModifier,
-)
-
 #Everything can be done here, in one loop and save time :)
 electronsForAnalysis = cms.EDProducer(
   'ElectronMerger',
-  trgMuon = cms.InputTag('muonTrgSelector:trgMuons'),
-  #lowptSrc = cms.InputTag('slimmedLowPtElectrons'),
-  pfSrc    = cms.InputTag('slimmedElectrons'), #@@ regressionForEle:regressedElectrons
-  pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+  trgLepton = cms.InputTag('muonTrgSelector:trgMuons'),
+  lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
+  pfSrc    = cms.InputTag('slimmedElectrons'),
+  pfmvaId = cms.InputTag(""),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
-  ## cleaning wrt trigger muon [-1 == no cut]
-  drForCleaning_wrtTrgMuon = cms.double(0.03),
-  dzForCleaning_wrtTrgMuon = cms.double(1.),
+  ## cleaning wrt trigger lepton [-1 == no cut]
+  drForCleaning_wrtTrgLepton = cms.double(0.03),
+  dzForCleaning_wrtTrgLepton = cms.double(1.),
   ## cleaning between pfEle and lowPtGsf
   drForCleaning = cms.double(0.03),
   dzForCleaning = cms.double(0.5), ##keep tighter dZ to check overlap of pfEle with lowPt (?)
@@ -102,16 +20,23 @@ electronsForAnalysis = cms.EDProducer(
   pf_ptMin = cms.double(1.),
   ptMin = cms.double(0.5),
   etaMax = cms.double(2.5),
-  bdtMin = cms.double(-20.), #@@ was -2.5, this cut can be used to deactivate low pT e if set to >12
+  bdtMin = cms.double(-2.5), #@@ was -2.5, this cut can be used to deactivate low pT e if set to >12
   useRegressionModeForP4 = cms.bool(False),
-  useGsfModeForP4 = cms.bool(True), #@@
+  useGsfModeForP4 = cms.bool(False),
   sortOutputCollections = cms.bool(True),
-  saveLowPtE = cms.bool(False),
+  saveLowPtE = cms.bool(True),
   filterEle = cms.bool(True),
     # conversions
     conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
     beamSpot = cms.InputTag("offlineBeamSpot"),
     addUserVarsExtra = cms.bool(False),
+)
+
+#cuts minimun number in B both mu and e, min number of trg, dz electron, dz and dr track, 
+countTrgElectrons = cms.EDFilter("PATCandViewCountFilter",
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(999999),
+    src = cms.InputTag("electronTrgSelector", "trgElectrons")
 )
 
 electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -131,7 +56,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
         vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
-        dzTrg = Var("userFloat('dzTrg')",float,doc="dz from the corresponding trigger muon, in cm",precision=10),
+        dzTrg = Var("userFloat('dzTrg')",float,doc="dz from the corresponding triggered lepton, in cm",precision=10),
         ip3d = Var("abs(dB('PV3D'))",float,doc="3D impact parameter wrt first PV, in cm",precision=10),
         sip3d = Var("abs(dB('PV3D')/edB('PV3D'))",float,doc="3D impact parameter significance wrt first PV, in cm",precision=10),
 #        deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
@@ -149,6 +74,9 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         unBiased = Var("userFloat('unBiased')",float,doc="unBiased from seed BDT 20 for pfEle"),
         mvaId = Var("userFloat('mvaId')",float,doc="MVA ID for low pT, 20 for pfEle"),
         pfmvaId = Var("userFloat('pfmvaId')",float,doc="MVA ID for pfEle, 20 for low pT"),
+        LooseID = Var("userInt('LooseID')",float,doc="MVA ID for pfEle, mvaEleID-Fall17-noIso-V1-wpLoose"),
+        MediumID = Var("userInt('MediumID')",float,doc="MVA ID for pfEle, mvaEleID-Fall17-noIso-V1-wp90"),
+        TightID = Var("userInt('TightID')",float,doc="MVA ID for pfEle, mvaEleID-Fall17-noIso-V1-wp80"),
         fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
         isPFoverlap = Var("userInt('isPFoverlap')",bool,doc="flag lowPt ele overlapping with pf in selected_pf_collection",precision=8),
         convOpen = Var("userInt('convOpen')",bool,doc="Matched to a conversion in gsfTracksOpenConversions collection"),
@@ -215,9 +143,6 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 )
 
 electronsBParkSequence = cms.Sequence(
-    #slimmedElectronsTo106X+
-    #regressionForEle+
-    #egmGsfElectronIDSequence+
     electronsForAnalysis
 )
 electronBParkMC = cms.Sequence(electronsBParkSequence + electronsBParkMCMatchForTable + selectedElectronsMCMatchEmbedded + electronBParkMCTable)
@@ -235,8 +160,14 @@ BToKEE_OpenConfig.toModify(electronsForAnalysis,
                            etaMax=2.5,
                            bdtMin=-1.e3,
                            flagAndclean=False,
-                           #drForCleaning_wrtTrgMuon=-1.,
-                           #dzForCleaning_wrtTrgMuon=-1.,
+                           #drForCleaning_wrtTrgLepton=-1.,
+                           #dzForCleaning_wrtTrgLepton=-1.,
                            #drForCleaning=-1.,
                            #dzForCleaning=-1.,
                            filterEle=False)
+
+BToKEE_DiEle.toModify(electronsForAnalysis,
+                      trgLepton = 'electronTrgSelector:trgElectrons',
+                      bdtMin = -100., # Open this up and rely on L/M/T WPs
+                      useGsfModeForP4 = True, # Use GSF for PF ele as well
+                      saveLowPtE = False) # Don't use low-pT ele
