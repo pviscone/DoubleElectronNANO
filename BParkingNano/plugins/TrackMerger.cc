@@ -20,6 +20,9 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/PatCandidates/interface/PATObject.h"
+#include "DataFormats/PatCandidates/interface/Lepton.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/Common/interface/AssociationVector.h"
@@ -37,7 +40,7 @@ public:
     beamSpotSrc_(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamSpot"))),
     tracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     lostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
-    trgMuonToken_(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("trgMuon"))),
+    trgLeptonToken_(consumes<edm::View<reco::Candidate> >(cfg.getParameter<edm::InputTag>("trgLepton"))),
     muonToken_(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons"))),
     eleToken_(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("pfElectrons"))),
     vertexToken_(consumes<reco::VertexCollection> (cfg.getParameter<edm::InputTag>( "vertices" ))), 
@@ -71,7 +74,7 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> tracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksToken_;
-  const edm::EDGetTokenT<pat::MuonCollection> trgMuonToken_;
+  const edm::EDGetTokenT<edm::View<reco::Candidate> > trgLeptonToken_;
   const edm::EDGetTokenT<pat::MuonCollection> muonToken_;
   const edm::EDGetTokenT<pat::ElectronCollection> eleToken_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
@@ -108,8 +111,8 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.getByToken(tracksToken_, tracks);
   edm::Handle<pat::PackedCandidateCollection> lostTracks;
   evt.getByToken(lostTracksToken_, lostTracks);
-  edm::Handle<pat::MuonCollection> trgMuons;
-  evt.getByToken(trgMuonToken_, trgMuons);
+  edm::Handle<edm::View<reco::Candidate> > trgLeptons;
+  evt.getByToken(trgLeptonToken_, trgLeptons);
 
   edm::Handle<pat::MuonCollection> muons;
   evt.getByToken(muonToken_, muons);
@@ -155,20 +158,20 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 
     bool skipTrack=true;
     float dzTrg = 0.0;
-    for (const pat::Muon & mu: *trgMuons){
-      //remove tracks inside trg muons jet
-      if(reco::deltaR(trk, mu) < drTrg_Cleaning_ && drTrg_Cleaning_ >0) 
+    for (const auto & trg: *trgLeptons){
+      //remove tracks inside trg leptons jet
+      if(reco::deltaR(trk, trg) < drTrg_Cleaning_ && drTrg_Cleaning_ >0) 
         continue;
       //if dz is negative it is deactivated
-      if((fabs(trk.vz() - mu.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0))
+      if((fabs(trk.vz() - trg.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0))
         continue;
       skipTrack=false;
-      dzTrg = trk.vz() - mu.vz();
-      break; // at least for one trg muon to pass this cuts
+      dzTrg = trk.vz() - trg.vz();
+      break; // at least for one trg lepton to pass this cuts
     }
-    // if (trgMuons->empty()) { skipTrack=false; } //@@ needed???
+    // if (trgLeptons->empty()) { skipTrack=false; } //@@ needed???
 
-    // if track is closer to at least a triggering muon keep it
+    // if track is closer to at least a triggering lepton keep it
     if (filterTrack_ && skipTrack ) continue;
 
     // high purity requirment applied only in packedCands
