@@ -43,16 +43,18 @@ if __name__ == '__main__':
           print("Failed submitting task:",cle)
 
   parser = ArgumentParser()
-  parser.add_argument('-y', '--yaml', default = 'samples.yml', help = 'File with dataset descriptions')
+  parser.add_argument('-y', '--yaml', default = 'samples_Run3.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
   args = parser.parse_args()
 
   with open(args.yaml) as f:
-    doc = yaml.load(f) # Parse YAML file
+    doc = yaml.load(f,Loader=yaml.FullLoader) # Parse YAML file
     common = doc['common'] if 'common' in doc else {'data' : {}, 'mc' : {}}
     
     # loop over samples
     for sample, info in doc['samples'].items():
+      # Input DBS
+      input_dbs = info['dbs'] if 'dbs' in info else None
       # Given we have repeated datasets check for different parts
       parts = info['parts'] if 'parts' in info else [None]
       for part in parts:
@@ -63,6 +65,8 @@ if __name__ == '__main__':
         print('submitting', name)
 
         isMC = info['isMC']
+
+        config.Data.inputDBS = input_dbs if input_dbs is not None else 'global'
 
         config.Data.inputDataset = info['dataset'].replace('%d',str(part)) \
                                    if part is not None else \
@@ -95,8 +99,7 @@ if __name__ == '__main__':
         ]
         
         config.JobType.outputFiles = ['_'.join(['BParkNANO', 'mc' if isMC else 'data', production_tag])+'.root']
-        
+
+        print()
         print(config)
         submit(config)
-
-
