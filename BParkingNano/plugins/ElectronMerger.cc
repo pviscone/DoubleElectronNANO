@@ -9,6 +9,9 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/View.h"
 
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/PatCandidates/interface/PATObject.h"
+#include "DataFormats/PatCandidates/interface/Lepton.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
@@ -36,15 +39,16 @@ public:
 
   explicit ElectronMerger(const edm::ParameterSet &cfg):
     ttbToken_(esConsumes(edm::ESInputTag{"","TransientTrackBuilder"})),
-    triggerMuons_{ consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("trgMuon") )},
-    lowpt_src_{},//@@ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
+    triggerLeptons_{ consumes<edm::View<reco::Candidate> >( cfg.getParameter<edm::InputTag>("trgLepton") )},
+    lowpt_src_{consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
-    pf_mvaId_src_{},//@@ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("pfmvaId") )},
+    pf_mvaId_src_(),
+    pf_mvaId_src_Tag_(cfg.getParameter<edm::InputTag>("pfmvaId")),
     vertexSrc_{ consumes<reco::VertexCollection> ( cfg.getParameter<edm::InputTag>("vertexCollection") )},
     conversions_{ consumes<edm::View<reco::Conversion> > ( cfg.getParameter<edm::InputTag>("conversions") )},
     beamSpot_{ consumes<reco::BeamSpot> ( cfg.getParameter<edm::InputTag>("beamSpot") )},
-    drTrg_cleaning_{cfg.getParameter<double>("drForCleaning_wrtTrgMuon")},
-    dzTrg_cleaning_{cfg.getParameter<double>("dzForCleaning_wrtTrgMuon")},
+    drTrg_cleaning_{cfg.getParameter<double>("drForCleaning_wrtTrgLepton")},
+    dzTrg_cleaning_{cfg.getParameter<double>("dzForCleaning_wrtTrgLepton")},
     dr_cleaning_{cfg.getParameter<double>("drForCleaning")},
     dz_cleaning_{cfg.getParameter<double>("dzForCleaning")},
     flagAndclean_{cfg.getParameter<bool>("flagAndclean")},
@@ -71,10 +75,11 @@ public:
   
 private:
   const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbToken_;
-  const edm::EDGetTokenT<pat::MuonCollection> triggerMuons_;
+  const edm::EDGetTokenT<edm::View<reco::Candidate> > triggerLeptons_;
   const edm::EDGetTokenT<pat::ElectronCollection> lowpt_src_;
   const edm::EDGetTokenT<pat::ElectronCollection> pf_src_;
-  const edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_;
+  edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_;
+  const edm::InputTag pf_mvaId_src_Tag_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
   const edm::EDGetTokenT<edm::View<reco::Conversion> > conversions_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpot_;
@@ -99,15 +104,15 @@ private:
 void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const & iSetup) const {
 
   //input
-  edm::Handle<pat::MuonCollection> trgMuon;
-  evt.getByToken(triggerMuons_, trgMuon);
+  edm::Handle<edm::View<reco::Candidate> > trgLepton;
+  evt.getByToken(triggerLeptons_, trgLepton);
   edm::Handle<pat::ElectronCollection> lowpt;
-  //@@evt.getByToken(lowpt_src_, lowpt);
+  if ( saveLowPtE_ ) evt.getByToken(lowpt_src_, lowpt);
   edm::Handle<pat::ElectronCollection> pf;
   evt.getByToken(pf_src_, pf);
   edm::Handle<edm::ValueMap<float> > pfmvaId;  
-  //@@evt.getByToken(pf_mvaId_src_, pfmvaId);
-  // 
+  if ( !pf_mvaId_src_Tag_.label().empty() ) { evt.getByToken(pf_mvaId_src_, pfmvaId); }
+
   const auto& theB = iSetup.getData(ttbToken_);
   //
   edm::Handle<reco::VertexCollection> vertexHandle;
@@ -168,7 +173,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    // skip electrons inside tag's jet or from different PV
    bool skipEle=true;
    float dzTrg = 0.0;
-   for(const auto & trg : *trgMuon) {
+   for(const auto & trg : *trgLepton) {
      if(reco::deltaR(ele, trg) < drTrg_cleaning_ && drTrg_cleaning_ > 0)
         continue;
      if(fabs(ele.vz() - trg.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0)
@@ -182,16 +187,17 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
    // for PF e we set BDT outputs to much higher number than the max
    edm::Ref<pat::ElectronCollection> ref(pf,ipfele);
-   //@@float pf_mva_id = float((*pfmvaId)[ref]);
-   float pf_mva_id = 1. * ( 1 * ref->electronID("mvaEleID-Fall17-noIso-V1-wpLoose") +
-			    2 * ref->electronID("mvaEleID-Fall17-noIso-V2-wp90") +
-			    4 * ref->electronID("mvaEleID-Fall17-noIso-V2-wp80") ); //@@ hack for electron ID
+   float pf_mva_id = 20.;
+   if ( !pf_mvaId_src_Tag_.label().empty() ) { pf_mva_id = float((*pfmvaId)[ref]); }
    ele.addUserInt("isPF", 1);
    ele.addUserInt("isLowPt", 0);
    ele.addUserFloat("ptBiased", 20.);
    ele.addUserFloat("unBiased", 20.);
    ele.addUserFloat("mvaId", 20.);
    ele.addUserFloat("pfmvaId", pf_mva_id);
+   ele.addUserInt("LooseID", ref->electronID("mvaEleID-Fall17-noIso-V1-wpLoose"));
+   ele.addUserInt("MediumID", ref->electronID("mvaEleID-Fall17-noIso-V2-wp90"));
+   ele.addUserInt("TightID", ref->electronID("mvaEleID-Fall17-noIso-V2-wp80"));
    ele.addUserFloat("chargeMode", ele.charge());
    ele.addUserInt("isPFoverlap", 0);
    ele.addUserFloat("dzTrg", dzTrg);
@@ -259,7 +265,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
    bool skipEle=true;
    float dzTrg = 0.0;
-   for(const auto & trg : *trgMuon) {
+   for(const auto & trg : *trgLepton) {
      if(reco::deltaR(ele, trg) < drTrg_cleaning_ && drTrg_cleaning_ > 0)
         continue;
      if(fabs(ele.vz() - trg.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0)

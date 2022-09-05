@@ -3,14 +3,14 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 tracksBPark = cms.EDProducer('TrackMerger',
                              beamSpot   = cms.InputTag("offlineBeamSpot"),
-                             trgMuon    = cms.InputTag("muonTrgSelector:trgMuons"),
+                             trgLepton    = cms.InputTag("muonTrgSelector:trgMuons"),
                              tracks     = cms.InputTag("packedPFCandidates"),
                              lostTracks = cms.InputTag("lostTracks"),
                              trkPtCut = cms.double(0.5),
                              muons      = cms.InputTag("slimmedMuons"),
                              pfElectrons= cms.InputTag("slimmedElectrons"),
                              vertices   = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                             lowPtElectrons=cms.InputTag(""), # remove "slimmedLowPtElectrons" for now
+                             lowPtElectrons=cms.InputTag("slimmedLowPtElectrons"),
                              trkEtaCut = cms.double(2.5),
                              filterTrack = cms.bool(True),
                              dzTrg_cleaning = cms.double(1.),
@@ -41,7 +41,7 @@ trackBParkTable = cms.EDProducer(
         dzS = Var("userFloat('dzS')", float, doc="dz/err (with sign) wrt first PV, in cm", precision=10),
         dxyS = Var("userFloat('dxyS')", float, doc="dxy/err (with sign) wrt first PV, in cm", precision=10),
         DCASig=Var("userFloat('DCASig')", float,doc="significance of xy-distance of closest approach wrt beamspot", precision=10),
-        dzTrg = Var("userFloat('dzTrg')", float,doc="dz from the corresponding trigger muon, in cm", precision=10),
+        dzTrg = Var("userFloat('dzTrg')", float,doc="dz from the corresponding trigger lepton, in cm", precision=10),
         isMatchedToMuon = Var("userInt('isMatchedToMuon')",bool,doc="track was used to build a muon", precision=10),
         isMatchedToLooseMuon = Var("userInt('isMatchedToLooseMuon')",bool,doc="track was used to build a muon passing LooseID", precision=10),
         isMatchedToSoftMuon = Var("userInt('isMatchedToSoftMuon')",bool,doc="track was used to build a muon passing softID", precision=10),
@@ -104,3 +104,7 @@ _modifiers.toModify(tracksBPark,
                     #dzTrg_cleaning=-1.,
                     #drTrg_Cleaning=-1.,
                     filterTrack=False)
+
+BToKEE_DiEle.toModify(tracksBPark,
+                      trgLepton = "electronTrgSelector:trgElectrons",
+                      lowPtElectrons = "") # don't use "slimmedLowPtElectrons"

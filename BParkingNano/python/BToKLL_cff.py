@@ -219,7 +219,6 @@ BToKLLTables = cms.Sequence(BToKeeTable + BToKmumuTable)
 
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
-BToKMuMu_OpenConfig.toModify(CountBToKmumu,minNumber=0)
 BToKMuMu_OpenConfig.toModify(muonPairsForKmumu,
                              lep1Selection='pt > 0.5',
                              lep2Selection='',
@@ -239,6 +238,7 @@ BToKMuMu_OpenConfig.toModify(BToKmumu,
                              isotrkDCATightCut=0.,
                              drIso_cleaning=0.,
                              filterBySelection=False)
+BToKMuMu_OpenConfig.toModify(CountBToKmumu,minNumber=0)
 
 BToKEE_OpenConfig.toModify(electronPairsForKee,
                            lep1Selection='pt > 0.5',
