@@ -32,18 +32,24 @@ git cms-merge-topic -u DiElectronX:fixKinParticleVtxFitter_124X # unsafe checkou
 ```shell
 git clone git@github.com:DiElectronX/BParkingNANO.git ./PhysicsTools
 git cms-addpkg PhysicsTools/NanoAOD
-scram b
 ```
 
 ### Build and run on a test file
 
 ```shell
-scram b
-cd PhysicsTools/BParkingNano/test/
-cmsenv 
+cd $CMSSW_BASE/src/PhysicsTools/BParkingNano/test
 cmsRun run_nano_cfg.py        # by default, runs over Run 3 data
 cmsRun run_nano_cfg.py isMC=1 # runs over MC for 2022
 ```
+
+### Submit CRAB jobs to process Run 3 data and 2022 MC 
+
+```shell
+cd $CMSSW_BASE/src/PhysicsTools/BParkingNano/production
+python3 submit_on_crab.py
+```
+
+---
 
 ## Provenance and branches
 
