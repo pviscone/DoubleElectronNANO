@@ -9,10 +9,9 @@ This recipe is for 12_4_X. The original recipe for 10_2_X can be found [here](ht
 ### Getting started
 
 ```shell
-export SCRAM_ARCH=slc7_amd64_gcc10
 scram list CMSSW
-cmsrel CMSSW_12_4_0_pre3
-cd CMSSW_12_4_0_pre3/src
+cmsrel CMSSW_12_4_8
+cd CMSSW_12_4_8/src
 cmsenv
 ```
 
@@ -42,9 +41,8 @@ scram b
 scram b
 cd PhysicsTools/BParkingNano/test/
 cmsenv 
-cmsRun run_nano_cfg.py        # by default, runs over data
-cmsRun run_nano_cfg.py isMC=1 # runs over MC
-
+cmsRun run_nano_cfg.py        # by default, runs over Run 3 data
+cmsRun run_nano_cfg.py isMC=1 # runs over MC for 2022
 ```
 
 ## Provenance and branches
