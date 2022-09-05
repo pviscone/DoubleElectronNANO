@@ -33,63 +33,41 @@ options.register('skip', 0,
     VarParsing.varType.int,
     "skip first N events"
 )
-options.register('dimuon', False,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "Use dimuon trigger (if data, Charmonium data set)"
-)
 
 options.setDefault('maxEvents', 1000)
-options.setDefault('tag', '124X')
+options.setDefault('tag', '124X') # 124X or 102X !!!
 options.parseArguments()
+print(options)
 
-globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'
-if options._beenSet['globalTag']:
-    globaltag = options.globalTag
-
-filesDict = {
-    'data':{
-        # original test file (BParking 2018)
-        'test_orig':'root://cms-xrd-global.cern.ch//store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root',
-        # example (default) charmomium file
-        'charmonium_orig':'root://cms-xrd-global.cern.ch//store/data/Run2018D/Charmonium/MINIAOD/12Nov2019_UL2018-v1/00000/00AC5CFC-5390-F947-911B-2074A7DFF23D.root',
-        # example charmomium file with emulated di-electron trigger
-        'charmonium_jay':'root://cms-xrd-global.cern.ch//store/user/jodedra/Charmonium_20221705/Charmonium/Spring22_Trigger_20221705_MiniAODHLTRAWCOMB/220517_091036/0000/output_10.root',
-    },
-    'mc':{
-        # original test file
-        'test_orig':'file:///eos/cms/store/cmst3/group/bpark/BToKmumu_1000Events_MINIAOD.root',
-        # test BuToKJpsi_Toee file
-        'test_BuToKJpsi_Toee':'file:///eos/cms/store/group/phys_bphys/ec/RKR3/test/test_files/MINIAOD_BuToKJpsi_Toee_Skim_1000events_102X.root',
-        # test BuToKMuMu file
-        'test_BuToKMuMu':'file:///eos/cms/store/group/phys_bphys/ec/RKR3/test/test_files/MINIAOD_BuToKMuMu_Skim_1000events_102X.root',
-        # example BuToKMuMu file
-        'BuToKMuMu':'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/40000/43F82832-A9A2-5D45-950F-BC7D8DAC9C9B.root',
-        # example BuToKJpsi_ToMuMu file
-        'BuToKJpsi_ToMuMu':'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_ToMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/120000/028A5AEE-90AD-7448-A186-A86AA85E1881.root',
-        # example BuToKJpsi_Toee file from RK analysis
-        'example_BuToKJpsi_Toee':'root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_Toee_Mufilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15_ext1-v2/100000/041EF22D-69F5-914D-AD60-F2D1187B0842.root',
-        # Jay's BuToKJpsi_ToMuMu "x2" sample, example file, 1000 events
-        'example_BuToKJpsi_ToMuMu':'root://cms-xrd-global.cern.ch//store/user/jodedra/BKMUMUMC_20222805_MiniAOD/BKMUMUMC20222805/SUMMER22_MiniAOD/220529_182116/0000/EGM-Run3Winter21DRMiniAOD-00021_inMINIAODSIM_12.root'
-    }
-}
+globaltag = None
+if   options.tag == '124X': globaltag = '124X_mcRun3_2022_realistic_v11' if options.isMC else '124X_dataRun3_Prompt_v4'
+elif options.tag == '102X': globaltag = '102X_upgrade2018_realistic_v15' if options.isMC else '102X_dataRun2_v11'
+if options._beenSet['globalTag']: globaltag = options.globalTag
 
 extension = {False : 'data', True : 'mc'}
 outputFileNANO = cms.untracked.string('_'.join(['BParkNANO', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles:
-    options.inputFiles = [
-        filesDict['data']['charmonium_jay'] if options.dimuon is True else filesDict['data']['test_orig']
-    ] if not options.isMC else [
-        filesDict['mc']['example_BuToKJpsi_Toee']
-    ]
+    if options.tag == "102X": 
+        options.inputFiles = [
+            'file:///eos/cms/store/cmst3/group/bpark/BToKmumu_1000Events_MINIAOD.root'
+        ] if options.isMC else [
+            'root://cms-xrd-global.cern.ch//store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root'
+        ]
+    elif options.tag == "124X":
+        options.inputFiles = [
+            'root://cms-xrd-global.cern.ch//store/user/jodedra/BuTOjpsiKEE20220831fiftyMbettersplitting/BuTOjpsiKEE20220831fiftyMbettersplitting/SUMMER22_MINIAOD/220902_093638/0000/PPD-Run3Summer22MiniAODv3-00002_inMINIAODSIM_1.root'
+        ] if options.isMC else [
+            'root://cms-xrd-global.cern.ch//store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/309/00000/2e62494a-6ef9-4262-9afc-95c2b8951970.root'
+        ]
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
+# Process
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
 process = None
-if options.dimuon is False : process = cms.Process('BParkNANO',eras.Run2_2018)
-else : process = cms.Process('BParkNANO',eras.Run2_2018,BToKMuMu_DiMuon)
+if   options.tag == '124X': process = cms.Process('BParkNANO',eras.Run3,BToKEE_DiEle)
+elif options.tag == '102X': process = cms.Process('BParkNANO',eras.Run2_2018)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -162,128 +140,35 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
-# this is for the LowPt energy regression
-process.GlobalTag.toGet = cms.VPSet(
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_eb_ecalOnly_05To20_mean"),
-         tag = cms.string("lowPtElectron_eb_ecalOnly_05To20_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_ee_ecalOnly_05To20_mean"),
-         tag = cms.string("lowPtElectron_ee_ecalOnly_05To20_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_eb_ecalOnly_05To20_sigma"),
-         tag = cms.string("lowPtElectron_eb_ecalOnly_05To20_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_ee_ecalOnly_05To20_sigma"),
-         tag = cms.string("lowPtElectron_ee_ecalOnly_05To20_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_eb_ecalTrk_05To20_mean"),
-         tag = cms.string("lowPtElectron_eb_ecalTrk_05To20_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_ee_ecalTrk_05To20_mean"),
-         tag = cms.string("lowPtElectron_ee_ecalTrk_05To20_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_eb_ecalTrk_05To20_sigma"),
-         tag = cms.string("lowPtElectron_eb_ecalTrk_05To20_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_ee_ecalTrk_05To20_sigma"),
-         tag = cms.string("lowPtElectron_ee_ecalTrk_05To20_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_eb_ecalOnly_20To50_mean"),
-         tag = cms.string("lowPtElectron_eb_ecalOnly_20To50_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_ee_ecalOnly_20To50_mean"),
-         tag = cms.string("lowPtElectron_ee_ecalOnly_20To50_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_eb_ecalOnly_20To50_sigma"),
-         tag = cms.string("lowPtElectron_eb_ecalOnly_20To50_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_ee_ecalOnly_20To50_sigma"),
-         tag = cms.string("lowPtElectron_ee_ecalOnly_20To50_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_eb_ecalTrk_20To50_mean"),
-         tag = cms.string("lowPtElectron_eb_ecalTrk_20To50_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_ee_ecalTrk_20To50_mean"),
-         tag = cms.string("lowPtElectron_ee_ecalTrk_20To50_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_eb_ecalTrk_20To50_sigma"),
-         tag = cms.string("lowPtElectron_eb_ecalTrk_20To50_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("lowPtElectron_ee_ecalTrk_20To50_sigma"),
-         tag = cms.string("lowPtElectron_ee_ecalTrk_20To50_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("gsfElectron_eb_ecalOnly_05To50_mean"),
-         tag = cms.string("gsfElectron_eb_ecalOnly_05To50_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("gsfElectron_ee_ecalOnly_05To50_mean"),
-         tag = cms.string("gsfElectron_ee_ecalOnly_05To50_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("gsfElectron_eb_ecalOnly_05To50_sigma"),
-         tag = cms.string("gsfElectron_eb_ecalOnly_05To50_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("gsfElectron_ee_ecalOnly_05To50_sigma"),
-         tag = cms.string("gsfElectron_ee_ecalOnly_05To50_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("gsfElectron_eb_ecalTrk_05To50_mean"),
-         tag = cms.string("gsfElectron_eb_ecalTrk_05To50_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("gsfElectron_ee_ecalTrk_05To50_mean"),
-         tag = cms.string("gsfElectron_ee_ecalTrk_05To50_mean_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("gsfElectron_eb_ecalTrk_05To50_sigma"),
-         tag = cms.string("gsfElectron_eb_ecalTrk_05To50_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-cms.PSet(record = cms.string("GBRDWrapperRcd"),
-         label = cms.untracked.string("gsfElectron_ee_ecalTrk_05To50_sigma"),
-         tag = cms.string("gsfElectron_ee_ecalTrk_05To50_sigma_2018V1"),
-         connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")))
-
-
-
-
-
-
 
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
-process = nanoAOD_customizeMuonTriggerBPark(process)
-process = nanoAOD_customizeElectronFilteredBPark(process)
-process = nanoAOD_customizeTrackFilteredBPark(process)
-process = nanoAOD_customizeBToKLL(process)
-process = nanoAOD_customizeBToKstarEE(process)
-process = nanoAOD_customizeBToKstarMuMu(process)
-process = nanoAOD_customizeTriggerBitsBPark(process)
-
-
-
+if options.tag == '102X':
+    process = nanoAOD_customizeMuonTriggerBPark(process)
+    process = nanoAOD_customizeElectronFilteredBPark(process)
+    process = nanoAOD_customizeTrackFilteredBPark(process)
+    process = nanoAOD_customizeBToKLL(process)
+    process = nanoAOD_customizeBToKstarEE(process)
+    process = nanoAOD_customizeBToKstarMuMu(process)
+elif options.tag == '124X':
+    from PhysicsTools.BParkingNano.electronsTrigger_cff import *
+    process = nanoAOD_customizeDiEle(process)
+    process = nanoAOD_customizeElectronFilteredBPark(process)
+    process = nanoAOD_customizeTriggerBitsBPark(process)
+    process = nanoAOD_customizeTrackFilteredBPark(process)
+    process = nanoAOD_customizeBToKLL(process)
 
 # Path and EndPath definitions
-process.nanoAOD_KMuMu_step = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu )
-process.nanoAOD_Kee_step   = cms.Path(process.nanoSequence + process.nanoBKeeSequence   + CountBToKee   )
-process.nanoAOD_KstarMuMu_step = cms.Path(process.nanoSequence + process.KstarToKPiSequence + process.nanoBKstarMuMuSequence + CountBToKstarMuMu )
-process.nanoAOD_KstarEE_step  = cms.Path(process.nanoSequence+ process.KstarToKPiSequence + process.nanoBKstarEESequence + CountBToKstarEE  )
+if options.tag == '102X':
+    process.nanoAOD_KMuMu_step = cms.Path(process.nanoSequence + process.nanoTracksSequence + process.nanoBKMuMuSequence + CountBToKmumu )
+    process.nanoAOD_Kee_step   = cms.Path(process.nanoSequence + process.nanoTracksSequence + process.nanoBKeeSequence   + CountBToKee   )
+    process.nanoAOD_KstarMuMu_step = cms.Path(process.nanoSequence + process.nanoTracksSequence + process.KstarToKPiSequence + process.nanoBKstarMuMuSequence + CountBToKstarMuMu )
+    process.nanoAOD_KstarEE_step  = cms.Path(process.nanoSequence + process.nanoTracksSequence + process.KstarToKPiSequence + process.nanoBKstarEESequence + CountBToKstarEE  )
+elif options.tag == '124X':
+    process.nanoAOD_DiEle_step = cms.Path(process.nanoSequence
+                                          +process.nanoDiEleSequence
+                                          +process.nanoTracksSequence
+                                          +process.nanoBKeeSequence
+                                          +CountBToKee)
 
 # customisation of the process.
 if options.isMC:
@@ -295,36 +180,52 @@ process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
-process.schedule = cms.Schedule(
-                                process.nanoAOD_KMuMu_step,
-                                process.nanoAOD_Kee_step,
-                                #process.nanoAOD_KstarMuMu_step,
-                                #process.nanoAOD_KstarEE_step,
-                                process.endjob_step, 
-                                process.NANOAODoutput_step
-                               )
-if options.wantFullRECO:
+if options.tag == '124X':
+
+    process.schedule = cms.Schedule(process.nanoAOD_DiEle_step,
+                                    process.endjob_step,
+                                    process.NANOAODoutput_step)
+    if options.wantFullRECO:
+        process.schedule = cms.Schedule(process.nanoAOD_DiEle_step,
+                                        process.endjob_step,
+                                        process.FEVTDEBUGHLToutput_step,
+                                        process.NANOAODoutput_step)
+    from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
+    associatePatAlgosToolsTask(process)
+    process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
+        SelectEvents = cms.vstring('nanoAOD_DiEle_step')
+    )
+
+elif options.tag == '102X':
+
     process.schedule = cms.Schedule(
-                                    process.nanoAOD_KMuMu_step,
-                                    process.nanoAOD_Kee_step,
-                                    #process.nanoAOD_KstarMuMu_step,
-                                    #process.nanoAOD_KstarEE_step,
-                                    process.endjob_step, 
-                                    process.FEVTDEBUGHLToutput_step, 
-                                    process.NANOAODoutput_step
-                                    )
-from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
-associatePatAlgosToolsTask(process)
-
-process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
+        process.nanoAOD_KMuMu_step,
+        process.nanoAOD_Kee_step,
+        #process.nanoAOD_KstarMuMu_step,
+        #process.nanoAOD_KstarEE_step,
+        process.endjob_step,
+        process.NANOAODoutput_step
+    )
+    if options.wantFullRECO:
+        process.schedule = cms.Schedule(
+            process.nanoAOD_KMuMu_step,
+            process.nanoAOD_Kee_step,
+            #process.nanoAOD_KstarMuMu_step,
+            #process.nanoAOD_KstarEE_step,
+            process.endjob_step,
+            process.FEVTDEBUGHLToutput_step,
+            process.NANOAODoutput_step
+        )
+    from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
+    associatePatAlgosToolsTask(process)
+    process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring(
-                                   'nanoAOD_KMuMu_step', 
-                                   'nanoAOD_Kee_step',
-                                   #'nanoAOD_KstarMuMu_step',
-                                   #'nanoAOD_KstarEE_step',
-                                   )
-)
-
+            'nanoAOD_KMuMu_step',
+            'nanoAOD_Kee_step',
+            #'nanoAOD_KstarMuMu_step',
+            #'nanoAOD_KstarEE_step',
+        )
+    )
 
 ### from https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3287/1/1/1/1/1.html
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
