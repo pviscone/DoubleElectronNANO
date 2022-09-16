@@ -24,6 +24,7 @@
 #include <limits>
 #include <algorithm>
 #include "KinVtxFitter.h"
+#include <TLorentzVector.h>
 
 class BToKLLBuilder : public edm::global::EDProducer<> {
 
@@ -226,7 +227,42 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("fitted_k_pt"  , fitter.daughter_p4(2).pt()); 
       cand.addUserFloat("fitted_k_eta" , fitter.daughter_p4(2).eta());
       cand.addUserFloat("fitted_k_phi" , fitter.daughter_p4(2).phi());
-    
+
+      // Anti-Do variables
+      // From: https://github.com/gkaratha/cmgtools-lite/blob/1d02c82/RKAnalysis/python/tools/nanoAOD/UserFunctions.py#L382-L395
+      TLorentzVector lep;
+      if ( fitter.fitted_daughter(0).particleCharge() != fitter.fitted_daughter(2).particleCharge() ) {
+	lep.SetPtEtaPhiM( fitter.daughter_p4(0).Pt(),
+			  fitter.daughter_p4(0).Eta(),
+			  fitter.daughter_p4(0).Phi(),
+			  0.493); // Kaon mass
+      } else if ( fitter.fitted_daughter(1).particleCharge() != fitter.fitted_daughter(2).particleCharge() ) {
+	lep.SetPtEtaPhiM( fitter.daughter_p4(1).Pt(),
+			  fitter.daughter_p4(1).Eta(),
+			  fitter.daughter_p4(1).Phi(),
+			  0.493); // Kaon mass
+      } else {
+	std::cerr << "Anti-D0 filter: Same-sign leptons?"
+		  << " lep1 charge=" << fitter.fitted_daughter(1).particleCharge()
+		  << " lep2 charge=" << fitter.fitted_daughter(1).particleCharge()
+		  << ". Assuming leading lepton takes kaon mass..."
+		  << std::endl;
+	lep.SetPtEtaPhiM( fitter.daughter_p4(0).Pt(),
+			  fitter.daughter_p4(0).Eta(),
+			  fitter.daughter_p4(0).Phi(),
+			  0.493); // Kaon mass
+      }
+      TLorentzVector kaon(fitter.daughter_p4(2).Pt(),
+			  fitter.daughter_p4(2).Eta(),
+			  fitter.daughter_p4(2).Phi(),
+			  0.139); // Pion mass
+      float mass1 = (lep+kaon).M(); // mass(K-->pi,e-->K)
+      lep.SetPtEtaPhiM(lep.Pt(),lep.Eta(),lep.Phi(),0.139); // Pion mass
+      kaon.SetPtEtaPhiM(kaon.Pt(),kaon.Eta(),kaon.Phi(),0.493); // Kaon mass
+      float mass2 = (lep+kaon).M(); // mass(K-->K,e-->pi)
+      cand.addUserFloat("D0_mass_LepToK_KToPi",mass1);
+      cand.addUserFloat("D0_mass_LepToPi_KToK",mass2);
+
       // kaon 3D impact parameter from dilepton SV
       TrajectoryStateOnSurface tsos = extrapolator.extrapolate(kaons_ttracks->at(k_idx).impactPointState(), dileptons_kinVtxs->at(ll_idx).fitted_vtx());
       std::pair<bool,Measurement1D> cur2DIP = signedTransverseImpactParameter(tsos, dileptons_kinVtxs->at(ll_idx).fitted_refvtx(), *beamspot);
