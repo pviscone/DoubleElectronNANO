@@ -33,28 +33,33 @@ options.register('skip', 0,
     VarParsing.varType.int,
     "skip first N events"
 )
+options.register('lhcRun', 3,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.int,
+    "LHC Run 2 or 3 (default)"
+)
 
 options.setDefault('maxEvents', 1000)
-options.setDefault('tag', '124X') # 124X or 102X !!!
+options.setDefault('tag', '124X')
 options.parseArguments()
 print(options)
 
 globaltag = None
-if   options.tag == '124X': globaltag = '124X_mcRun3_2022_realistic_v11' if options.isMC else '124X_dataRun3_Prompt_v4'
-elif options.tag == '102X': globaltag = '102X_upgrade2018_realistic_v15' if options.isMC else '102X_dataRun2_v11'
+if   options.lhcRun == 3: globaltag = '124X_mcRun3_2022_realistic_v11' if options.isMC else '124X_dataRun3_Prompt_v4'
+elif options.lhcRun == 2: globaltag = '102X_upgrade2018_realistic_v15' if options.isMC else '102X_dataRun2_v11'
 if options._beenSet['globalTag']: globaltag = options.globalTag
 
 extension = {False : 'data', True : 'mc'}
 outputFileNANO = cms.untracked.string('_'.join(['BParkNANO', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles:
-    if options.tag == "102X": 
+    if options.lhcRun == 2:
         options.inputFiles = [
             'file:///eos/cms/store/cmst3/group/bpark/BToKmumu_1000Events_MINIAOD.root'
         ] if options.isMC else [
             'root://cms-xrd-global.cern.ch//store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root'
         ]
-    elif options.tag == "124X":
+    elif options.lhcRun == 3:
         options.inputFiles = [
             'root://cms-xrd-global.cern.ch//store/user/jodedra/BuTOjpsiKEE20220831fiftyMbettersplitting/BuTOjpsiKEE20220831fiftyMbettersplitting/SUMMER22_MINIAOD/220902_093638/0000/PPD-Run3Summer22MiniAODv3-00002_inMINIAODSIM_1.root'
         ] if options.isMC else [
@@ -66,12 +71,12 @@ annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
 process = None
-if   options.tag == '124X': process = cms.Process('BParkNANO',eras.Run3,BToKEE_DiEle)
-elif options.tag == '102X': process = cms.Process('BParkNANO',eras.Run2_2018)
+if   options.lhcRun == 3: process = cms.Process('BParkNANO',eras.Run3,BToKEE_DiEle)
+elif options.lhcRun == 2: process = cms.Process('BParkNANO',eras.Run2_2018)
 
 # import of standard configurations
-process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
+process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
@@ -142,14 +147,14 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
-if options.tag == '102X':
+if options.lhcRun == 2:
     process = nanoAOD_customizeMuonTriggerBPark(process)
     process = nanoAOD_customizeElectronFilteredBPark(process)
     process = nanoAOD_customizeTrackFilteredBPark(process)
     process = nanoAOD_customizeBToKLL(process)
     process = nanoAOD_customizeBToKstarEE(process)
     process = nanoAOD_customizeBToKstarMuMu(process)
-elif options.tag == '124X':
+elif options.lhcRun == 3:
     from PhysicsTools.BParkingNano.electronsTrigger_cff import *
     process = nanoAOD_customizeDiEle(process)
     process = nanoAOD_customizeElectronFilteredBPark(process)
@@ -158,12 +163,12 @@ elif options.tag == '124X':
     process = nanoAOD_customizeBToKLL(process)
 
 # Path and EndPath definitions
-if options.tag == '102X':
+if options.lhcRun == 2:
     process.nanoAOD_KMuMu_step = cms.Path(process.nanoSequence + process.nanoTracksSequence + process.nanoBKMuMuSequence + CountBToKmumu )
     process.nanoAOD_Kee_step   = cms.Path(process.nanoSequence + process.nanoTracksSequence + process.nanoBKeeSequence   + CountBToKee   )
     process.nanoAOD_KstarMuMu_step = cms.Path(process.nanoSequence + process.nanoTracksSequence + process.KstarToKPiSequence + process.nanoBKstarMuMuSequence + CountBToKstarMuMu )
     process.nanoAOD_KstarEE_step  = cms.Path(process.nanoSequence + process.nanoTracksSequence + process.KstarToKPiSequence + process.nanoBKstarEESequence + CountBToKstarEE  )
-elif options.tag == '124X':
+elif options.lhcRun == 3:
     process.nanoAOD_DiEle_step = cms.Path(process.nanoSequence
                                           +process.nanoDiEleSequence
                                           +process.nanoTracksSequence
@@ -180,7 +185,7 @@ process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
-if options.tag == '124X':
+if options.lhcRun == 3:
 
     process.schedule = cms.Schedule(process.nanoAOD_DiEle_step,
                                     process.endjob_step,
@@ -196,7 +201,7 @@ if options.tag == '124X':
         SelectEvents = cms.vstring('nanoAOD_DiEle_step')
     )
 
-elif options.tag == '102X':
+elif options.lhcRun == 2:
 
     process.schedule = cms.Schedule(
         process.nanoAOD_KMuMu_step,
