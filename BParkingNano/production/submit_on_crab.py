@@ -45,6 +45,7 @@ if __name__ == '__main__':
   parser = ArgumentParser()
   parser.add_argument('-y', '--yaml', default = 'samples_Run3.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
+  parser.add_argument('-r', '--lhcRun', type=int, default=3, help = 'Run 2 or 3 (default)')
   args = parser.parse_args()
 
   with open(args.yaml) as f:
@@ -93,9 +94,11 @@ if __name__ == '__main__':
         )
         
         config.JobType.pyCfgParams = [
-            'isMC={:.0f}'.format(int(isMC)), 'reportEvery=1000',
+            'isMC={:.0f}'.format(int(isMC)),
+            'reportEvery=1000',
             'tag={:s}'.format(production_tag),
             'globalTag={:s}'.format(globaltag),
+            'lhcRun={:.0f}'.format(args.lhcRun),
         ]
         
         config.JobType.outputFiles = ['_'.join(['BParkNANO', 'mc' if isMC else 'data', production_tag])+'.root']
