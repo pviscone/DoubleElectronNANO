@@ -236,26 +236,27 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 			  fitter.daughter_p4(0).Eta(),
 			  fitter.daughter_p4(0).Phi(),
 			  0.493); // Kaon mass
-      } else if ( fitter.fitted_daughter(1).particleCharge() != fitter.fitted_daughter(2).particleCharge() ) {
+      } else {//if ( fitter.fitted_daughter(1).particleCharge() != fitter.fitted_daughter(2).particleCharge() ) {
 	lep.SetPtEtaPhiM( fitter.daughter_p4(1).Pt(),
 			  fitter.daughter_p4(1).Eta(),
 			  fitter.daughter_p4(1).Phi(),
 			  0.493); // Kaon mass
-      } else {
-	std::cerr << "Anti-D0 filter: Same-sign leptons?"
-		  << " lep1 charge=" << fitter.fitted_daughter(1).particleCharge()
-		  << " lep2 charge=" << fitter.fitted_daughter(1).particleCharge()
-		  << ". Assuming leading lepton takes kaon mass..."
-		  << std::endl;
-	lep.SetPtEtaPhiM( fitter.daughter_p4(0).Pt(),
-			  fitter.daughter_p4(0).Eta(),
-			  fitter.daughter_p4(0).Phi(),
-			  0.493); // Kaon mass
+//      } else {
+//	std::cerr << "Anti-D0 filter: Same-sign leptons?"
+//		  << " lep1 charge=" << fitter.fitted_daughter(1).particleCharge()
+//		  << " lep2 charge=" << fitter.fitted_daughter(1).particleCharge()
+//		  << ". Assuming leading lepton takes kaon mass..."
+//		  << std::endl;
+//	lep.SetPtEtaPhiM( fitter.daughter_p4(0).Pt(),
+//			  fitter.daughter_p4(0).Eta(),
+//			  fitter.daughter_p4(0).Phi(),
+//			  0.493); // Kaon mass
       }
-      TLorentzVector kaon(fitter.daughter_p4(2).Pt(),
-			  fitter.daughter_p4(2).Eta(),
-			  fitter.daughter_p4(2).Phi(),
-			  0.139); // Pion mass
+      TLorentzVector kaon;
+      kaon.SetPtEtaPhiM(fitter.daughter_p4(2).Pt(),
+			fitter.daughter_p4(2).Eta(),
+			fitter.daughter_p4(2).Phi(),
+			0.139); // Pion mass
       float mass1 = (lep+kaon).M(); // mass(K-->pi,e-->K)
       lep.SetPtEtaPhiM(lep.Pt(),lep.Eta(),lep.Phi(),0.139); // Pion mass
       kaon.SetPtEtaPhiM(kaon.Pt(),kaon.Eta(),kaon.Phi(),0.493); // Kaon mass
