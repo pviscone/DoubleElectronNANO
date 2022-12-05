@@ -49,9 +49,16 @@ if   options.lhcRun == 3: globaltag = '124X_mcRun3_2022_realistic_v11' if option
 elif options.lhcRun == 2: globaltag = '102X_upgrade2018_realistic_v15' if options.isMC else '102X_dataRun2_v11'
 if options._beenSet['globalTag']: globaltag = options.globalTag
 
-extension = {False : 'data', True : 'mc'}
-outputFileNANO = cms.untracked.string('_'.join(['BParkNANO', extension[options.isMC], options.tag])+'.root')
-outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
+ext1 = {2:'Run2', 3:'Run3'}
+ext2 = {False:'data', True:'mc'}
+outputFileNANO = cms.untracked.string('_'.join(['BParkingNANO',
+                                                ext1[options.lhcRun],
+                                                ext2[options.isMC],
+                                                options.tag])+'.root')
+outputFileFEVT = cms.untracked.string('_'.join(['BParkingFullEvt',
+                                                ext1[options.lhcRun],
+                                                ext2[options.isMC],
+                                                options.tag])+'.root')
 if not options.inputFiles:
     if options.lhcRun == 2:
         options.inputFiles = [
