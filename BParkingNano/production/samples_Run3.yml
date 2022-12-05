@@ -57,15 +57,27 @@ samples:
       - 3
       - 4
       - 5
-  BuToKee:
+  BuToKee_PU0:
     dataset: /BuTOKEE20220826bettersplitting/jodedra-SUMMER22_MINIAOD-d5db235e2a58bcae594a314d29cbde75/USER
     isMC: True
     dbs: phys03
-  BuToKJpsi_Toee:
+  BuToKJpsi_Toee_PU0:
     dataset: /BuTOjpsiKEE20220831fiftyMbettersplitting/jodedra-SUMMER22_MINIAOD-d5db235e2a58bcae594a314d29cbde75/USER
     isMC: True
     dbs: phys03
-  BuToKPsi2S_Toee:
+  BuToKPsi2S_Toee_PU0:
     dataset: /BuTOpsi2sKEE20220831fiftyMbettersplitting/jodedra-SUMMER22_MINIAOD-d5db235e2a58bcae594a314d29cbde75/USER
+    isMC: True
+    dbs: phys03
+  BuToKee:
+    dataset: /BuTOKEE20221103FIFTYM/jodedra-SUMMER22_MINIAOD-8da3c779fd247f42d8411cf96207b146/USER
+    isMC: True
+    dbs: phys03
+  BuToKJpsi_Toee:
+    dataset: /BuTOjpsiKEE20221103FIFTYM/jodedra-SUMMER22_MINIAOD-8da3c779fd247f42d8411cf96207b146/USER
+    isMC: True
+    dbs: phys03
+  BuToKPsi2S_Toee:
+    dataset: /BuTOpsi2sKEE20221103FIFTYM/jodedra-SUMMER22_MINIAOD-8da3c779fd247f42d8411cf96207b146/USER
     isMC: True
     dbs: phys03
