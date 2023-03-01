@@ -1,13 +1,29 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
+# Electron ID MVA raw values
+mvaConfigsForEleProducer = cms.VPSet()
+from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_noIso_V2_cff \
+    import mvaEleID_Fall17_noIso_V2_producer_config
+from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
+    import mvaEleID_BParkRetrain_producer_config
+mvaConfigsForEleProducer.append( mvaEleID_Fall17_noIso_V2_producer_config )
+mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
+electronMVAValueMapProducer = cms.EDProducer(
+    'ElectronMVAValueMapProducer',
+    src = cms.InputTag('slimmedElectrons'),#,processName=cms.InputTag.skipCurrentProcess()),
+    mvaConfigurations = mvaConfigsForEleProducer,
+)
+
 #Everything can be done here, in one loop and save time :)
 electronsForAnalysis = cms.EDProducer(
   'ElectronMerger',
   trgLepton = cms.InputTag('muonTrgSelector:trgMuons'),
   lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
   pfSrc    = cms.InputTag('slimmedElectrons'),
-  pfmvaId = cms.InputTag(""),
+  pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+  pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
+  #pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut]
   drForCleaning_wrtTrgLepton = cms.double(0.03),
@@ -70,13 +86,19 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         trkRelIso = Var("trackIso/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
         isPF = Var("userInt('isPF')",bool,doc="electron is PF candidate"),
         isLowPt = Var("userInt('isLowPt')",bool,doc="electron is LowPt candidate"),
-        ptBiased = Var("userFloat('ptBiased')",float,doc="ptBiased from seed BDT 20 for pfEle"),
-        unBiased = Var("userFloat('unBiased')",float,doc="unBiased from seed BDT 20 for pfEle"),
-        mvaId = Var("userFloat('mvaId')",float,doc="MVA ID for low pT, 20 for pfEle"),
-        pfmvaId = Var("userFloat('pfmvaId')",float,doc="MVA ID for pfEle, 20 for low pT"),
-        LooseID = Var("userInt('LooseID')",bool,doc="MVA ID for pfEle, mvaEleID-Fall17-noIso-V1-wpLoose"),
-        MediumID = Var("userInt('MediumID')",bool,doc="MVA ID for pfEle, mvaEleID-Fall17-noIso-V1-wp90"),
-        TightID = Var("userInt('TightID')",bool,doc="MVA ID for pfEle, mvaEleID-Fall17-noIso-V1-wp80"),
+        LPEleSeed_Fall17PtBiasedV1RawValue = Var("userFloat('LPEleSeed_Fall17PtBiasedV1RawValue')",float,doc="Seed BDT for low-pT electrons, Fall17 ptBiased model"), #@@ was called "ptBiased"
+        LPEleSeed_Fall17UnBiasedV1RawValue = Var("userFloat('LPEleSeed_Fall17UnBiasedV1RawValue')",float,doc="Seed BDT for low-pT electrons, Fall17 unBiased model"), #@@ was called "unBiased"
+        LPEleMvaID_2020Sept15RawValue = Var("userFloat('LPEleMvaID_2020Sept15RawValue')",float,doc="MVA ID for low-pT electrons, 2020Sept15 model"), #@@ was called "mvaId"
+        PFEleMvaID_RetrainedRawValue = Var("userFloat('PFEleMvaID_RetrainedRawValue')",float,doc="MVA ID for PF electrons, BParkRetrainRawValues"), #@@ was called "pfmvaId"
+        PFEleMvaID_Fall17NoIsoV2RawValue = Var("userFloat('PFEleMvaID_Fall17NoIsoV2RawValue')",float,doc="MVA ID for PF electrons, Fall17NoIsoV2RawValues"),
+        PFEleMvaID_Fall17NoIsoV1wpLoose = Var("userInt('PFEleMvaID_Fall17NoIsoV1wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V1-wpLoose"), #@@ to be deprecated
+        PFEleMvaID_Fall17NoIsoV2wpLoose = Var("userInt('PFEleMvaID_Fall17NoIsoV2wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wpLoose"),
+        PFEleMvaID_Fall17NoIsoV2wp90 = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp90"),
+        PFEleMvaID_Fall17NoIsoV2wp80 = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp80"),
+        #PFEleMvaID_Winter22NoIsoV1RawValue = Var("userFloat('PFEleMvaID_Winter22NoIsoV1RawValue')",float,doc="MVA ID for PF electrons: RunIIIWinter22NoIsoV1RawValues"),
+        #PFEleMvaID_Winter22NoIsoV1wp90 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
+        #PFEleMvaID_Winter22NoIsoV1wp80 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp80"),
+
         fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
         isPFoverlap = Var("userInt('isPFoverlap')",bool,doc="flag lowPt ele overlapping with pf in selected_pf_collection",precision=8),
         convOpen = Var("userInt('convOpen')",bool,doc="Matched to a conversion in gsfTracksOpenConversions collection"),
@@ -143,8 +165,10 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 )
 
 electronsBParkSequence = cms.Sequence(
+    electronMVAValueMapProducer +
     electronsForAnalysis
 )
+
 electronBParkMC = cms.Sequence(electronsBParkSequence + electronsBParkMCMatchForTable + selectedElectronsMCMatchEmbedded + electronBParkMCTable)
 electronBParkTables = cms.Sequence(electronBParkTable)
 
