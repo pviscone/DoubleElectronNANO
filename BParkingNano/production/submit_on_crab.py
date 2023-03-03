@@ -14,7 +14,7 @@ config.General.workArea = 'BParkingNANO_{:s}'.format(production_tag)
 
 config.section_('Data')
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/phys_bphys/DiElectronX/nzipper/BParking/samples/{:s}'.format(config.General.workArea)
+config.Data.outLFNDirBase = '/store/group/phys_bphys/DiElectronX/test/samples/{:s}'.format(config.General.workArea)
 config.Data.inputDBS = 'global'
 
 config.section_('JobType')
