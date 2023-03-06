@@ -51,7 +51,7 @@ if __name__ == '__main__':
   with open(args.yaml) as f:
     doc = yaml.load(f,Loader=yaml.FullLoader) # Parse YAML file
     common = doc['common'] if 'common' in doc else {'data' : {}, 'mc' : {}}
-    
+
     # loop over samples
     for sample, info in doc['samples'].items():
       # Input DBS
@@ -60,7 +60,7 @@ if __name__ == '__main__':
       parts = info['parts'] if 'parts' in info else [None]
       for part in parts:
         name = sample.replace('%d',str(part)) if part is not None else sample
-        
+
         # filter names according to what we need
         if not fnmatch(name, args.filter): continue
         print('submitting', name)
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         config.Data.splitting = 'FileBased' if isMC else 'LumiBased'
         if not isMC:
             config.Data.lumiMask = info.get(
-                'lumimask', 
+                'lumimask',
                 common[common_branch].get('lumimask', None)
             )
         else:
@@ -92,7 +92,7 @@ if __name__ == '__main__':
             'globaltag',
             common[common_branch].get('globaltag', None)
         )
-        
+
         config.JobType.pyCfgParams = [
             'isMC={:.0f}'.format(int(isMC)),
             'reportEvery=1000',
@@ -100,8 +100,8 @@ if __name__ == '__main__':
             'globalTag={:s}'.format(globaltag),
             'lhcRun={:.0f}'.format(args.lhcRun),
         ]
-        
-        config.JobType.outputFiles = ['_'.join(['BParkNANO', 'mc' if isMC else 'data', production_tag])+'.root']
+
+        config.JobType.outputFiles = ['_'.join(['BParkingNANO', 'Run3' if args.lhcRun==3 else 'Run2', 'mc' if isMC else 'data', production_tag])+'.root']
 
         print()
         print(config)

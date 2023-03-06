@@ -68,9 +68,9 @@ if not options.inputFiles:
         ]
     elif options.lhcRun == 3:
         options.inputFiles = [
-            'root://cms-xrd-global.cern.ch//store/user/jodedra/BuTOjpsiKEE20220831fiftyMbettersplitting/BuTOjpsiKEE20220831fiftyMbettersplitting/SUMMER22_MINIAOD/220902_093638/0000/PPD-Run3Summer22MiniAODv3-00002_inMINIAODSIM_1.root'
+            'root://cms-xrd-global.cern.ch//store/user/jodedra/BuTOjpsiKEE20221103FIFTYMminiaod/BuTOjpsiKEE20221103FIFTYM/SUMMER22_MINIAOD/221106_001759/0000/step1_inMINIAODSIM_1.root',
         ] if options.isMC else [
-            'root://cms-xrd-global.cern.ch//store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/309/00000/2e62494a-6ef9-4262-9afc-95c2b8951970.root'
+            'root://cms-xrd-global.cern.ch//store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/170/00000/45c0f2ed-eb5b-4292-abc8-3117424d9432.root'
         ]
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
@@ -241,7 +241,7 @@ elif options.lhcRun == 2:
 
 ### from https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3287/1/1/1/1/1.html
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
-process.NANOAODoutput.fakeNameForCrab=cms.untracked.bool(True)    
+process.NANOAODoutput.fakeNameForCrab=cms.untracked.bool(True)
 
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
