@@ -44,6 +44,10 @@ public:
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
     pf_mvaId_src_(),
     pf_mvaId_src_Tag_(cfg.getParameter<edm::InputTag>("pfmvaId")),
+    pf_mvaId_src_run2_(),
+    pf_mvaId_src_Tag_run2_(cfg.getParameter<edm::InputTag>("pfmvaId_Run2")),
+    //pf_mvaId_src_run3_(),
+    //pf_mvaId_src_Tag_run3_(cfg.getParameter<edm::InputTag>("pfmvaId_Run3")),
     vertexSrc_{ consumes<reco::VertexCollection> ( cfg.getParameter<edm::InputTag>("vertexCollection") )},
     conversions_{ consumes<edm::View<reco::Conversion> > ( cfg.getParameter<edm::InputTag>("conversions") )},
     beamSpot_{ consumes<reco::BeamSpot> ( cfg.getParameter<edm::InputTag>("beamSpot") )},
@@ -65,6 +69,15 @@ public:
     {
        produces<pat::ElectronCollection>("SelectedElectrons");
        produces<TransientTrackCollection>("SelectedTransientElectrons");  
+       if ( !pf_mvaId_src_Tag_.label().empty() ) {
+	 pf_mvaId_src_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId") );
+       }
+       if ( !pf_mvaId_src_Tag_run2_.label().empty() ) {
+	 pf_mvaId_src_run2_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run2") );
+       }
+//       if ( !pf_mvaId_src_Tag_run3_.label().empty() ) {
+//	 pf_mvaId_src_run3_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run3") );
+//       }
     }
 
   ~ElectronMerger() override {}
@@ -80,6 +93,10 @@ private:
   const edm::EDGetTokenT<pat::ElectronCollection> pf_src_;
   edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_;
   const edm::InputTag pf_mvaId_src_Tag_;
+  edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_run2_;
+  const edm::InputTag pf_mvaId_src_Tag_run2_;
+  //edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_run3_;
+  //const edm::InputTag pf_mvaId_src_Tag_run3_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
   const edm::EDGetTokenT<edm::View<reco::Conversion> > conversions_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpot_;
@@ -112,6 +129,10 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   evt.getByToken(pf_src_, pf);
   edm::Handle<edm::ValueMap<float> > pfmvaId;  
   if ( !pf_mvaId_src_Tag_.label().empty() ) { evt.getByToken(pf_mvaId_src_, pfmvaId); }
+  edm::Handle<edm::ValueMap<float> > pfmvaId_run2;
+  if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { evt.getByToken(pf_mvaId_src_run2_, pfmvaId_run2); }
+  //edm::Handle<edm::ValueMap<float> > pfmvaId_run3;
+  //if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { evt.getByToken(pf_mvaId_src_run3_, pfmvaId_run3); }
 
   const auto& theB = iSetup.getData(ttbToken_);
   //
@@ -189,15 +210,28 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    edm::Ref<pat::ElectronCollection> ref(pf,ipfele);
    float pf_mva_id = 20.;
    if ( !pf_mvaId_src_Tag_.label().empty() ) { pf_mva_id = float((*pfmvaId)[ref]); }
+   float pf_mva_id_run2 = 20.;
+   if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { pf_mva_id_run2 = float((*pfmvaId_run2)[ref]); }
+   //float pf_mva_id_run3 = 20.;
+   //if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { pf_mva_id_run3 = float((*pfmvaId_run3)[ref]); }
    ele.addUserInt("isPF", 1);
    ele.addUserInt("isLowPt", 0);
-   ele.addUserFloat("ptBiased", 20.);
-   ele.addUserFloat("unBiased", 20.);
-   ele.addUserFloat("mvaId", 20.);
-   ele.addUserFloat("pfmvaId", pf_mva_id);
-   ele.addUserInt("LooseID", ref->electronID("mvaEleID-Fall17-noIso-V1-wpLoose"));
-   ele.addUserInt("MediumID", ref->electronID("mvaEleID-Fall17-noIso-V2-wp90"));
-   ele.addUserInt("TightID", ref->electronID("mvaEleID-Fall17-noIso-V2-wp80"));
+   // Custom IDs
+   ele.addUserFloat("LPEleSeed_Fall17PtBiasedV1RawValue", 20.); // was called "ptBiased"
+   ele.addUserFloat("LPEleSeed_Fall17UnBiasedV1RawValue", 20.); // was called "unBiased"
+   ele.addUserFloat("LPEleMvaID_2020Sept15RawValue", 20.); // was called "mvaId"
+   ele.addUserFloat("PFEleMvaID_RetrainedRawValue", pf_mva_id); // was called "pfmvaId"
+   // Run-2 PF ele ID
+   ele.addUserFloat("PFEleMvaID_Fall17NoIsoV2RawValue", pf_mva_id_run2);
+   ele.addUserInt("PFEleMvaID_Fall17NoIsoV1wpLoose", ref->electronID("mvaEleID-Fall17-noIso-V1-wpLoose")); //@@ to be deprecated
+   ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wpLoose", ref->electronID("mvaEleID-Fall17-noIso-V2-wpLoose"));
+   ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp90", ref->electronID("mvaEleID-Fall17-noIso-V2-wp90"));
+   ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp80", ref->electronID("mvaEleID-Fall17-noIso-V2-wp80"));
+   // Run-3 PF ele ID
+   //ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", pf_mva_id_run3);
+   //ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp90"));
+   //ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp80"));
+   //
    ele.addUserFloat("chargeMode", ele.charge());
    ele.addUserInt("isPFoverlap", 0);
    ele.addUserFloat("dzTrg", dzTrg);
@@ -294,11 +328,16 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    float ptbiased_seedBDT = ( ele.isElectronIDAvailable("ptbiased") ? ele.electronID("ptbiased") : -100. );
    ele.addUserInt("isPF", 0);
    ele.addUserInt("isLowPt", 1);
+   // Custom IDs
+   ele.addUserFloat("LPEleSeed_Fall17PtBiasedV1RawValue", ptbiased_seedBDT); // was called "ptBiased"
+   ele.addUserFloat("LPEleSeed_Fall17UnBiasedV1RawValue", unbiased_seedBDT); // was called "unBiased"
+   ele.addUserFloat("LPEleMvaID_2020Sept15RawValue", mva_id); // was called "mvaId"
+   ele.addUserFloat("PFEleMvaID_RetrainedRawValue", 20.); // was called "pfmvaId"
+   // Run-2 PF ele ID
+   ele.addUserFloat("PFEleMvaID_Fall17NoIsoV2RawValue", 20.); // Run 2 ID
+   // Run-3 PF ele ID
+   //ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", 20.); // Run 3 ID
    ele.addUserFloat("chargeMode", ele.gsfTrack()->chargeMode());
-   ele.addUserFloat("ptBiased", ptbiased_seedBDT);
-   ele.addUserFloat("unBiased", unbiased_seedBDT);
-   ele.addUserFloat("mvaId", mva_id);
-   ele.addUserFloat("pfmvaId", 20.);
    ele.addUserFloat("dzTrg", dzTrg);
    ele.addUserInt("skipEle",skipEle);
 
