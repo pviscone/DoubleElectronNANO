@@ -26,7 +26,7 @@ electronsForAnalysis = cms.EDProducer(
   #pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut]
-  drForCleaning_wrtTrgLepton = cms.double(0.03),
+  drForCleaning_wrtTrgLepton = cms.double(0.0000000000000000000000000001),
   dzForCleaning_wrtTrgLepton = cms.double(1.),
   ## cleaning between pfEle and lowPtGsf
   drForCleaning = cms.double(0.03),
