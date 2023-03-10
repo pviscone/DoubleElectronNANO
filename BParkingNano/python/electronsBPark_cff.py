@@ -26,7 +26,7 @@ electronsForAnalysis = cms.EDProducer(
   #pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut]
-  drForCleaning_wrtTrgLepton = cms.double(0.0000000000000000000000000001),
+  drForCleaning_wrtTrgLepton = cms.double(0.03),
   dzForCleaning_wrtTrgLepton = cms.double(1.),
   ## cleaning between pfEle and lowPtGsf
   drForCleaning = cms.double(0.03),
@@ -194,4 +194,5 @@ BToKEE_DiEle.toModify(electronsForAnalysis,
                       trgLepton = 'electronTrgSelector:trgElectrons',
                       bdtMin = -100., # Open this up and rely on L/M/T WPs
                       useGsfModeForP4 = True, # Use GSF for PF ele as well
-                      saveLowPtE = False) # Don't use low-pT ele
+                      saveLowPtE = False, # Don't use low-pT ele
+                      drForCleaning_wrtTrgLepton = -1.)
