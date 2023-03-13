@@ -37,7 +37,9 @@ git cms-addpkg PhysicsTools/NanoAOD
 ### Build and run on a test file
 
 ```shell
-cd $CMSSW_BASE/src/PhysicsTools/BParkingNano/test
+cd $CMSSW_BASE/src/
+scram b -j 8
+cd PhysicsTools/BParkingNano/test
 cmsRun run_nano_cfg.py        # by default, runs over Run 3 data
 cmsRun run_nano_cfg.py isMC=1 # runs over MC for 2022
 ```
