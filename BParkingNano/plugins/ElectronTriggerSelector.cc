@@ -7,7 +7,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -35,7 +35,7 @@ using namespace std;
 
 constexpr int debug = 0;
 
-class ElectronTriggerSelector : public edm::EDProducer {
+class ElectronTriggerSelector : public edm::stream::EDProducer<> {
     
 public:
     
@@ -214,7 +214,7 @@ void ElectronTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup&
     int nele = 0;
     int mele = 0;
     for(const pat::Electron & electron : *electrons){
-        unsigned int iEle(&electron - &(electrons->at(0)) );
+      //unsigned int iEle(&electron - &(electrons->at(0)) );
         if(electron.pt()<ptMin_) continue;
         if(fabs(electron.eta())>absEtaMax_) continue;
 	if(debug>1)
@@ -254,7 +254,7 @@ void ElectronTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup&
         int ipath=-1;
         int iseed=-1;
 
-        for (const std::string seed: L1Seeds_){
+        for (const std::string& seed: L1Seeds_){
 	  iseed++;
 	  char cstr[(seed+"*").size()+1];
 	  strcpy( cstr,(seed+"*").c_str());
@@ -282,7 +282,7 @@ void ElectronTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup&
 	  }
         }
 
-        for (const std::string path: HLTPaths_){
+        for (const std::string& path: HLTPaths_){
             ipath++;
             // the following vectors are used in order to find the minimum DR between a reco electron and all the HLT objects that is matched with it so as a reco electron will be matched with only one HLT object every time so as there is a one-to-one correspondance between the two collection. DPt_rel is not used to create this one-to-one correspondance but only to create a few plots, debugging and be sure thateverything is working fine.
 	    // RB: deltaR match determined for trigger (eta,phi) and electron SuperCluster (eta,phi) positions ...

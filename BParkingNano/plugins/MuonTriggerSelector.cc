@@ -7,7 +7,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -35,7 +35,7 @@ using namespace std;
 
 constexpr bool debug = false; //false;
 
-class MuonTriggerSelector : public edm::EDProducer {
+class MuonTriggerSelector : public edm::stream::EDProducer<> {
     
 public:
     
@@ -155,7 +155,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                 }
             }
         } */
-        for (const std::string path: HLTPaths_){
+        for (const std::string& path: HLTPaths_){
             ipath++;
             // the following vectors are used in order to find the minimum DR between a reco muon and all the HLT objects that is matched with it so as a reco muon will be matched with only one HLT object every time so as there is a one-to-one correspondance between the two collection. DPt_rel is not used to create this one-to-one correspondance but only to create a few plots, debugging and be sure thateverything is working fine. 
             std::vector<float> temp_dr(muon.triggerObjectMatches().size(),1000.);
