@@ -30,8 +30,8 @@ git cms-merge-topic -u DiElectronX:fixKinParticleVtxFitter_124X # unsafe checkou
 ### Add the BParkingNano package
 
 ```shell
+git cms-merge-topic -u DiElectronX:NanoAOD_131X
 git clone git@github.com:DiElectronX/BParkingNANO.git ./PhysicsTools
-git cms-addpkg PhysicsTools/NanoAOD
 ```
 
 ### Build and run on a test file
