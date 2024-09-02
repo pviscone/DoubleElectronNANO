@@ -6,12 +6,14 @@ The focus is on RK/K*/phi analyses.
 
 This recipe is for 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
 
+Currently using release CMSSW_12_4_11_patch3.
+
 ### Getting started
 
 ```shell
 scram list CMSSW
-cmsrel CMSSW_12_4_8
-cd CMSSW_12_4_8/src
+cmsrel CMSSW_12_4_11_patch3
+cd CMSSW_12_4_11_patch3/src
 cmsenv
 ```
 
@@ -31,7 +33,9 @@ git cms-merge-topic -u DiElectronX:fixKinParticleVtxFitter_124X # unsafe checkou
 
 ```shell
 git clone git@github.com:DiElectronX/BParkingNANO.git ./PhysicsTools
-git cms-merge-topic -u DiElectronX:NanoAOD_131X
+git cms-addpkg PhysicsTools/NanoAOD
+# instead of:
+# git cms-merge-topic -u DiElectronX:NanoAOD_131X
 ```
 
 ### Build and run on a test file
