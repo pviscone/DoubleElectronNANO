@@ -23,7 +23,7 @@ electronsForAnalysis = cms.EDProducer(
   pfSrc    = cms.InputTag('slimmedElectrons'),
   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
   pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
-  #pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
+  pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut]
   drForCleaning_wrtTrgLepton = cms.double(0.03),
@@ -95,9 +95,9 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         PFEleMvaID_Fall17NoIsoV2wpLoose = Var("userInt('PFEleMvaID_Fall17NoIsoV2wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wpLoose"),
         PFEleMvaID_Fall17NoIsoV2wp90 = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp90"),
         PFEleMvaID_Fall17NoIsoV2wp80 = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp80"),
-        #PFEleMvaID_Winter22NoIsoV1RawValue = Var("userFloat('PFEleMvaID_Winter22NoIsoV1RawValue')",float,doc="MVA ID for PF electrons: RunIIIWinter22NoIsoV1RawValues"),
-        #PFEleMvaID_Winter22NoIsoV1wp90 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
-        #PFEleMvaID_Winter22NoIsoV1wp80 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp80"),
+        PFEleMvaID_Winter22NoIsoV1RawValue = Var("userFloat('PFEleMvaID_Winter22NoIsoV1RawValue')",float,doc="MVA ID for PF electrons: RunIIIWinter22NoIsoV1RawValues"),
+        PFEleMvaID_Winter22NoIsoV1wp90 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
+        PFEleMvaID_Winter22NoIsoV1wp80 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp80"),
 
         fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
         isPFoverlap = Var("userInt('isPFoverlap')",bool,doc="flag lowPt ele overlapping with pf in selected_pf_collection",precision=8),
@@ -163,7 +163,7 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
     branchName = cms.string("genPart"),
     docString = cms.string("MC matching to status==1 electrons or photons"),
 )
-
+    
 electronsBParkSequence = cms.Sequence(
     electronMVAValueMapProducer +
     electronsForAnalysis

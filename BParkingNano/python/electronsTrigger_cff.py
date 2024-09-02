@@ -1,22 +1,31 @@
 import FWCore.ParameterSet.Config as cms
 
-paths=['HLT_DoubleEle10_eta1p22_mMax6',
-       'HLT_DoubleEle9p5_eta1p22_mMax6',
-       'HLT_DoubleEle9_eta1p22_mMax6',
-       'HLT_DoubleEle8p5_eta1p22_mMax6',
-       'HLT_DoubleEle8_eta1p22_mMax6',
-       'HLT_DoubleEle7p5_eta1p22_mMax6',
-       'HLT_DoubleEle7_eta1p22_mMax6',
-       'HLT_DoubleEle6p5_eta1p22_mMax6',
-       'HLT_DoubleEle6_eta1p22_mMax6',
-       'HLT_DoubleEle5p5_eta1p22_mMax6',
-       'HLT_DoubleEle5_eta1p22_mMax6',
-       'HLT_DoubleEle4p5_eta1p22_mMax6',
-       'HLT_DoubleEle4_eta1p22_mMax6'
-]
-paths_OR = " || ".join([ 'path( "{:s}_v*" )'.format(path) for path in paths])
+paths = []
+seeds = []
 
-seeds = ['L1_DoubleEG11_er1p2_dR_Max0p6',
+is_new = True
+
+if is_new:
+    paths = ['HLT_DoubleEle6p5_eta1p22_mMax6',
+            'HLT_DoubleEle8_eta1p22_mMax6',
+            'HLT_DoubleEle10_eta1p22_mMax6']
+    seeds = ['L1_DoubleEG11_er1p2_dR_Max0p6']
+else:
+    paths=['HLT_DoubleEle10_eta1p22_mMax6',
+        'HLT_DoubleEle9p5_eta1p22_mMax6',
+        'HLT_DoubleEle9_eta1p22_mMax6',
+        'HLT_DoubleEle8p5_eta1p22_mMax6',
+        'HLT_DoubleEle8_eta1p22_mMax6',
+        'HLT_DoubleEle7p5_eta1p22_mMax6',
+        'HLT_DoubleEle7_eta1p22_mMax6',
+        'HLT_DoubleEle6p5_eta1p22_mMax6',
+        'HLT_DoubleEle6_eta1p22_mMax6',
+        'HLT_DoubleEle5p5_eta1p22_mMax6',
+        'HLT_DoubleEle5_eta1p22_mMax6',
+        'HLT_DoubleEle4p5_eta1p22_mMax6',
+        'HLT_DoubleEle4_eta1p22_mMax6'
+    ]
+    seeds = ['L1_DoubleEG11_er1p2_dR_Max0p6',
          'L1_DoubleEG10p5_er1p2_dR_Max0p6',
          'L1_DoubleEG10_er1p2_dR_Max0p6',
          'L1_DoubleEG9p5_er1p2_dR_Max0p6',
@@ -31,7 +40,9 @@ seeds = ['L1_DoubleEG11_er1p2_dR_Max0p6',
          'L1_DoubleEG5_er1p2_dR_Max0p9',
          'L1_DoubleEG4p5_er1p2_dR_Max0p9',
          'L1_DoubleEG4_er1p2_dR_Max0p9',
-]
+    ]
+
+paths_OR = " || ".join([ 'path( "{:s}_v*" )'.format(path) for path in paths])
 
 # https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatAlgos/plugins/PATTriggerObjectStandAloneUnpacker.cc
 myUnpackedPatTrigger = cms.EDProducer(

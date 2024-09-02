@@ -10,10 +10,32 @@ electronPairsForKee = cms.EDProducer(
     filterBySelection = cms.bool(True),
     preVtxSelection = cms.string(
         'abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 5 '
-        '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03 && userInt("nlowpt")<2'
+        '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03 && userInt("nlowpt") < 2'
         
     ),
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
+)
+
+electronPairsForKeeTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+    src = cms.InputTag('electronPairsForKee:SelectedDiLeptons'),
+    cut = cms.string(""),
+    name= cms.string("DiElectron"),
+    doc = cms.string("SelectedElectron pairs for BPark with sucessful vertex fit"),
+    singleton = cms.bool(False), 
+    extension = cms.bool(False),                                                
+    variables = cms.PSet(P4Vars,
+        lep_deltaR = Var("userFloat('lep_deltaR')", float, doc="deltaR between the two leptons"),
+        l1idx = Var("userInt('l1_idx')", int, doc="index of the first electron (leading)"),
+        l2idx = Var("userInt('l2_idx')", int, doc="index of the second electron (subleading)"),
+        nlowpt = Var("userInt('nlowpt')", int, doc="number of low pt electrons"),
+        pre_vtx_sel = Var("userInt('pre_vtx_sel')", bool, doc="Satisfies pre-vertexing selections?"),
+        sv_chi2 = Var("userFloat('sv_chi2')", float, doc="chi2 of the vertex fit"),
+        sv_prob = Var("userFloat('sv_prob')", float, doc="chi2 of the vertex fit"),
+        sv_ndof = Var("userFloat('sv_ndof')", float, doc="chi2 of the vertex fit"),
+        fitted_mass = Var("userFloat('fitted_mass')", float, doc="fitted dielectron"),
+        fitted_massErr = Var("userFloat('fitted_massErr')", float, doc="fitted dielectron mass error"),
+        post_vtx_sel = Var("userInt('post_vtx_sel')", bool, doc="Satisfies post-vertexing selections?"),
+        )
 )
 
 BToKee = cms.EDProducer(
@@ -190,7 +212,6 @@ BToKmumuTable = BToKeeTable.clone(
     doc = cms.string("BToKMuMu Variable")
 )
 
-
 CountBToKee = cms.EDFilter("PATCandViewCountFilter",
     minNumber = cms.uint32(1),
     maxNumber = cms.uint32(999999),
@@ -201,12 +222,15 @@ CountBToKmumu = CountBToKee.clone(
     src = cms.InputTag("BToKmumu")
 )
 
-
 BToKMuMuSequence = cms.Sequence(
     (muonPairsForKmumu * BToKmumu)
 )
 BToKEESequence = cms.Sequence(
     (electronPairsForKee * BToKee)
+)
+DiElectronSequence = cms.Sequence(
+    electronPairsForKee + 
+    electronPairsForKeeTable
 )
 
 BToKLLSequence = cms.Sequence(

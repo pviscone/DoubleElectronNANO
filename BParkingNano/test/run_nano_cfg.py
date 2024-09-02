@@ -45,7 +45,8 @@ options.parseArguments()
 print(options)
 
 globaltag = None
-if   options.lhcRun == 3: globaltag = '124X_mcRun3_2022_realistic_v11' if options.isMC else '124X_dataRun3_Prompt_v4'
+# if   options.lhcRun == 3: globaltag = '124X_mcRun3_2022_realistic_v11' if options.isMC else '124X_dataRun3_Prompt_v4'
+if   options.lhcRun == 3: globaltag = '124X_mcRun3_2022_realistic_postEE_v1' if options.isMC else '124X_dataRun3_Prompt_v4'
 elif options.lhcRun == 2: globaltag = '102X_upgrade2018_realistic_v15' if options.isMC else '102X_dataRun2_v11'
 if options._beenSet['globalTag']: globaltag = options.globalTag
 
@@ -68,13 +69,29 @@ if not options.inputFiles:
         ]
     elif options.lhcRun == 3:
         options.inputFiles = [
-            'root://cms-xrd-global.cern.ch//store/user/jodedra/BuTOjpsiKEE20221103FIFTYMminiaod/BuTOjpsiKEE20221103FIFTYM/SUMMER22_MINIAOD/221106_001759/0000/step1_inMINIAODSIM_1.root',
+            # # original
+            # 'root://cms-xrd-global.cern.ch//store/user/jodedra/BuTOjpsiKEE20221103FIFTYMminiaod/BuTOjpsiKEE20221103FIFTYM/SUMMER22_MINIAOD/221106_001759/0000/step1_inMINIAODSIM_1.root', #4481 events
+            # central BuToKJpsi_JPsiToEE (should be similar), mini v1 bc of CMSSW compatibility reasons
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/0cc74dad-0a95-430d-82f1-113feb060680.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/79ca5368-3191-42f6-877d-28760fbae9d8.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/904980f9-5a94-493d-8e6c-3673b289ca30.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/adc7d31b-a38b-41a1-8df9-e71e0a7e1d40.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/04603ab0-8eff-4d59-bccb-bb3e9c64e4a5.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/358618a8-9aad-4283-8249-e1fb48354c73.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/9eafc8d8-d627-486d-a137-9931cd54f7f8.root',
+            # central BuToKJpsi_JPsiToEE (should be similar), mini v6
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/0cc74dad-0a95-430d-82f1-113feb060680.root',
+            # # DARK PHOTON SAMPLES
+            # 'root://cmsxrootd.fnal.gov///store/user/marlow/EtaToGammaTM_TMToEE_2022/EtaToGammaTM_TMToEE_2022_MINIAOD_388.root', #1000 events
+            # 'root://cmsxrootd.fnal.gov///store/user/marlow/EtaToGammaTM_TMToEE_2022/EtaToGammaTM_TMToEE_2022_MINIAOD_828.root',
+            # 'root://cmsxrootd.fnal.gov///store/user/marlow/EtaToGammaTM_TMToEE_2022/EtaToGammaTM_TMToEE_2022_MINIAOD_60.root',
+            # 'root://cmsxrootd.fnal.gov///store/user/marlow/EtaToGammaTM_TMToEE_2022/EtaToGammaTM_TMToEE_2022_MINIAOD_19.root',
         ] if options.isMC else [
             'root://cms-xrd-global.cern.ch//store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/170/00000/45c0f2ed-eb5b-4292-abc8-3117424d9432.root'
         ]
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
-# Process
+# Process   
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
 process = None
@@ -93,6 +110,9 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
+# process.MessageLogger.cerr.threshold = "DEBUG"
+# process.MessageLogger.debugModules = ["*"]
+
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
 )
@@ -146,7 +166,6 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
 
 )
 
-
 # Additional output definition
 
 # Other statements
@@ -167,7 +186,8 @@ elif options.lhcRun == 3:
     process = nanoAOD_customizeElectronFilteredBPark(process)
     process = nanoAOD_customizeTriggerBitsBPark(process)
     process = nanoAOD_customizeTrackFilteredBPark(process)
-    process = nanoAOD_customizeBToKLL(process)
+    process = nanoAOD_customizeDielectron(process)
+    # process = nanoAOD_customizeBToKLL(process) #remove B, K reco -- only need dielectrons
 
 # Path and EndPath definitions
 if options.lhcRun == 2:
@@ -179,8 +199,8 @@ elif options.lhcRun == 3:
     process.nanoAOD_DiEle_step = cms.Path(process.nanoSequence
                                           +process.nanoDiEleSequence
                                           +process.nanoTracksSequence
-                                          +process.nanoBKeeSequence
-                                          +CountBToKee)
+                                          +process.nanoBKeeSequence)
+                                        #   +CountBToKee)
 
 # customisation of the process.
 if options.isMC:

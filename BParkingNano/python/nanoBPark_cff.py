@@ -21,7 +21,6 @@ from PhysicsTools.BParkingNano.tracksBPark_cff import *
 from PhysicsTools.BParkingNano.BToKLL_cff import *
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 
-
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
 
 nanoSequence = cms.Sequence(nanoMetadata + 
@@ -33,6 +32,7 @@ nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSeque
                               cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable)
 
 from PhysicsTools.BParkingNano.electronsTrigger_cff import *
+
 def nanoAOD_customizeDiEle(process):
     process.nanoDiEleSequence = cms.Sequence(
         myUnpackedPatTrigger
@@ -57,6 +57,10 @@ def nanoAOD_customizeElectronFilteredBPark(process):
 
 def nanoAOD_customizeTriggerBitsBPark(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + trgTables)
+    return process
+
+def nanoAOD_customizeDielectron(process):
+    process.nanoBKeeSequence = cms.Sequence( process.nanoBKeeSequence + DiElectronSequence)
     return process
 
 def nanoAOD_customizeBToKLL(process):
