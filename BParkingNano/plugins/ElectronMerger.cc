@@ -40,19 +40,22 @@ public:
   explicit ElectronMerger(const edm::ParameterSet &cfg):
     ttbToken_(esConsumes(edm::ESInputTag{"","TransientTrackBuilder"})),
     triggerLeptons_{ consumes<edm::View<reco::Candidate> >( cfg.getParameter<edm::InputTag>("trgLepton") )},
+    triggerObjects_{ consumes<std::vector<pat::TriggerObjectStandAlone>>(cfg.getParameter<edm::InputTag>("trgObjects"))},
+    triggerBits_{consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trgBits"))},
     lowpt_src_{consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
     pf_mvaId_src_(),
     pf_mvaId_src_Tag_(cfg.getParameter<edm::InputTag>("pfmvaId")),
     pf_mvaId_src_run2_(),
     pf_mvaId_src_Tag_run2_(cfg.getParameter<edm::InputTag>("pfmvaId_Run2")),
-    //pf_mvaId_src_run3_(),
-    //pf_mvaId_src_Tag_run3_(cfg.getParameter<edm::InputTag>("pfmvaId_Run3")),
+    pf_mvaId_src_run3_(),
+    pf_mvaId_src_Tag_run3_(cfg.getParameter<edm::InputTag>("pfmvaId_Run3")),
     vertexSrc_{ consumes<reco::VertexCollection> ( cfg.getParameter<edm::InputTag>("vertexCollection") )},
     conversions_{ consumes<edm::View<reco::Conversion> > ( cfg.getParameter<edm::InputTag>("conversions") )},
     beamSpot_{ consumes<reco::BeamSpot> ( cfg.getParameter<edm::InputTag>("beamSpot") )},
     drTrg_cleaning_{cfg.getParameter<double>("drForCleaning_wrtTrgLepton")},
     dzTrg_cleaning_{cfg.getParameter<double>("dzForCleaning_wrtTrgLepton")},
+    drMaxTrgMatching_{cfg.getParameter<double>("drMaxTrgMatching")},
     dr_cleaning_{cfg.getParameter<double>("drForCleaning")},
     dz_cleaning_{cfg.getParameter<double>("dzForCleaning")},
     flagAndclean_{cfg.getParameter<bool>("flagAndclean")},
@@ -75,9 +78,9 @@ public:
        if ( !pf_mvaId_src_Tag_run2_.label().empty() ) {
 	 pf_mvaId_src_run2_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run2") );
        }
-//       if ( !pf_mvaId_src_Tag_run3_.label().empty() ) {
-//	 pf_mvaId_src_run3_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run3") );
-//       }
+      if ( !pf_mvaId_src_Tag_run3_.label().empty() ) {
+	 pf_mvaId_src_run3_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run3") );
+      }
     }
 
   ~ElectronMerger() override {}
@@ -89,19 +92,22 @@ public:
 private:
   const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbToken_;
   const edm::EDGetTokenT<edm::View<reco::Candidate> > triggerLeptons_;
+  const edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
+  const edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
   const edm::EDGetTokenT<pat::ElectronCollection> lowpt_src_;
   const edm::EDGetTokenT<pat::ElectronCollection> pf_src_;
   edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_;
   const edm::InputTag pf_mvaId_src_Tag_;
   edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_run2_;
   const edm::InputTag pf_mvaId_src_Tag_run2_;
-  //edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_run3_;
-  //const edm::InputTag pf_mvaId_src_Tag_run3_;
+  edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_run3_;
+  const edm::InputTag pf_mvaId_src_Tag_run3_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
   const edm::EDGetTokenT<edm::View<reco::Conversion> > conversions_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpot_;
   const double drTrg_cleaning_;
   const double dzTrg_cleaning_;
+  const double drMaxTrgMatching_;
   const double dr_cleaning_;
   const double dz_cleaning_;
   const bool flagAndclean_;
@@ -123,6 +129,10 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   //input
   edm::Handle<edm::View<reco::Candidate> > trgLepton;
   evt.getByToken(triggerLeptons_, trgLepton);
+  edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;
+  evt.getByToken(triggerObjects_, triggerObjects);
+  edm::Handle<edm::TriggerResults> triggerBits;
+  evt.getByToken(triggerBits_, triggerBits);  
   edm::Handle<pat::ElectronCollection> lowpt;
   if ( saveLowPtE_ ) evt.getByToken(lowpt_src_, lowpt);
   edm::Handle<pat::ElectronCollection> pf;
@@ -131,8 +141,8 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   if ( !pf_mvaId_src_Tag_.label().empty() ) { evt.getByToken(pf_mvaId_src_, pfmvaId); }
   edm::Handle<edm::ValueMap<float> > pfmvaId_run2;
   if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { evt.getByToken(pf_mvaId_src_run2_, pfmvaId_run2); }
-  //edm::Handle<edm::ValueMap<float> > pfmvaId_run3;
-  //if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { evt.getByToken(pf_mvaId_src_run3_, pfmvaId_run3); }
+  edm::Handle<edm::ValueMap<float> > pfmvaId_run3;
+  if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { evt.getByToken(pf_mvaId_src_run3_, pfmvaId_run3); }
 
   const auto& theB = iSetup.getData(ttbToken_);
   //
@@ -212,8 +222,8 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    if ( !pf_mvaId_src_Tag_.label().empty() ) { pf_mva_id = float((*pfmvaId)[ref]); }
    float pf_mva_id_run2 = 20.;
    if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { pf_mva_id_run2 = float((*pfmvaId_run2)[ref]); }
-   //float pf_mva_id_run3 = 20.;
-   //if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { pf_mva_id_run3 = float((*pfmvaId_run3)[ref]); }
+   float pf_mva_id_run3 = 20.;
+   if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { pf_mva_id_run3 = float((*pfmvaId_run3)[ref]); }
    ele.addUserInt("isPF", 1);
    ele.addUserInt("isLowPt", 0);
    // Custom IDs
@@ -227,11 +237,11 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wpLoose", ref->electronID("mvaEleID-Fall17-noIso-V2-wpLoose"));
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp90", ref->electronID("mvaEleID-Fall17-noIso-V2-wp90"));
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp80", ref->electronID("mvaEleID-Fall17-noIso-V2-wp80"));
+
    // Run-3 PF ele ID
-   //ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", pf_mva_id_run3);
-   //ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp90"));
-   //ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp80"));
-   //
+   ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", pf_mva_id_run3);
+   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp90"));
+   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp80"));
    ele.addUserFloat("chargeMode", ele.charge());
    ele.addUserInt("isPFoverlap", 0);
    ele.addUserFloat("dzTrg", dzTrg);
@@ -293,8 +303,8 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
    //assigning BDT values
    float mva_id = ( ele.isElectronIDAvailable("ID") ? ele.electronID("ID") : -100. );
- //  if ( unbiased_seedBDT <bdtMin_) continue; //extra cut for low pT e on BDT
-   if ( mva_id <bdtMin_) continue; //extra cut for low pT e on BDT
+   //  if ( unbiased_seedBDT <bdtMin_) continue; //extra cut for low pT e on BDT
+   if ( mva_id < bdtMin_) continue; //extra cut for low pT e on BDT
 
 
    bool skipEle=true;
@@ -335,8 +345,17 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserFloat("PFEleMvaID_RetrainedRawValue", 20.); // was called "pfmvaId"
    // Run-2 PF ele ID
    ele.addUserFloat("PFEleMvaID_Fall17NoIsoV2RawValue", 20.); // Run 2 ID
+
+   //need to add as placeholders
+   ele.addUserInt("PFEleMvaID_Fall17NoIsoV1wpLoose", 0); //@@ to be deprecated
+   ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wpLoose", 0);
+   ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp90", 0);
+   ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp80", 0);
+
    // Run-3 PF ele ID
-   //ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", 20.); // Run 3 ID
+   ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", 20.); // Run 3 ID
+   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", 0); //placeholder
+   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", 0); //placeholder
    ele.addUserFloat("chargeMode", ele.gsfTrack()->chargeMode());
    ele.addUserFloat("dzTrg", dzTrg);
    ele.addUserInt("skipEle",skipEle);
@@ -366,6 +385,57 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
     //easier identification of leading and subleading with smarter loop
     std::sort( ele_out->begin(), ele_out->end(), [] (pat::Electron e1, pat::Electron e2) -> bool {return e1.pt() > e2.pt();}
              );
+  }
+
+  // TRIGGER MATCHING
+
+  // finding best
+  const edm::TriggerNames &names = evt.triggerNames(*triggerBits);
+  
+  std::map<int, float> best_PFele_with_dr;
+  std::map<int, float> best_LPele_with_dr;
+  
+  for(auto trg : *triggerObjects) {
+    // unpack trigger object
+    trg.unpackPathNames(names);
+    // check if trigger object fires HLT_DoubleEle*    
+    if(trg.hasPathName("HLT_DoubleEle*", true) == false) continue;
+    float best_dr_PF = 999., best_dr_LP = 999.;
+    int best_idx_PF = -1, best_idx_LP = -1;
+    for(auto &ele : *ele_out){
+      float dr = reco::deltaR(ele, trg);
+      if(ele.userInt("isPF") == 1 && dr < best_dr_PF){
+        best_dr_PF = dr;
+        best_idx_PF = &ele - &(ele_out->at(0));
+      }
+      if(ele.userInt("isLowPt") == 1 && dr < best_dr_LP){
+        best_dr_LP = dr;
+        best_idx_LP = &ele - &(ele_out->at(0));
+      }
+      // if(dr < best_dr){
+      //   best_dr = dr; //save best_dr regardless for debugging
+      //   if(dr < drMaxTrgMatching_) best_idx = &ele - &(ele_out->at(0));
+      // }
+    }
+    best_PFele_with_dr[best_idx_PF] = best_dr_PF;
+    best_LPele_with_dr[best_idx_LP] = best_dr_LP;
+  }
+
+  // save trigger matching result
+  for(auto &ele : *ele_out){
+    int idx = &ele - &(ele_out->at(0));
+    // check if electron was matched to any trigger lepton
+
+    // PF
+    if((ele.userInt("isPF") == 1 && best_PFele_with_dr.find(idx) != best_PFele_with_dr.end())
+      || (ele.userInt("isLowPt") == 1 && best_LPele_with_dr.find(idx) != best_LPele_with_dr.end())){
+      ele.addUserInt("isTriggering", 1);
+      float dr = ele.userInt("isPF") == 1 ? best_PFele_with_dr[idx] : best_LPele_with_dr[idx];
+      ele.addUserFloat("drTrg", dr);
+    } else {
+      ele.addUserInt("isTriggering", 0);
+      ele.addUserFloat("drTrg", 999.);
+    }
   }
 
   // build transient track collection

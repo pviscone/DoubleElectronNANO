@@ -7,8 +7,12 @@ from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_noIso
     import mvaEleID_Fall17_noIso_V2_producer_config
 from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
     import mvaEleID_BParkRetrain_producer_config
+from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter22_noIso_V1_cff \
+    import mvaEleID_RunIIIWinter22_noIso_V1_producer_config
+
 mvaConfigsForEleProducer.append( mvaEleID_Fall17_noIso_V2_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
+mvaConfigsForEleProducer.append( mvaEleID_RunIIIWinter22_noIso_V1_producer_config )
 electronMVAValueMapProducer = cms.EDProducer(
     'ElectronMVAValueMapProducer',
     src = cms.InputTag('slimmedElectrons'),#,processName=cms.InputTag.skipCurrentProcess()),
@@ -19,15 +23,19 @@ electronMVAValueMapProducer = cms.EDProducer(
 electronsForAnalysis = cms.EDProducer(
   'ElectronMerger',
   trgLepton = cms.InputTag('muonTrgSelector:trgMuons'),
+  trgObjects = cms.InputTag('slimmedPatTrigger'),
+  trgBits = cms.InputTag("TriggerResults","","HLT"),
   lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
   pfSrc    = cms.InputTag('slimmedElectrons'),
   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
   pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
   pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
-  ## cleaning wrt trigger lepton [-1 == no cut]
+  ## cleaning wrt trigger lepton [-1 == no cut] 
   drForCleaning_wrtTrgLepton = cms.double(0.03),
   dzForCleaning_wrtTrgLepton = cms.double(1.),
+  ## trigger matching parameter
+  drMaxTrgMatching = cms.double(0.3),
   ## cleaning between pfEle and lowPtGsf
   drForCleaning = cms.double(0.03),
   dzForCleaning = cms.double(0.5), ##keep tighter dZ to check overlap of pfEle with lowPt (?)
@@ -75,11 +83,43 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         dzTrg = Var("userFloat('dzTrg')",float,doc="dz from the corresponding triggered lepton, in cm",precision=10),
         ip3d = Var("abs(dB('PV3D'))",float,doc="3D impact parameter wrt first PV, in cm",precision=10),
         sip3d = Var("abs(dB('PV3D')/edB('PV3D'))",float,doc="3D impact parameter significance wrt first PV, in cm",precision=10),
-#        deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
-#        r9 = Var("full5x5_r9()",float,doc="R9 of the supercluster, calculated with full 5x5 region",precision=10),
-#        sieie = Var("full5x5_sigmaIetaIeta()",float,doc="sigma_IetaIeta of the supercluster, calculated with full 5x5 region",precision=10),
-#        hoe = Var("hadronicOverEm()",float,doc="H over E",precision=8),
-#        tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
+        preRegEnergy = Var("superCluster().rawEnergy()",float,doc="energy before correction",precision=10),
+        trackPt = Var("gsfTrack().ptMode()",float,doc="pt of the gsf track", precision=10),
+        correctedEnergy = Var("correctedEcalEnergy()",float,doc="energy after correction",precision=10),
+        # regressedEnergy = Var("ecalTrackRegressionEnergy()",float,doc="energy after regression",precision=10),
+        # MVA input variabiles
+        deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
+        r9 = Var("full5x5_r9()",float,doc="R9 of the supercluster, calculated with full 5x5 region",precision=10),
+        sieie = Var("full5x5_sigmaIetaIeta()",float,doc="sigma_IetaIeta of the supercluster, calculated with full 5x5 region",precision=10),
+        sipip = Var("full5x5_sigmaIphiIphi()",float,doc="sigma_IphiIphi of the supercluster, calculated with full 5x5 region",precision=10),
+        hovere = Var("full5x5_hcalOverEcal()",float,doc="H/E of the supercluster, calculated with full 5x5 region",precision=10),
+        # hoe = Var("hadronicOverEm()",float,doc="H over E",precision=8),
+        scletawidth = Var("superCluster().etaWidth()",float,doc="width of the supercluster in eta",precision=10),
+        sclphiwidth = Var("superCluster().phiWidth()",float,doc="width of the supercluster in phi",precision=10),
+        circularity = Var("1.-full5x5_e1x5()/full5x5_e5x5()",float,doc="circularity of the supercluster",precision=10),
+        kfhits = Var("closestCtfTrackNLayers()",int,doc="number of missing hits in the inner tracker"),
+        kfchi2 = Var("closestCtfTrackNormChi2()",float,doc="normalized chi2 of the closest CTF track"),
+        gsfchi2 = Var("gsfTrack().normalizedChi2()",int,doc="number of missing hits in the inner tracker"),
+        gsfhits = Var("gsfTrack().hitPattern().trackerLayersWithMeasurement()",int,doc="number of missing hits in the inner tracker"),
+        expected_inner_hits = Var("gsfTrack().hitPattern().numberOfLostHits('MISSING_INNER_HITS')",int,doc="number of missing hits in the inner tracker"),
+        fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
+        conversionVertexFitProbability = Var("convVtxFitProb()",float,doc="conversion vertex fit probability"),
+        eoverp = Var("eSuperClusterOverP()",float,doc="E/P of the electron",precision=10),
+        eeleoverpout = Var("eEleClusterOverPout()",float,doc="E/E_{SC} of the electron",precision=10),
+        IoEmIop = Var("1.0/ecalEnergy()-1.0/trackMomentumAtVtx().R()",float,doc="1/E - 1/P of the electron",precision=10),
+        deltaetain = Var("abs(deltaEtaSuperClusterTrackAtVtx())",float,doc="delta eta (SC,track) with sign",precision=10),
+        deltaphiin = Var("abs(deltaPhiSuperClusterTrackAtVtx())",float,doc="delta phi (SC,track) with sign",precision=10),
+        deltaetaseed = Var("abs(deltaEtaSeedClusterTrackAtCalo())",float,doc="delta eta (seed,track) with sign",precision=10),
+        psOverEraw = Var("superCluster().preshowerEnergy()/superCluster().rawEnergy()",float,doc="preshower energy over raw ECAL energy",precision=10),
+        pfPhotonIso = Var("pfIsolationVariables().sumPhotonEt()",float,doc="sum of photon pT in isolation cone",precision=10),
+        pfChargedHadIso = Var("pfIsolationVariables().sumChargedHadronPt()",float,doc="sum of charged hadron pT in isolation cone",precision=10),
+        pfNeutralHadIso = Var("pfIsolationVariables().sumNeutralHadronEt()",float,doc="sum of neutral hadron pT in isolation cone",precision=10),
+        ecalPFclusterIso = Var("ecalPFClusterIso()",float,doc="sum of PF clusters in isolation cone",precision=10),
+        hcalPFclusterIso = Var("hcalPFClusterIso()",float,doc="sum of PF clusters in isolation cone",precision=10),
+        dr03TkSumPt = Var("dr03TkSumPt()",float,doc="sum of tracks in isolation cone",precision=10),
+        # end MVA input variables
+
+        tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
         convVeto = Var("passConversionVeto()",bool,doc="pass conversion veto"),
 #        lostHits = Var("gsfTrack.hitPattern.numberOfLostHits('MISSING_INNER_HITS')","uint8",doc="number of missing inner hits"),
         pfRelIso = Var("(pfIsolationVariables().sumChargedHadronPt+max(0.0,pfIsolationVariables().sumNeutralHadronEt+pfIsolationVariables().sumPhotonEt-0.5*pfIsolationVariables().sumPUPt))/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
@@ -90,17 +130,21 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         LPEleSeed_Fall17UnBiasedV1RawValue = Var("userFloat('LPEleSeed_Fall17UnBiasedV1RawValue')",float,doc="Seed BDT for low-pT electrons, Fall17 unBiased model"), #@@ was called "unBiased"
         LPEleMvaID_2020Sept15RawValue = Var("userFloat('LPEleMvaID_2020Sept15RawValue')",float,doc="MVA ID for low-pT electrons, 2020Sept15 model"), #@@ was called "mvaId"
         PFEleMvaID_RetrainedRawValue = Var("userFloat('PFEleMvaID_RetrainedRawValue')",float,doc="MVA ID for PF electrons, BParkRetrainRawValues"), #@@ was called "pfmvaId"
+        
         PFEleMvaID_Fall17NoIsoV2RawValue = Var("userFloat('PFEleMvaID_Fall17NoIsoV2RawValue')",float,doc="MVA ID for PF electrons, Fall17NoIsoV2RawValues"),
         PFEleMvaID_Fall17NoIsoV1wpLoose = Var("userInt('PFEleMvaID_Fall17NoIsoV1wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V1-wpLoose"), #@@ to be deprecated
         PFEleMvaID_Fall17NoIsoV2wpLoose = Var("userInt('PFEleMvaID_Fall17NoIsoV2wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wpLoose"),
         PFEleMvaID_Fall17NoIsoV2wp90 = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp90"),
         PFEleMvaID_Fall17NoIsoV2wp80 = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp80"),
+        
         PFEleMvaID_Winter22NoIsoV1RawValue = Var("userFloat('PFEleMvaID_Winter22NoIsoV1RawValue')",float,doc="MVA ID for PF electrons: RunIIIWinter22NoIsoV1RawValues"),
         PFEleMvaID_Winter22NoIsoV1wp90 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
         PFEleMvaID_Winter22NoIsoV1wp80 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp80"),
 
-        fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
-        isPFoverlap = Var("userInt('isPFoverlap')",bool,doc="flag lowPt ele overlapping with pf in selected_pf_collection",precision=8),
+        isTriggering = Var("userInt('isTriggering')",int,doc="Is ele triggering?"),
+        drTrg = Var("userFloat('drTrg')",float,doc="dR to the triggering lepton"),
+
+        isPFoverlap = Var("userInt('isPFoverlap')",bool,doc="flag lowPt ele overlapping with pf in selected_pf_collection", precision=8),
         convOpen = Var("userInt('convOpen')",bool,doc="Matched to a conversion in gsfTracksOpenConversions collection"),
         convLoose = Var("userInt('convLoose')",bool,doc="Matched to a conversion satisfying Loose WP (see code)"),
         convTight = Var("userInt('convTight')",bool,doc="Matched to a conversion satisfying Tight WP (see code)"),
@@ -190,9 +234,12 @@ BToKEE_OpenConfig.toModify(electronsForAnalysis,
                            #dzForCleaning=-1.,
                            filterEle=False)
 
+# FIRST CONFIG: saveLowPtE = True, useGsfModeForP4 = True
 BToKEE_DiEle.toModify(electronsForAnalysis,
                       trgLepton = 'electronTrgSelector:trgElectrons',
                       bdtMin = -100., # Open this up and rely on L/M/T WPs
-                      useGsfModeForP4 = True, # Use GSF for PF ele as well
-                      saveLowPtE = False, # Don't use low-pT ele
+                    #   useGsfModeForP4 = True, # Use GSF for PF ele as well
+                      useGsfModeForP4 = False, # Use regressed energy for both PF and LowPt eles
+                    #   saveLowPtE = False, # Don't use low-pT ele
+                      saveLowPtE = True, # Use low-pT ele
                       drForCleaning_wrtTrgLepton = -1.)

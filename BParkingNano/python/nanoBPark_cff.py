@@ -21,12 +21,14 @@ from PhysicsTools.BParkingNano.tracksBPark_cff import *
 from PhysicsTools.BParkingNano.BToKLL_cff import *
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 
-nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
+# nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
+nanoSequenceOnlyFullSim = cms.Sequence(electronTriggerObjectBParkTables + l1bits)
 
 nanoSequence = cms.Sequence(nanoMetadata + 
                             cms.Sequence(vertexTask) +
                             cms.Sequence(globalTablesTask) + cms.Sequence(vertexTablesTask) +
-                            triggerObjectBParkTables + l1bits)
+                            # triggerObjectBParkTables + l1bits)
+                            electronTriggerObjectBParkTables + l1bits)
 
 nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
                               cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable)

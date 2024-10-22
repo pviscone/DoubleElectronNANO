@@ -9,9 +9,8 @@ electronPairsForKee = cms.EDProducer(
     lep2Selection = cms.string(''),
     filterBySelection = cms.bool(True),
     preVtxSelection = cms.string(
-        'abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 5 '
-        '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03 && userInt("nlowpt") < 2'
-        
+        'abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 6 '
+        '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03 && userInt("nlowpt") < 3'  
     ),
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
 )
