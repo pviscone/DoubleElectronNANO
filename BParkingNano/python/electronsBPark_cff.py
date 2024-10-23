@@ -87,6 +87,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         trackPt = Var("gsfTrack().ptMode()",float,doc="pt of the gsf track", precision=10),
         correctedEnergy = Var("correctedEcalEnergy()",float,doc="energy after correction",precision=10),
         # regressedEnergy = Var("ecalTrackRegressionEnergy()",float,doc="energy after regression",precision=10),
+
         # MVA input variabiles
         deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
         r9 = Var("full5x5_r9()",float,doc="R9 of the supercluster, calculated with full 5x5 region",precision=10),
@@ -222,24 +223,10 @@ electronBParkTables = cms.Sequence(electronBParkTable)
 
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
-BToKEE_OpenConfig.toModify(electronsForAnalysis,
-                           pf_ptMin=0.5,
-                           ptMin=0.5,
-                           etaMax=2.5,
-                           bdtMin=-1.e3,
-                           flagAndclean=False,
-                           #drForCleaning_wrtTrgLepton=-1.,
-                           #dzForCleaning_wrtTrgLepton=-1.,
-                           #drForCleaning=-1.,
-                           #dzForCleaning=-1.,
-                           filterEle=False)
-
 # FIRST CONFIG: saveLowPtE = True, useGsfModeForP4 = True
-BToKEE_DiEle.toModify(electronsForAnalysis,
+DiEle.toModify(electronsForAnalysis,
                       trgLepton = 'electronTrgSelector:trgElectrons',
                       bdtMin = -100., # Open this up and rely on L/M/T WPs
-                    #   useGsfModeForP4 = True, # Use GSF for PF ele as well
-                      useGsfModeForP4 = False, # Use regressed energy for both PF and LowPt eles
-                    #   saveLowPtE = False, # Don't use low-pT ele
-                      saveLowPtE = True, # Use low-pT ele
+                      useGsfModeForP4 = False, # If False, use REGRESSED energy for both PF and LowPt eles; else, use GSF (track) energy
+                      saveLowPtE = True, # Use low-pT eles
                       drForCleaning_wrtTrgLepton = -1.)

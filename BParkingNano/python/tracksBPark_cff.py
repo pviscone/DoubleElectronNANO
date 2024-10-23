@@ -94,17 +94,6 @@ tracksBParkMC = cms.Sequence(tracksBParkSequence + tracksBParkMCMatchForTable + 
 
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
-_modifiers = BToKMuMu_OpenConfig | BToKEE_OpenConfig
-_modifiers.toModify(tracksBPark,
-                    trkPtCut=0.5,
-                    trkEtaCut=2.5,
-                    trkNormChiMin=-1,
-                    trkNormChiMax=-1,
-                    dcaSig=-100000,
-                    #dzTrg_cleaning=-1.,
-                    #drTrg_Cleaning=-1.,
-                    filterTrack=False)
-
-BToKEE_DiEle.toModify(tracksBPark,
+DiEle.toModify(tracksBPark,
                       trgLepton = "electronTrgSelector:trgElectrons",
                       lowPtElectrons = "") # don't use "slimmedLowPtElectrons"

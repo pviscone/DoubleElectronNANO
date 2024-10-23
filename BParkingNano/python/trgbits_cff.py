@@ -35,7 +35,7 @@ trgTables = cms.Sequence(trgTable)
 
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
-BToKEE_DiEle.toModify(trgTable,
+DiEle.toModify(trgTable,
                       paths = ['HLT_DoubleEle10_eta1p22_mMax6',
                                'HLT_DoubleEle9p5_eta1p22_mMax6',
                                'HLT_DoubleEle9_eta1p22_mMax6',
@@ -66,6 +66,7 @@ BToKEE_DiEle.toModify(trgTable,
                                'L1_DoubleEG4_er1p2_dR_Max0p9',],
 )
 
+# # 2024 paths/seeds only
 # BToKEE_DiEle.toModify(trgTable,
 #                       paths = ['HLT_DoubleEle6p5_eta1p22_mMax6',
 #                                'HLT_DoubleEle8_eta1p22_mMax6',
@@ -73,10 +74,10 @@ BToKEE_DiEle.toModify(trgTable,
 #                       seeds = ['L1_DoubleEG11_er1p2_dR_Max0p6'],
 # )
 
-BToKMuMu_DiMuon.toModify(trgTable,
-                         paths = ["HLT_DoubleMu4_JpsiTrk_Displaced"],
-                         seeds = ["L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4",
-                                  "L1_DoubleMu0er1p4_SQ_OS_dR_Max1p4",
-                                  "L1_DoubleMu4p5_SQ_OS_dR_Max1p2",
-                                  "L1_DoubleMu4_SQ_OS_dR_Max1p2",],
-)
+# BToKMuMu_DiMuon.toModify(trgTable,
+#                          paths = ["HLT_DoubleMu4_JpsiTrk_Displaced"],
+#                          seeds = ["L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4",
+#                                   "L1_DoubleMu0er1p4_SQ_OS_dR_Max1p4",
+#                                   "L1_DoubleMu4p5_SQ_OS_dR_Max1p2",
+#                                   "L1_DoubleMu4_SQ_OS_dR_Max1p2",],
+# )

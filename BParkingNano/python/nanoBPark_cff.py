@@ -17,9 +17,8 @@ from PhysicsTools.BParkingNano.muonsBPark_cff import *
 from PhysicsTools.BParkingNano.electronsBPark_cff import * 
 from PhysicsTools.BParkingNano.tracksBPark_cff import *
 
-## B collections
-from PhysicsTools.BParkingNano.BToKLL_cff import *
-from PhysicsTools.BParkingNano.BToKstarLL_cff import *
+## Dielectron collection
+from PhysicsTools.BParkingNano.dielectron_cff import *
 
 # nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
 nanoSequenceOnlyFullSim = cms.Sequence(electronTriggerObjectBParkTables + l1bits)
@@ -35,8 +34,8 @@ nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSeque
 
 from PhysicsTools.BParkingNano.electronsTrigger_cff import *
 
-def nanoAOD_customizeDiEle(process):
-    process.nanoDiEleSequence = cms.Sequence(
+def nanoAOD_customizeEle(process):
+    process.nanoEleSequence = cms.Sequence(
         myUnpackedPatTrigger
         +myTriggerMatches
         +mySlimmedElectronsWithEmbeddedTrigger
@@ -53,34 +52,15 @@ def nanoAOD_customizeTrackFilteredBPark(process):
     return process
 
 def nanoAOD_customizeElectronFilteredBPark(process):
-    process.nanoBKeeSequence     = cms.Sequence( electronsBParkSequence + electronBParkTables)
-    process.nanoBKstarEESequence = cms.Sequence( electronsBParkSequence + electronBParkTables)
+    process.nanoDiEleSequence     = cms.Sequence(electronsBParkSequence + electronBParkTables)
     return process
 
 def nanoAOD_customizeTriggerBitsBPark(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + trgTables)
     return process
 
-def nanoAOD_customizeDielectron(process):
-    process.nanoBKeeSequence = cms.Sequence( process.nanoBKeeSequence + DiElectronSequence)
-    return process
-
-def nanoAOD_customizeBToKLL(process):
-    process.nanoBKeeSequence   = cms.Sequence( process.nanoBKeeSequence + BToKEESequence    + BToKeeTable   )
-    process.nanoBKMuMuSequence = cms.Sequence( BToKMuMuSequence + BToKmumuTable )
-    return process
-
-#three possibilities for K*LL
-def nanoAOD_customizeBToKstarLL(process):
-    process.nanoBKstarLLSequence   = cms.Sequence( KstarToKPiSequence + BToKstarLLSequence + KstarToKPiTable + BToKstarLLTables )
-    return process
-
-def nanoAOD_customizeBToKstarEE(process):
-    process.nanoBKstarEESequence   = cms.Sequence( process.nanoBKstarEESequence + BToKstarEESequence + BToKstarEETable + KstarToKPiTable )
-    return process
-
-def nanoAOD_customizeBToKstarMuMu(process):
-    process.nanoBKstarMuMuSequence = cms.Sequence( BToKstarMuMuSequence + BToKstarMuMuTable + KstarToKPiTable )
+def nanoAOD_customizeDiElectron(process):
+    process.nanoDiEleSequence = cms.Sequence( process.nanoDiEleSequence + DiElectronSequence)
     return process
 
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag
