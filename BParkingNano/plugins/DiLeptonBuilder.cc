@@ -105,8 +105,20 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       lepton_pair.addUserFloat("sv_chi2", fitter.chi2());
       lepton_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       lepton_pair.addUserFloat("sv_prob", fitter.prob());
+      // vertex variables
+      lepton_pair.addUserFloat("sv_x", lepton_pair.vx());
+      lepton_pair.addUserFloat("sv_y", lepton_pair.vy());
+      lepton_pair.addUserFloat("sv_z", lepton_pair.vz());
+
       lepton_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
       lepton_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
+      // add fitted single lepton variables
+      lepton_pair.addUserFloat("l1_postfit_pt", fitter.success() ? fitter.daughter_p4(0).pt() : -1);
+      lepton_pair.addUserFloat("l1_postfit_eta", fitter.success() ? fitter.daughter_p4(0).eta() : -1);
+      lepton_pair.addUserFloat("l1_postfit_phi", fitter.success() ? fitter.daughter_p4(0).phi() : -1);
+      lepton_pair.addUserFloat("l2_postfit_pt", fitter.success() ? fitter.daughter_p4(1).pt() : -1);
+      lepton_pair.addUserFloat("l2_postfit_eta", fitter.success() ? fitter.daughter_p4(1).eta() : -1);
+      lepton_pair.addUserFloat("l2_postfit_phi", fitter.success() ? fitter.daughter_p4(1).phi() : -1);      
       // if needed, add here more stuff
 
       // cut on the SV info

@@ -59,8 +59,8 @@ print(options)
 globaltag = None
 
 if options.year == 2022:
-    globaltag = '124X_mcRun3_2022_realistic_postEE_v3' if options.isMC else '124X_dataRun3_v15'
-    #TODO: change 2022 sample to prompt one (-> change GT to 124X_dataRun3_PromptAnalysis_v1)
+    globaltag = '124X_mcRun3_2022_realistic_postEE_v3' if options.isMC else '124X_dataRun3_PromptAnalysis_v1'
+    # NB for DATA: use 124X_dataRun3_PromptAnalysis_v1 for PromptReco, 124X_dataRun3_v15 for ReReco
 elif options.year == 2023:
     globaltag = "130X_mcRun3_2023_realistic_v14" if options.isMC else "130X_dataRun3_PromptAnalysis_v1"
 else:
@@ -115,12 +115,16 @@ if not options.inputFiles:
             'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/60000/6db4a541-5fc9-4dbc-a799-d69a1be12d1f.root',
         ] if options.isMC else [
             # 2022C files
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/10Dec2022-v2/30000/3a970b47-04fe-4b41-b3d3-6bd4dc7b7281.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/10Dec2022-v2/2560000/f0c41013-6a45-4f13-ad74-19de9c08c528.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/10Dec2022-v2/2560000/182138bf-9146-4760-a86b-5dafb19dd740.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/10Dec2022-v2/2560000/6f79c2b1-a34c-4d51-8576-a9313059d5c0.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/10Dec2022-v2/2560000/de22bdd5-19b0-4709-88fe-cc9c182597b5.root',
-            # 'root://cms-xrd-global.cern.ch//store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/170/00000/45c0f2ed-eb5b-4292-abc8-3117424d9432.root'
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/170/00000/45c0f2ed-eb5b-4292-abc8-3117424d9432.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/371/00000/b160219b-02dd-4858-a408-a3b1828ea504.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/375/00000/0487e761-50b3-4816-9b50-214915af2a6d.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/377/00000/5d8a23be-8541-498b-bc7c-4377a3108cc7.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/71ac56a4-be9f-4f67-ba3f-580e9cb2afa1.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/37c50324-b780-4536-b137-11ab9fafdbd8.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/322/00000/c90b0b8a-26f4-446e-a393-80e277d8678b.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/82f33586-4556-41da-8f11-52472be77bd4.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/84e04fbb-f944-4b4e-900e-43f6b2777bfd.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/0c9dba33-d8dc-4118-8fba-2ab5cff57f5e.root',
         ]
     elif options.year == 2023:
         options.inputFiles = [

@@ -5,9 +5,3 @@ cmsRun run_nano_cfg.py isMC=0 maxEvents=5000 reportEvery=100 lhcRun=3 year=2023 
 cmsRun run_nano_cfg.py isMC=1 maxEvents=5000 reportEvery=100 lhcRun=3 year=2023 isSignal=0 # Data with Run 3
 cmsRun run_nano_cfg.py isMC=0 maxEvents=3000 reportEvery=100 lhcRun=3 year=2022 # Data with Run 3 2022
 cmsRun run_nano_cfg.py isMC=1 maxEvents=3000 reportEvery=100 lhcRun=3 year=2022 isSignal=0 # Data with Run 3 2022
-
-# export SINGULARITY_CACHEDIR="/eos/home-n/npalmeri/singularity"
-# export APPTAINER_CACHEDIR="/eos/home-n/npalmeri/singularity"
-# singularity shell -B /afs -B /eos -B /cvmfs docker://coffeateam/coffea-dask-almalinux8:latest
-# # try accessing cvmfs inside of the container
-# source /cvmfs/cms.cern.ch/cmsset_default.sh
