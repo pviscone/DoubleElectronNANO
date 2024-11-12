@@ -13,10 +13,46 @@ from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter
 mvaConfigsForEleProducer.append( mvaEleID_Fall17_noIso_V2_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_RunIIIWinter22_noIso_V1_producer_config )
+
 electronMVAValueMapProducer = cms.EDProducer(
     'ElectronMVAValueMapProducer',
     src = cms.InputTag('slimmedElectrons'),#,processName=cms.InputTag.skipCurrentProcess()),
     mvaConfigurations = mvaConfigsForEleProducer,
+)
+
+egmGsfElectronIDs = cms.EDProducer(
+    "VersionedGsfElectronIdProducer",
+    physicsObjectSrc = cms.InputTag('slimmedElectrons'),
+    physicsObjectIDs = cms.VPSet( )
+)
+
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import setupVIDSelection
+my_id_modules = [
+    'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter22_noIso_V1_cff',
+    'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_noIso_V2_cff',
+    'PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff'
+]
+for id_module_name in my_id_modules: 
+    idmod= __import__(id_module_name, globals(), locals(), ['idName','cutFlow'])
+    for name in dir(idmod):
+        item = getattr(idmod,name)
+        if hasattr(item,'idName') and hasattr(item,'cutFlow'):
+            setupVIDSelection(egmGsfElectronIDs, item)
+
+# embed IDs in slimmedElectrons collection
+
+myslimmedElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
+    src = cms.InputTag("slimmedElectrons"),
+    userFloats = cms.PSet(
+        pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+        pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
+        pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
+    ),
+    userIntFromBools = cms.PSet(
+        PFEleMvaID_Winter22NoIsoV1wp90 = cms.InputTag("egmGsfElectronIDs:mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
+        PFEleMvaID_Winter22NoIsoV1wp80 = cms.InputTag("egmGsfElectronIDs:mvaEleID-RunIIIWinter22-noIso-V1-wp80")
+        # other ones are already embedded in slimmedElectrons for both 2022/23
+    ),
 )
 
 #Everything can be done here, in one loop and save time :)
@@ -26,10 +62,14 @@ electronsForAnalysis = cms.EDProducer(
   trgObjects = cms.InputTag('slimmedPatTrigger'),
   trgBits = cms.InputTag("TriggerResults","","HLT"),
   lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
-  pfSrc    = cms.InputTag('slimmedElectrons'),
-  pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
-  pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
-  pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
+#   pfSrc    = cms.InputTag('slimmedElectrons'),
+  pfSrc    = cms.InputTag('myslimmedElectronsWithUserData'),
+#   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+#   pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
+#   pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
+  pfmvaId = cms.InputTag(""), #use embedded values
+  pfmvaId_Run2 = cms.InputTag(""), #use embedded values
+  pfmvaId_Run3 = cms.InputTag(""), #use embedded values
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut] 
   drForCleaning_wrtTrgLepton = cms.double(0.03),
@@ -68,8 +108,8 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
  cut = cms.string(""),
     name= cms.string("Electron"),
     doc = cms.string("slimmedElectrons for BPark after basic selection"),
-    singleton = cms.bool(False), 
-    extension = cms.bool(False),                                                
+    singleton = cms.bool(False),
+    extension = cms.bool(False),
     variables = cms.PSet(P4Vars,
         pdgId  = Var("pdgId", int, doc="PDG code assigned by the event reconstruction (not by MC truth)"),
         charge = Var("userFloat('chargeMode')", int, doc="electric charge from pfEle or chargeMode for lowPtGsf"),
@@ -211,6 +251,8 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
     
 electronsBParkSequence = cms.Sequence(
     electronMVAValueMapProducer +
+    egmGsfElectronIDs +
+    myslimmedElectronsWithUserData +
     electronsForAnalysis
 )
 

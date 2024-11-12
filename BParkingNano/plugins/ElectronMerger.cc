@@ -70,17 +70,17 @@ public:
     filterEle_{cfg.getParameter<bool>("filterEle")},
     addUserVarsExtra_{cfg.getParameter<bool>("addUserVarsExtra")}
     {
-       produces<pat::ElectronCollection>("SelectedElectrons");
-       produces<TransientTrackCollection>("SelectedTransientElectrons");  
-       if ( !pf_mvaId_src_Tag_.label().empty() ) {
-	 pf_mvaId_src_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId") );
-       }
-       if ( !pf_mvaId_src_Tag_run2_.label().empty() ) {
-	 pf_mvaId_src_run2_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run2") );
-       }
-      if ( !pf_mvaId_src_Tag_run3_.label().empty() ) {
-	 pf_mvaId_src_run3_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run3") );
+      produces<pat::ElectronCollection>("SelectedElectrons");
+      produces<TransientTrackCollection>("SelectedTransientElectrons");  
+      if ( !pf_mvaId_src_Tag_.label().empty() ) {
+        pf_mvaId_src_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId") );
       }
+      if ( !pf_mvaId_src_Tag_run2_.label().empty() ) {
+        pf_mvaId_src_run2_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run2") );
+      }
+      if ( !pf_mvaId_src_Tag_run3_.label().empty() ) {
+        pf_mvaId_src_run3_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId_Run3") );
+    }
     }
 
   ~ElectronMerger() override {}
@@ -220,10 +220,16 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    edm::Ref<pat::ElectronCollection> ref(pf,ipfele);
    float pf_mva_id = 20.;
    if ( !pf_mvaId_src_Tag_.label().empty() ) { pf_mva_id = float((*pfmvaId)[ref]); }
+   else pf_mva_id = ele.userFloat("pfmvaId"); // needed for 2022 when manually embedding Run 3 WP; refs to electronMVAValueMapProducer products are not usable here
+
    float pf_mva_id_run2 = 20.;
    if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { pf_mva_id_run2 = float((*pfmvaId_run2)[ref]); }
+   else pf_mva_id_run2 = ele.userFloat("pfmvaId_Run2"); // same as above
+
    float pf_mva_id_run3 = 20.;
    if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { pf_mva_id_run3 = float((*pfmvaId_run3)[ref]); }
+   else pf_mva_id_run3 = ele.userFloat("pfmvaId_Run3"); // same as above
+
    ele.addUserInt("isPF", 1);
    ele.addUserInt("isLowPt", 0);
    // Custom IDs
@@ -240,8 +246,8 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
    // Run-3 PF ele ID
    ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", pf_mva_id_run3);
-   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp90"));
-   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp80"));
+  //  ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp90"));
+  //  ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp80"));
    ele.addUserFloat("chargeMode", ele.charge());
    ele.addUserInt("isPFoverlap", 0);
    ele.addUserFloat("dzTrg", dzTrg);
