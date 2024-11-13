@@ -14,12 +14,14 @@ mvaConfigsForEleProducer.append( mvaEleID_Fall17_noIso_V2_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_RunIIIWinter22_noIso_V1_producer_config )
 
+# evaluate MVA IDs
 electronMVAValueMapProducer = cms.EDProducer(
     'ElectronMVAValueMapProducer',
     src = cms.InputTag('slimmedElectrons'),#,processName=cms.InputTag.skipCurrentProcess()),
     mvaConfigurations = mvaConfigsForEleProducer,
 )
 
+# Compute WPs
 egmGsfElectronIDs = cms.EDProducer(
     "VersionedGsfElectronIdProducer",
     physicsObjectSrc = cms.InputTag('slimmedElectrons'),
@@ -39,9 +41,12 @@ for id_module_name in my_id_modules:
         if hasattr(item,'idName') and hasattr(item,'cutFlow'):
             setupVIDSelection(egmGsfElectronIDs, item)
 
-# embed IDs in slimmedElectrons collection
+# compute electron seed gain
+seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("slimmedElectrons"))
+seedGainEleLowPt = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("slimmedLowPtElectrons"))
 
-myslimmedElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
+# embed IDs and additional variables in slimmedElectrons collection
+slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("slimmedElectrons"),
     userFloats = cms.PSet(
         pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
@@ -53,7 +58,18 @@ myslimmedElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
         PFEleMvaID_Winter22NoIsoV1wp80 = cms.InputTag("egmGsfElectronIDs:mvaEleID-RunIIIWinter22-noIso-V1-wp80")
         # other ones are already embedded in slimmedElectrons for both 2022/23
     ),
+    userInts = cms.PSet(
+        seedGain = cms.InputTag("seedGainElePF"),
+    )
 )
+
+slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
+    src = cms.InputTag("slimmedLowPtElectrons"),
+    userInts = cms.PSet(
+        seedGain = cms.InputTag("seedGainEleLowPt"),
+    ),
+)
+
 
 #Everything can be done here, in one loop and save time :)
 electronsForAnalysis = cms.EDProducer(
@@ -61,12 +77,13 @@ electronsForAnalysis = cms.EDProducer(
   trgLepton = cms.InputTag('muonTrgSelector:trgMuons'),
   trgObjects = cms.InputTag('slimmedPatTrigger'),
   trgBits = cms.InputTag("TriggerResults","","HLT"),
-  lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
-#   pfSrc    = cms.InputTag('slimmedElectrons'),
-  pfSrc    = cms.InputTag('myslimmedElectronsWithUserData'),
-#   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
-#   pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
-#   pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
+  # lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
+  lowptSrc = cms.InputTag('slimmedLowPtElectronsWithUserData'), # Only used if saveLowPtE == True
+  # pfSrc    = cms.InputTag('slimmedElectrons'),
+  pfSrc    = cms.InputTag('slimmedPFElectronsWithUserData'),
+  # pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+  # pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
+  # pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
   pfmvaId = cms.InputTag(""), #use embedded values
   pfmvaId_Run2 = cms.InputTag(""), #use embedded values
   pfmvaId_Run3 = cms.InputTag(""), #use embedded values
@@ -90,10 +107,10 @@ electronsForAnalysis = cms.EDProducer(
   sortOutputCollections = cms.bool(True),
   saveLowPtE = cms.bool(True),
   filterEle = cms.bool(True),
-    # conversions
-    conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
-    beamSpot = cms.InputTag("offlineBeamSpot"),
-    addUserVarsExtra = cms.bool(False),
+  # conversions
+  conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
+  beamSpot = cms.InputTag("offlineBeamSpot"),
+  addUserVarsExtra = cms.bool(False),
 )
 
 #cuts minimun number in B both mu and e, min number of trg, dz electron, dz and dr track, 
@@ -128,22 +145,21 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         correctedEnergy = Var("correctedEcalEnergy()",float,doc="energy after correction",precision=10),
         # regressedEnergy = Var("ecalTrackRegressionEnergy()",float,doc="energy after regression",precision=10),
 
-        # MVA input variabiles
+        # START MVA ID input variabiles (from RecoEgamma/ElectronIdentification/data/ElectronIDVariablesRun3.txt)
         deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
+        sigmaietaieta = Var("full5x5_sigmaIetaIeta()",float,doc="sigma_IetaIeta of the supercluster, calculated with full 5x5 region",precision=10),
+        sigmaiphiiphi = Var("full5x5_sigmaIphiIphi()",float,doc="sigma_IphiIphi of the supercluster, calculated with full 5x5 region",precision=10),
+        circularity = Var("1.-full5x5_e1x5()/full5x5_e5x5()",float,doc="circularity of the supercluster",precision=10),
         r9 = Var("full5x5_r9()",float,doc="R9 of the supercluster, calculated with full 5x5 region",precision=10),
-        sieie = Var("full5x5_sigmaIetaIeta()",float,doc="sigma_IetaIeta of the supercluster, calculated with full 5x5 region",precision=10),
-        sipip = Var("full5x5_sigmaIphiIphi()",float,doc="sigma_IphiIphi of the supercluster, calculated with full 5x5 region",precision=10),
-        hovere = Var("full5x5_hcalOverEcal()",float,doc="H/E of the supercluster, calculated with full 5x5 region",precision=10),
-        # hoe = Var("hadronicOverEm()",float,doc="H over E",precision=8),
         scletawidth = Var("superCluster().etaWidth()",float,doc="width of the supercluster in eta",precision=10),
         sclphiwidth = Var("superCluster().phiWidth()",float,doc="width of the supercluster in phi",precision=10),
-        circularity = Var("1.-full5x5_e1x5()/full5x5_e5x5()",float,doc="circularity of the supercluster",precision=10),
+        hoe = Var("full5x5_hcalOverEcal()",float,doc="H/E of the supercluster, calculated with full 5x5 region",precision=10),
         kfhits = Var("closestCtfTrackNLayers()",int,doc="number of missing hits in the inner tracker"),
         kfchi2 = Var("closestCtfTrackNormChi2()",float,doc="normalized chi2 of the closest CTF track"),
         gsfchi2 = Var("gsfTrack().normalizedChi2()",int,doc="number of missing hits in the inner tracker"),
+        fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
         gsfhits = Var("gsfTrack().hitPattern().trackerLayersWithMeasurement()",int,doc="number of missing hits in the inner tracker"),
         expected_inner_hits = Var("gsfTrack().hitPattern().numberOfLostHits('MISSING_INNER_HITS')",int,doc="number of missing hits in the inner tracker"),
-        fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
         conversionVertexFitProbability = Var("convVtxFitProb()",float,doc="conversion vertex fit probability"),
         eoverp = Var("eSuperClusterOverP()",float,doc="E/P of the electron",precision=10),
         eeleoverpout = Var("eEleClusterOverPout()",float,doc="E/E_{SC} of the electron",precision=10),
@@ -158,7 +174,11 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         ecalPFclusterIso = Var("ecalPFClusterIso()",float,doc="sum of PF clusters in isolation cone",precision=10),
         hcalPFclusterIso = Var("hcalPFClusterIso()",float,doc="sum of PF clusters in isolation cone",precision=10),
         dr03TkSumPt = Var("dr03TkSumPt()",float,doc="sum of tracks in isolation cone",precision=10),
-        # end MVA input variables
+        # END MVA input variables
+
+        # START Scale and smearing inputs
+        seedGain = Var("userInt('seedGain')", int, doc="Gain of the seed crystal"),
+        # END Scale and smearing inputs
 
         tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
         convVeto = Var("passConversionVeto()",bool,doc="pass conversion veto"),
@@ -252,7 +272,10 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 electronsBParkSequence = cms.Sequence(
     electronMVAValueMapProducer +
     egmGsfElectronIDs +
-    myslimmedElectronsWithUserData +
+    seedGainElePF +
+    seedGainEleLowPt +
+    slimmedPFElectronsWithUserData +
+    slimmedLowPtElectronsWithUserData +
     electronsForAnalysis
 )
 
