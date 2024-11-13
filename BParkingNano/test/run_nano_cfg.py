@@ -8,7 +8,7 @@ options.register('year', 2023,
     VarParsing.varType.int,
     "Year to process between 2022 or 2023 (default)")
 
-options.register('isMC', False,
+options.register('isMC', False, 
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on real data"
@@ -52,7 +52,7 @@ options.register('lhcRun', 3,
 )
 
 options.setDefault('maxEvents', 1000)
-options.setDefault('tag', '124X')
+options.setDefault('tag', '130X')
 options.parseArguments()
 print(options)
 
@@ -228,6 +228,7 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
       'drop *',
       "keep nanoaodFlatTable_*Table_*_*",     # event data
       "keep nanoaodUniqueString_nanoMetadata_*_*",   # basic metadata
+      "keep nanoaodMergeableCounterTable_*Table_*_*", # run data
     )
 
 )
