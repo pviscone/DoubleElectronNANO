@@ -13,6 +13,7 @@
 <use   name="CommonTools/Utils"/>
 <use   name="CommonTools/CandAlgos"/>
 <use   name="CommonTools/Statistics"/>
+<use   name="CommonTools/Egamma"/>
 <use   name="RecoEgamma/EgammaTools"/>
 <use   name="PhysicsTools/JetMCUtils"/>
 <use   name="DataFormats/NanoAOD"/>
