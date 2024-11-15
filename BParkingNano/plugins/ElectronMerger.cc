@@ -24,6 +24,7 @@
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "ConversionInfo.h"
+#include "CommonTools/Egamma/interface/EffectiveAreas.h"
 
 #include <limits>
 #include <algorithm>
@@ -44,6 +45,8 @@ public:
     triggerBits_{consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trgBits"))},
     lowpt_src_{consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
+    rho_pfiso_{ consumes<double>(cfg.getParameter<edm::InputTag>("rho_PFIso")) },
+    ea_pfiso_{std::make_unique<EffectiveAreas>((cfg.getParameter<edm::FileInPath>("EAFile_PFIso")).fullPath())},
     pf_mvaId_src_(),
     pf_mvaId_src_Tag_(cfg.getParameter<edm::InputTag>("pfmvaId")),
     pf_mvaId_src_run2_(),
@@ -96,6 +99,8 @@ private:
   const edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
   const edm::EDGetTokenT<pat::ElectronCollection> lowpt_src_;
   const edm::EDGetTokenT<pat::ElectronCollection> pf_src_;
+  edm::EDGetTokenT<double> rho_pfiso_;
+  std::unique_ptr<EffectiveAreas> ea_pfiso_;
   edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_;
   const edm::InputTag pf_mvaId_src_Tag_;
   edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_run2_;
@@ -154,6 +159,8 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   evt.getByToken(conversions_, conversions);
   edm::Handle<reco::BeamSpot> beamSpot;
   evt.getByToken(beamSpot_, beamSpot);
+  //
+  auto& rho = evt.get(rho_pfiso_);
 
   // output
   std::unique_ptr<pat::ElectronCollection>  ele_out      (new pat::ElectronCollection );
@@ -379,6 +386,40 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele_out       -> emplace_back(ele);
   }
 }
+
+  // Isolation (+ correction)
+  size_t ie=-1;
+  for(auto &ele : *ele_out){
+    ie+=1;
+    // Isolation
+    auto ea = ea_pfiso_->getEffectiveArea(fabs(ele.superCluster()->eta()));
+    float pfisoall0p3 = ele.pfIsolationVariables().sumChargedHadronPt + std::max(0.0, ele.pfIsolationVariables().sumNeutralHadronEt+ele.pfIsolationVariables().sumPhotonEt - rho * ea);
+    float pfisoall0p4 = ele.chargedHadronIso() + std::max(0.0, ele.neutralHadronIso() + ele.photonIso() - rho * ea * 16. / 9.);
+
+    // Correction for cases where LowPT electrons don't overlap with PF --> PF reconstructs it as charged hadron --> Need to subtract CTF pt from isolation sum
+    float tosub0p3=0.;
+    float tosub0p4=0.;
+
+    size_t ilp=-1;
+    for(auto &lp : *ele_out){
+      ilp+=1;
+      if ((lp.userInt("isPF")) || lp.userInt("isPFoverlap")) continue; // skip if lp is known to overlap with PF ele --> no correction needed
+      if (!lp.closestCtfTrackRef().isNonnull()) continue;       // skip if lp has no associated CTF track --> no correction possible
+
+      float dR_gsf = reco::deltaR(ele.eta(), ele.phi(), lp.eta(), lp.phi());
+      float dR_ctf = reco::deltaR(ele.eta(), ele.phi(), lp.closestCtfTrackRef()->eta(), lp.closestCtfTrackRef()->phi());
+      if (dR_gsf<0.001) continue; // skip if lp is same as reference --> cut comes down to numerical precision
+      if (dR_ctf < 0.3) tosub0p3+=lp.closestCtfTrackRef()->pt();
+      if (dR_ctf < 0.4) tosub0p4+=lp.closestCtfTrackRef()->pt();
+    }
+    ele.addUserFloat("PFIsoAll03", pfisoall0p3);
+    ele.addUserFloat("PFIsoAll03_corr", pfisoall0p3 - tosub0p3);
+    ele.addUserFloat("PFIsoChg03_corr", ele.pfIsolationVariables().sumChargedHadronPt - tosub0p3);
+    ele.addUserFloat("PFIsoAll04", pfisoall0p4);
+    ele.addUserFloat("PFIsoAll04_corr", pfisoall0p4 - tosub0p4);
+    ele.addUserFloat("PFIsoChg04_corr", ele.chargedHadronIso() - tosub0p4);
+  }
+
   if(sortOutputCollections_){
 
     //sorting increases sligtly the time but improves the code efficiency in the Bcandidate builder

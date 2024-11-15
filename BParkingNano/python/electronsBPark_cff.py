@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
+from PhysicsTools.NanoAOD.electrons_cff import *
+from PhysicsTools.NanoAOD.lowPtElectrons_cff import *
 
 # Electron ID MVA raw values
 mvaConfigsForEleProducer = cms.VPSet()
@@ -25,8 +27,10 @@ electronsForAnalysis = cms.EDProducer(
   trgLepton = cms.InputTag('muonTrgSelector:trgMuons'),
   trgObjects = cms.InputTag('slimmedPatTrigger'),
   trgBits = cms.InputTag("TriggerResults","","HLT"),
-  lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
+  lowptSrc = cms.InputTag('updatedLowPtElectrons'), # Only used if saveLowPtE == True
   pfSrc    = cms.InputTag('slimmedElectrons'),
+  rho_PFIso = cms.InputTag("fixedGridRhoFastjetAll"),
+  EAFile_PFIso = cms.FileInPath("RecoEgamma/ElectronIdentification/data/Run3_Winter22/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_122X.txt"),
   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
   pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
   pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
@@ -37,7 +41,7 @@ electronsForAnalysis = cms.EDProducer(
   ## trigger matching parameter
   drMaxTrgMatching = cms.double(0.3),
   ## cleaning between pfEle and lowPtGsf
-  drForCleaning = cms.double(0.03),
+  drForCleaning = cms.double(0.05),
   dzForCleaning = cms.double(0.5), ##keep tighter dZ to check overlap of pfEle with lowPt (?)
   ## true = flag and clean; false = only flag
   flagAndclean = cms.bool(False),
@@ -112,9 +116,21 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         deltaphiin = Var("abs(deltaPhiSuperClusterTrackAtVtx())",float,doc="delta phi (SC,track) with sign",precision=10),
         deltaetaseed = Var("abs(deltaEtaSeedClusterTrackAtCalo())",float,doc="delta eta (seed,track) with sign",precision=10),
         psOverEraw = Var("superCluster().preshowerEnergy()/superCluster().rawEnergy()",float,doc="preshower energy over raw ECAL energy",precision=10),
-        pfPhotonIso = Var("pfIsolationVariables().sumPhotonEt()",float,doc="sum of photon pT in isolation cone",precision=10),
-        pfChargedHadIso = Var("pfIsolationVariables().sumChargedHadronPt()",float,doc="sum of charged hadron pT in isolation cone",precision=10),
-        pfNeutralHadIso = Var("pfIsolationVariables().sumNeutralHadronEt()",float,doc="sum of neutral hadron pT in isolation cone",precision=10),
+
+        pfIso03_chg = Var("pfIsolationVariables().sumChargedHadronPt()",float,doc="PF absolute isolation dR=0.3, charged component",precision=10),
+        pfIso03_chg_corr = Var("userFloat('PFIsoChg03_corr')",float,doc="corrected PF absolute isolation dR=0.3, charged component",precision=10),
+        pfIso03_neu = Var("pfIsolationVariables().sumNeutralHadronEt()",float,doc="PF absolute isolation dR=0.3, neutral component",precision=10),
+        pfIso03_all = Var("userFloat('PFIsoAll03')",float,doc="PF absolute isolation dR=0.3, total (with rho*EA PU Winter22V1 corrections)"),
+        pfIso03_all_corr = Var("userFloat('PFIsoAll03_corr')",float,doc="corrected PF absolute isolation dR=0.3, total (with rho*EA PU Winter22V1 corrections)"),
+        pfIso04_chg = Var("chargedHadronIso()",float,doc="PF absolute isolation dR=0.4, charged component"),
+        pfIso04_chg_corr = Var("userFloat('PFIsoChg04_corr')",float,doc="corrected PF absolute isolation dR=0.4, charged component",precision=10),
+        pfIso04_neu = Var("neutralHadronIso()",float,doc="PF absolute isolation dR=0.4, neutral component"),
+        pfIso04_all = Var("userFloat('PFIsoAll04')",float,doc="PF absolute isolation dR=0.4, total (with rho*EA PU Winter22V1 corrections)"),
+        pfIso04_all_corr = Var("userFloat('PFIsoAll04_corr')",float,doc="corrected PF absolute isolation dR=0.4, total (with rho*EA PU Winter22V1 corrections)"),
+        ctfTrackPt = Var("?closestCtfTrackRef().isNonnull()?closestCtfTrackRef().pt():0",float,doc=""),
+        ctfTrackEta = Var("?closestCtfTrackRef().isNonnull()?closestCtfTrackRef().eta():0",float,doc=""),
+        ctfTrackPhi = Var("?closestCtfTrackRef().isNonnull()?closestCtfTrackRef().phi():0",float,doc=""),
+
         ecalPFclusterIso = Var("ecalPFClusterIso()",float,doc="sum of PF clusters in isolation cone",precision=10),
         hcalPFclusterIso = Var("hcalPFClusterIso()",float,doc="sum of PF clusters in isolation cone",precision=10),
         dr03TkSumPt = Var("dr03TkSumPt()",float,doc="sum of tracks in isolation cone",precision=10),
@@ -123,7 +139,6 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
         convVeto = Var("passConversionVeto()",bool,doc="pass conversion veto"),
 #        lostHits = Var("gsfTrack.hitPattern.numberOfLostHits('MISSING_INNER_HITS')","uint8",doc="number of missing inner hits"),
-        pfRelIso = Var("(pfIsolationVariables().sumChargedHadronPt+max(0.0,pfIsolationVariables().sumNeutralHadronEt+pfIsolationVariables().sumPhotonEt-0.5*pfIsolationVariables().sumPUPt))/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
         trkRelIso = Var("trackIso/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
         isPF = Var("userInt('isPF')",bool,doc="electron is PF candidate"),
         isLowPt = Var("userInt('isLowPt')",bool,doc="electron is LowPt candidate"),
@@ -210,6 +225,8 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 )
     
 electronsBParkSequence = cms.Sequence(
+    modifiedLowPtElectrons +
+    updatedLowPtElectrons +
     electronMVAValueMapProducer +
     electronsForAnalysis
 )
