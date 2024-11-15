@@ -15,11 +15,63 @@ from RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter
 mvaConfigsForEleProducer.append( mvaEleID_Fall17_noIso_V2_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_RunIIIWinter22_noIso_V1_producer_config )
+
+# evaluate MVA IDs
 electronMVAValueMapProducer = cms.EDProducer(
     'ElectronMVAValueMapProducer',
     src = cms.InputTag('slimmedElectrons'),#,processName=cms.InputTag.skipCurrentProcess()),
     mvaConfigurations = mvaConfigsForEleProducer,
 )
+
+# Compute WPs
+egmGsfElectronIDs = cms.EDProducer(
+    "VersionedGsfElectronIdProducer",
+    physicsObjectSrc = cms.InputTag('slimmedElectrons'),
+    physicsObjectIDs = cms.VPSet( )
+)
+
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import setupVIDSelection
+my_id_modules = [
+    'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter22_noIso_V1_cff',
+    'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_noIso_V2_cff',
+    'PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff'
+]
+for id_module_name in my_id_modules: 
+    idmod= __import__(id_module_name, globals(), locals(), ['idName','cutFlow'])
+    for name in dir(idmod):
+        item = getattr(idmod,name)
+        if hasattr(item,'idName') and hasattr(item,'cutFlow'):
+            setupVIDSelection(egmGsfElectronIDs, item)
+
+# compute electron seed gain
+seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("slimmedElectrons"))
+seedGainEleLowPt = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("updatedLowPtElectrons"))
+
+# embed IDs and additional variables in slimmedElectrons collection
+slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
+    src = cms.InputTag("slimmedElectrons"),
+    userFloats = cms.PSet(
+        pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+        pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
+        pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
+    ),
+    userIntFromBools = cms.PSet(
+        PFEleMvaID_Winter22NoIsoV1wp90 = cms.InputTag("egmGsfElectronIDs:mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
+        PFEleMvaID_Winter22NoIsoV1wp80 = cms.InputTag("egmGsfElectronIDs:mvaEleID-RunIIIWinter22-noIso-V1-wp80")
+        # other ones are already embedded in slimmedElectrons for both 2022/23
+    ),
+    userInts = cms.PSet(
+        seedGain = cms.InputTag("seedGainElePF"),
+    )
+)
+
+slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
+    src = cms.InputTag("updatedLowPtElectrons"),
+    userInts = cms.PSet(
+        seedGain = cms.InputTag("seedGainEleLowPt"),
+    ),
+)
+
 
 #Everything can be done here, in one loop and save time :)
 electronsForAnalysis = cms.EDProducer(
@@ -27,13 +79,18 @@ electronsForAnalysis = cms.EDProducer(
   trgLepton = cms.InputTag('muonTrgSelector:trgMuons'),
   trgObjects = cms.InputTag('slimmedPatTrigger'),
   trgBits = cms.InputTag("TriggerResults","","HLT"),
-  lowptSrc = cms.InputTag('updatedLowPtElectrons'), # Only used if saveLowPtE == True
-  pfSrc    = cms.InputTag('slimmedElectrons'),
+  # lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
+  lowptSrc = cms.InputTag('slimmedLowPtElectronsWithUserData'), # Only used if saveLowPtE == True
+  # pfSrc    = cms.InputTag('slimmedElectrons'),
+  pfSrc    = cms.InputTag('slimmedPFElectronsWithUserData'),
   rho_PFIso = cms.InputTag("fixedGridRhoFastjetAll"),
   EAFile_PFIso = cms.FileInPath("RecoEgamma/ElectronIdentification/data/Run3_Winter22/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_122X.txt"),
-  pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
-  pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
-  pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
+  # pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
+  # pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
+  # pfmvaId_Run3 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1RawValues"),
+  pfmvaId = cms.InputTag(""), #use embedded values
+  pfmvaId_Run2 = cms.InputTag(""), #use embedded values
+  pfmvaId_Run3 = cms.InputTag(""), #use embedded values
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut] 
   drForCleaning_wrtTrgLepton = cms.double(0.03),
@@ -54,10 +111,10 @@ electronsForAnalysis = cms.EDProducer(
   sortOutputCollections = cms.bool(True),
   saveLowPtE = cms.bool(True),
   filterEle = cms.bool(True),
-    # conversions
-    conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
-    beamSpot = cms.InputTag("offlineBeamSpot"),
-    addUserVarsExtra = cms.bool(False),
+  # conversions
+  conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
+  beamSpot = cms.InputTag("offlineBeamSpot"),
+  addUserVarsExtra = cms.bool(False),
 )
 
 #cuts minimun number in B both mu and e, min number of trg, dz electron, dz and dr track, 
@@ -72,8 +129,8 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
  cut = cms.string(""),
     name= cms.string("Electron"),
     doc = cms.string("slimmedElectrons for BPark after basic selection"),
-    singleton = cms.bool(False), 
-    extension = cms.bool(False),                                                
+    singleton = cms.bool(False),
+    extension = cms.bool(False),
     variables = cms.PSet(P4Vars,
         pdgId  = Var("pdgId", int, doc="PDG code assigned by the event reconstruction (not by MC truth)"),
         charge = Var("userFloat('chargeMode')", int, doc="electric charge from pfEle or chargeMode for lowPtGsf"),
@@ -92,22 +149,21 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         correctedEnergy = Var("correctedEcalEnergy()",float,doc="energy after correction",precision=10),
         # regressedEnergy = Var("ecalTrackRegressionEnergy()",float,doc="energy after regression",precision=10),
 
-        # MVA input variabiles
+        # START MVA ID input variabiles (from RecoEgamma/ElectronIdentification/data/ElectronIDVariablesRun3.txt)
         deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
+        sigmaietaieta = Var("full5x5_sigmaIetaIeta()",float,doc="sigma_IetaIeta of the supercluster, calculated with full 5x5 region",precision=10),
+        sigmaiphiiphi = Var("full5x5_sigmaIphiIphi()",float,doc="sigma_IphiIphi of the supercluster, calculated with full 5x5 region",precision=10),
+        circularity = Var("1.-full5x5_e1x5()/full5x5_e5x5()",float,doc="circularity of the supercluster",precision=10),
         r9 = Var("full5x5_r9()",float,doc="R9 of the supercluster, calculated with full 5x5 region",precision=10),
-        sieie = Var("full5x5_sigmaIetaIeta()",float,doc="sigma_IetaIeta of the supercluster, calculated with full 5x5 region",precision=10),
-        sipip = Var("full5x5_sigmaIphiIphi()",float,doc="sigma_IphiIphi of the supercluster, calculated with full 5x5 region",precision=10),
-        hovere = Var("full5x5_hcalOverEcal()",float,doc="H/E of the supercluster, calculated with full 5x5 region",precision=10),
-        # hoe = Var("hadronicOverEm()",float,doc="H over E",precision=8),
         scletawidth = Var("superCluster().etaWidth()",float,doc="width of the supercluster in eta",precision=10),
         sclphiwidth = Var("superCluster().phiWidth()",float,doc="width of the supercluster in phi",precision=10),
-        circularity = Var("1.-full5x5_e1x5()/full5x5_e5x5()",float,doc="circularity of the supercluster",precision=10),
+        hoe = Var("full5x5_hcalOverEcal()",float,doc="H/E of the supercluster, calculated with full 5x5 region",precision=10),
         kfhits = Var("closestCtfTrackNLayers()",int,doc="number of missing hits in the inner tracker"),
         kfchi2 = Var("closestCtfTrackNormChi2()",float,doc="normalized chi2 of the closest CTF track"),
         gsfchi2 = Var("gsfTrack().normalizedChi2()",int,doc="number of missing hits in the inner tracker"),
+        fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
         gsfhits = Var("gsfTrack().hitPattern().trackerLayersWithMeasurement()",int,doc="number of missing hits in the inner tracker"),
         expected_inner_hits = Var("gsfTrack().hitPattern().numberOfLostHits('MISSING_INNER_HITS')",int,doc="number of missing hits in the inner tracker"),
-        fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
         conversionVertexFitProbability = Var("convVtxFitProb()",float,doc="conversion vertex fit probability"),
         eoverp = Var("eSuperClusterOverP()",float,doc="E/P of the electron",precision=10),
         eeleoverpout = Var("eEleClusterOverPout()",float,doc="E/E_{SC} of the electron",precision=10),
@@ -134,7 +190,11 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         ecalPFclusterIso = Var("ecalPFClusterIso()",float,doc="sum of PF clusters in isolation cone",precision=10),
         hcalPFclusterIso = Var("hcalPFClusterIso()",float,doc="sum of PF clusters in isolation cone",precision=10),
         dr03TkSumPt = Var("dr03TkSumPt()",float,doc="sum of tracks in isolation cone",precision=10),
-        # end MVA input variables
+        # END MVA input variables
+
+        # START Scale and smearing inputs
+        seedGain = Var("userInt('seedGain')", int, doc="Gain of the seed crystal"),
+        # END Scale and smearing inputs
 
         tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
         convVeto = Var("passConversionVeto()",bool,doc="pass conversion veto"),
@@ -228,6 +288,11 @@ electronsBParkSequence = cms.Sequence(
     modifiedLowPtElectrons +
     updatedLowPtElectrons +
     electronMVAValueMapProducer +
+    egmGsfElectronIDs +
+    seedGainElePF +
+    seedGainEleLowPt +
+    slimmedPFElectronsWithUserData +
+    slimmedLowPtElectronsWithUserData +
     electronsForAnalysis
 )
 
