@@ -41,14 +41,21 @@ git clone -b dev git@github.com:noepalm/DoubleElectronNANO.git ./PhysicsTools
 git cms-merge-topic -u noepalm:nanoaod_fix_DoubleElectronNANO # unsafe checkout (no checkdeps), but suggested here
 ```
 
+### Adding isolation and iso-correction for lowPt electrons
+
+```shell
+git cms-merge-topic -u Pmeiring:leptonIso_13013 # unsafe checkout (no checkdeps), but suggested here
+```
+
+
 ### Build and run on a test file
 
 ```shell
 cd $CMSSW_BASE/src/
 scram b -j 8
 cd PhysicsTools/BParkingNano/test
-cmsRun run_nano_cfg.py        # by default, runs over Run 3 data
-cmsRun run_nano_cfg.py isMC=1 # runs over MC for 2022
+cmsRun run_nano_cfg.py        # by default, runs over Run 3 2023 data
+cmsRun run_nano_cfg.py isMC=1 # runs over BuToKJPsi_JPsiToEE MC for 2023
 ```
 
 ### Submit CRAB jobs to process Run 3 data and 2022 MC 
