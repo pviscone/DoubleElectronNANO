@@ -162,7 +162,7 @@ annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
-process = cms.Process('BParkNANO', eras.Run3, DiEle) #with only one process now, modifier is probably useless
+process = cms.Process('BParkNANO', eras.Run3) #removed DiEle modifier -- useless with 1 process
 
 # import of standard configurations
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')

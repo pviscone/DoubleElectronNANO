@@ -11,7 +11,7 @@ electronPairs = cms.EDProducer(
     filterBySelection = cms.bool(True),
     preVtxSelection = cms.string(
         'abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 6 '
-        f'&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning} && userInt("nlowpt") < 3'  
+        f'&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()} && userInt("nlowpt") < 3'  
     ),
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
 )

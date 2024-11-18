@@ -76,7 +76,7 @@ slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder"
 #Everything can be done here, in one loop and save time :)
 electronsForAnalysis = cms.EDProducer(
   'ElectronMerger',
-  trgLepton = cms.InputTag('muonTrgSelector:trgMuons'),
+  trgLepton = cms.InputTag('electronTrgSelector:trgElectrons'),
   trgObjects = cms.InputTag('slimmedPatTrigger'),
   trgBits = cms.InputTag("TriggerResults","","HLT"),
   # lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
@@ -93,7 +93,7 @@ electronsForAnalysis = cms.EDProducer(
   pfmvaId_Run3 = cms.InputTag(""), #use embedded values
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut] 
-  drForCleaning_wrtTrgLepton = cms.double(0.03),
+  drForCleaning_wrtTrgLepton = cms.double(-1), # do not check for dR matching to trg objs
   dzForCleaning_wrtTrgLepton = cms.double(1.),
   ## trigger matching parameter
   drMaxTrgMatching = cms.double(0.3),
@@ -105,18 +105,17 @@ electronsForAnalysis = cms.EDProducer(
   pf_ptMin = cms.double(1.),
   ptMin = cms.double(0.5),
   etaMax = cms.double(2.5),
-  bdtMin = cms.double(-2.5), #@@ was -2.5, this cut can be used to deactivate low pT e if set to >12
+  bdtMin = cms.double(-100.), # Open this up and rely on L/M/T WPs. was -2.5, this cut can be used to deactivate low pT e if set to >12
   useRegressionModeForP4 = cms.bool(False),
-  useGsfModeForP4 = cms.bool(False),
+  useGsfModeForP4 = cms.bool(False), # If False, use REGRESSED energy for both PF and LowPt eles; else, use GSF (track) energy
   sortOutputCollections = cms.bool(True),
-  saveLowPtE = cms.bool(True),
+  saveLowPtE = cms.bool(True), # Use low-pT eles
   filterEle = cms.bool(True),
   # conversions
   conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
   beamSpot = cms.InputTag("offlineBeamSpot"),
   addUserVarsExtra = cms.bool(False),
 )
-
 #cuts minimun number in B both mu and e, min number of trg, dz electron, dz and dr track, 
 countTrgElectrons = cms.EDFilter("PATCandViewCountFilter",
     minNumber = cms.uint32(1),
@@ -303,12 +302,6 @@ electronBParkTables = cms.Sequence(electronBParkTable)
 # Modifiers
 ###########
 
-from PhysicsTools.BParkingNano.modifiers_cff import *
+# from PhysicsTools.BParkingNano.modifiers_cff import *
 
-# FIRST CONFIG: saveLowPtE = True, useGsfModeForP4 = True
-DiEle.toModify(electronsForAnalysis,
-                      trgLepton = 'electronTrgSelector:trgElectrons',
-                      bdtMin = -100., # Open this up and rely on L/M/T WPs
-                      useGsfModeForP4 = False, # If False, use REGRESSED energy for both PF and LowPt eles; else, use GSF (track) energy
-                      saveLowPtE = True, # Use low-pT eles
-                      drForCleaning_wrtTrgLepton = -1.)
+# DiEle.toModify(electronsForAnalysis, ...)

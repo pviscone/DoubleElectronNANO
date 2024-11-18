@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 paths = []
 seeds = []
 
-is_new = False
+is_new = False #2024 triggers only?
 
 if is_new:
     paths = ['HLT_DoubleEle6p5_eta1p22_mMax6',
