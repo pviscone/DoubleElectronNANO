@@ -41,7 +41,6 @@ public:
   explicit ElectronMerger(const edm::ParameterSet &cfg):
     ttbToken_(esConsumes(edm::ESInputTag{"","TransientTrackBuilder"})),
     triggerLeptons_{ consumes<edm::View<reco::Candidate> >( cfg.getParameter<edm::InputTag>("trgLepton") )},
-    triggerObjects_{ consumes<std::vector<pat::TriggerObjectStandAlone>>(cfg.getParameter<edm::InputTag>("trgObjects"))},
     triggerBits_{consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trgBits"))},
     lowpt_src_{consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
@@ -95,7 +94,6 @@ public:
 private:
   const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbToken_;
   const edm::EDGetTokenT<edm::View<reco::Candidate> > triggerLeptons_;
-  const edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
   const edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
   const edm::EDGetTokenT<pat::ElectronCollection> lowpt_src_;
   const edm::EDGetTokenT<pat::ElectronCollection> pf_src_;
@@ -134,8 +132,6 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   //input
   edm::Handle<edm::View<reco::Candidate> > trgLepton;
   evt.getByToken(triggerLeptons_, trgLepton);
-  edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;
-  evt.getByToken(triggerObjects_, triggerObjects);
   edm::Handle<edm::TriggerResults> triggerBits;
   evt.getByToken(triggerBits_, triggerBits);  
   edm::Handle<pat::ElectronCollection> lowpt;
@@ -436,53 +432,23 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
   // TRIGGER MATCHING
 
-  // finding best
-  const edm::TriggerNames &names = evt.triggerNames(*triggerBits);
-  
-  std::map<int, float> best_PFele_with_dr;
-  std::map<int, float> best_LPele_with_dr;
-  
-  for(auto trg : *triggerObjects) {
-    // unpack trigger object
-    trg.unpackPathNames(names);
-    // check if trigger object fires HLT_DoubleEle*    
-    if(trg.hasPathName("HLT_DoubleEle*", true) == false) continue;
-    float best_dr_PF = 999., best_dr_LP = 999.;
-    int best_idx_PF = -1, best_idx_LP = -1;
-    for(auto &ele : *ele_out){
-      float dr = reco::deltaR(ele, trg);
-      if(ele.userInt("isPF") == 1 && dr < best_dr_PF){
-        best_dr_PF = dr;
-        best_idx_PF = &ele - &(ele_out->at(0));
-      }
-      if(ele.userInt("isLowPt") == 1 && dr < best_dr_LP){
-        best_dr_LP = dr;
-        best_idx_LP = &ele - &(ele_out->at(0));
-      }
-      // if(dr < best_dr){
-      //   best_dr = dr; //save best_dr regardless for debugging
-      //   if(dr < drMaxTrgMatching_) best_idx = &ele - &(ele_out->at(0));
-      // }
-    }
-    best_PFele_with_dr[best_idx_PF] = best_dr_PF;
-    best_LPele_with_dr[best_idx_LP] = best_dr_LP;
-  }
-
-  // save trigger matching result
+  // save useful information related to matched trigger object
   for(auto &ele : *ele_out){
-    int idx = &ele - &(ele_out->at(0));
-    // check if electron was matched to any trigger lepton
-
-    // PF
-    if((ele.userInt("isPF") == 1 && best_PFele_with_dr.find(idx) != best_PFele_with_dr.end())
-      || (ele.userInt("isLowPt") == 1 && best_LPele_with_dr.find(idx) != best_LPele_with_dr.end())){
-      ele.addUserInt("isTriggering", 1);
-      float dr = ele.userInt("isPF") == 1 ? best_PFele_with_dr[idx] : best_LPele_with_dr[idx];
-      ele.addUserFloat("drTrg", dr);
-    } else {
-      ele.addUserInt("isTriggering", 0);
-      ele.addUserFloat("drTrg", 999.);
+    bool isTriggering = false;
+    float drTrg = 999.;
+    float dPtOverPtTrg = 999.;
+    
+    if(ele.triggerObjectMatches().size() != 0){
+      isTriggering = true;
+      for(auto &trg : ele.triggerObjectMatches()){ //size always 1 since ambiguity resolved
+        drTrg = reco::deltaR(ele, trg);
+        dPtOverPtTrg = std::abs(ele.pt() - trg.pt())/ele.pt();
+      }
     }
+
+    ele.addUserInt("isTriggering", isTriggering);
+    ele.addUserFloat("drTrg", drTrg);
+    ele.addUserFloat("dPtOverPtTrg", dPtOverPtTrg);
   }
 
   // build transient track collection

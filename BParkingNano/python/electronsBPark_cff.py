@@ -16,17 +16,21 @@ mvaConfigsForEleProducer.append( mvaEleID_Fall17_noIso_V2_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_RunIIIWinter22_noIso_V1_producer_config )
 
-# evaluate MVA IDs
+
+# change modifiedLowPtElectrons input to use embedded trigger matching
+modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
+
+# evaluate MVA IDs for PF electrons 
 electronMVAValueMapProducer = cms.EDProducer(
     'ElectronMVAValueMapProducer',
-    src = cms.InputTag('slimmedElectrons'),#,processName=cms.InputTag.skipCurrentProcess()),
+    src = cms.InputTag('mySlimmedPFElectronsWithEmbeddedTrigger'),#,processName=cms.InputTag.skipCurrentProcess()),
     mvaConfigurations = mvaConfigsForEleProducer,
 )
 
 # Compute WPs
 egmGsfElectronIDs = cms.EDProducer(
     "VersionedGsfElectronIdProducer",
-    physicsObjectSrc = cms.InputTag('slimmedElectrons'),
+    physicsObjectSrc = cms.InputTag('mySlimmedPFElectronsWithEmbeddedTrigger'),
     physicsObjectIDs = cms.VPSet( )
 )
 
@@ -44,12 +48,12 @@ for id_module_name in my_id_modules:
             setupVIDSelection(egmGsfElectronIDs, item)
 
 # compute electron seed gain
-seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("slimmedElectrons"))
+seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"))
 seedGainEleLowPt = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("updatedLowPtElectrons"))
 
 # embed IDs and additional variables in slimmedElectrons collection
 slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
-    src = cms.InputTag("slimmedElectrons"),
+    src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"), #includes trigger matching
     userFloats = cms.PSet(
         pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
         pfmvaId_Run2 = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV2RawValues"),
@@ -72,12 +76,10 @@ slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder"
     ),
 )
 
-
 #Everything can be done here, in one loop and save time :)
 electronsForAnalysis = cms.EDProducer(
   'ElectronMerger',
   trgLepton = cms.InputTag('electronTrgSelector:trgElectrons'),
-  trgObjects = cms.InputTag('slimmedPatTrigger'),
   trgBits = cms.InputTag("TriggerResults","","HLT"),
   # lowptSrc = cms.InputTag('slimmedLowPtElectrons'), # Only used if saveLowPtE == True
   lowptSrc = cms.InputTag('slimmedLowPtElectronsWithUserData'), # Only used if saveLowPtE == True
@@ -94,7 +96,7 @@ electronsForAnalysis = cms.EDProducer(
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut] 
   drForCleaning_wrtTrgLepton = cms.double(-1), # do not check for dR matching to trg objs
-  dzForCleaning_wrtTrgLepton = cms.double(1.),
+  dzForCleaning_wrtTrgLepton = cms.double(-1), # do not check for dZ matching to trg objs
   ## trigger matching parameter
   drMaxTrgMatching = cms.double(0.3),
   ## cleaning between pfEle and lowPtGsf
@@ -116,6 +118,7 @@ electronsForAnalysis = cms.EDProducer(
   beamSpot = cms.InputTag("offlineBeamSpot"),
   addUserVarsExtra = cms.bool(False),
 )
+
 #cuts minimun number in B both mu and e, min number of trg, dz electron, dz and dr track, 
 countTrgElectrons = cms.EDFilter("PATCandViewCountFilter",
     minNumber = cms.uint32(1),
@@ -216,8 +219,9 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         PFEleMvaID_Winter22NoIsoV1wp90 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
         PFEleMvaID_Winter22NoIsoV1wp80 = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp80"),
 
-        isTriggering = Var("userInt('isTriggering')",int,doc="Is ele triggering?"),
+        isTriggering = Var("userInt('isTriggering')",int,doc="Is ele trigger-matched?"),
         drTrg = Var("userFloat('drTrg')",float,doc="dR to the triggering lepton"),
+        dPtOverPtTrg = Var("userFloat('dPtOverPtTrg')",float,doc="dPt/Pt to the triggering lepton"),
 
         isPFoverlap = Var("userInt('isPFoverlap')",bool,doc="flag lowPt ele overlapping with pf in selected_pf_collection", precision=8),
         convOpen = Var("userInt('convOpen')",bool,doc="Matched to a conversion in gsfTracksOpenConversions collection"),

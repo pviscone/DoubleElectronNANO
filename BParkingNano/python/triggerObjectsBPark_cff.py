@@ -5,8 +5,8 @@ from  PhysicsTools.NanoAOD.triggerObjects_cff import *
 
 triggerObjectBParkTable = cms.EDProducer("TriggerObjectTableBParkProducer",
     name= cms.string("TrigObj"),
-    # src = cms.InputTag("unpackedPatTrigger"),
-    src = cms.InputTag("slimmedPatTrigger"),
+    src = cms.InputTag("unpackedPatTrigger"),
+    # src = cms.InputTag("slimmedPatTrigger"),
     l1Muon = cms.InputTag("gmtStage2Digis","Muon"), #TODO: find equivalent for electrons
     selections = cms.VPSet(
         cms.PSet(

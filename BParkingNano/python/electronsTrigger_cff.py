@@ -54,30 +54,41 @@ myUnpackedPatTrigger = cms.EDProducer(
 
 # https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatAlgos/python/triggerLayer1/triggerMatcherExamples_cfi.py
 # https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatAlgos/plugins/PATTriggerMatcher.cc
-myTriggerMatches = cms.EDProducer(
-    "PATTriggerMatcherDEtaLessByDR", # match by DeltaEta only, best match by DeltaR
+myPFTriggerMatches = cms.EDProducer(
+    # "PATTriggerMatcherDEtaLessByDR", # match by DeltaEta only, best match by DeltaR
     #"PATTriggerMatcherDEtaLessByDEta", # match by DeltaEta only, best match by DeltaEta
-    #"PATTriggerMatcherDRDPtLessByR", # match by DeltaR only, best match by DeltaR
+    "PATTriggerMatcherDRDPtLessByR", # match by DeltaR only, best match by DeltaR
     src = cms.InputTag("slimmedElectrons"),
     matched = cms.InputTag("myUnpackedPatTrigger"),
     matchedCuts = cms.string(paths_OR), # e.g. 'path("HLT_DoubleEle6_eta1p22_mMax6_v*")'
-    maxDeltaR = cms.double(2.0),
-    maxDeltaEta = cms.double(0.5),
-    #maxDPtRel = cms.double(0.5),
+    maxDeltaR = cms.double(0.3),
+    maxDPtRel = cms.double(0.5),
     resolveAmbiguities    = cms.bool( True ), # only one match per trigger object
     resolveByMatchQuality = cms.bool( True ), # take best match found per reco object (e.g. by DeltaR)
 )
 
+myLPTriggerMatches = myPFTriggerMatches.clone(
+    src = cms.InputTag("slimmedLowPtElectrons"),
+    # NB: matching PF and LP collections separately;
+    #     they can be matched to the same trigger object
+)
+
 # https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatAlgos/plugins/PATTriggerMatchEmbedder.cc
-mySlimmedElectronsWithEmbeddedTrigger = cms.EDProducer(
+mySlimmedPFElectronsWithEmbeddedTrigger = cms.EDProducer(
     "PATTriggerMatchElectronEmbedder",
     src = cms.InputTag("slimmedElectrons"),
-    matches = cms.VInputTag('myTriggerMatches'),
+    matches = cms.VInputTag('myPFTriggerMatches'),
+)
+
+mySlimmedLPElectronsWithEmbeddedTrigger = cms.EDProducer(
+    "PATTriggerMatchElectronEmbedder",
+    src = cms.InputTag("slimmedLowPtElectrons"),
+    matches = cms.VInputTag('myLPTriggerMatches'),
 )
 
 electronTrgSelector = cms.EDProducer(
     "ElectronTriggerSelector",
-    electronCollection = cms.InputTag("mySlimmedElectronsWithEmbeddedTrigger"),
+    electronCollection = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"),
     bits = cms.InputTag("TriggerResults","","HLT"),
     prescales = cms.InputTag("patTrigger"),
     objects = cms.InputTag("slimmedPatTrigger"),
@@ -93,7 +104,7 @@ electronTrgSelector = cms.EDProducer(
 
 countTrgElectrons = cms.EDFilter(
     "PATCandViewCountFilter",
-    minNumber = cms.uint32(1),
+    minNumber = cms.uint32(0),
     maxNumber = cms.uint32(999999),
     src = cms.InputTag("electronTrgSelector", "trgElectrons"),
 )

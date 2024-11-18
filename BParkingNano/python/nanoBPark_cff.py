@@ -37,8 +37,10 @@ from PhysicsTools.BParkingNano.electronsTrigger_cff import *
 def nanoAOD_customizeEle(process):
     process.nanoEleSequence = cms.Sequence(
         myUnpackedPatTrigger
-        +myTriggerMatches
-        +mySlimmedElectronsWithEmbeddedTrigger
+        +myPFTriggerMatches
+        +myLPTriggerMatches
+        +mySlimmedPFElectronsWithEmbeddedTrigger
+        +mySlimmedLPElectronsWithEmbeddedTrigger
         +electronTrgSelector
         +countTrgElectrons)
     return process
