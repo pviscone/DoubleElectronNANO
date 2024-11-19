@@ -163,6 +163,10 @@ from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
 process = cms.Process('BParkNANO', eras.Run3) #removed DiEle modifier -- useless with 1 process
+# # Trigger matching study:
+# #   removes all trigger selections and opens up deltaR max value for trigger-matching
+# #   ambiguities not resolved -- looking at best match for each electron.
+# process = cms.Process('BParkNANO', eras.Run3, triggerMatchingStudy)
 
 # import of standard configurations
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -245,6 +249,7 @@ from PhysicsTools.BParkingNano.electronsTrigger_cff import *
 process = nanoAOD_customizeEle(process)
 process = nanoAOD_customizeElectronFilteredBPark(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)
+process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
 process = nanoAOD_customizeDiElectron(process)
 
 process.nanoAOD_DiEle_step = cms.Path(process.nanoSequence

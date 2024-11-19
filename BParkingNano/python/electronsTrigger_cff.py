@@ -102,11 +102,15 @@ electronTrgSelector = cms.EDProducer(
     L1seeds=cms.vstring(seeds),
 )
 
-countTrgElectrons = cms.EDFilter(
-    "PATCandViewCountFilter",
-    minNumber = cms.uint32(0),
-    maxNumber = cms.uint32(999999),
-    src = cms.InputTag("electronTrgSelector", "trgElectrons"),
+# first skim based on trigger -- discard events that don't fire any of the paths
+hltHighLevel = cms.EDFilter("HLTHighLevel",
+                            TriggerResultsTag = cms.InputTag("TriggerResults", "", "HLT"),
+                            HLTPaths = cms.vstring(              # provide list of HLT paths (or patterns) you want
+                                [path + "_v*" for path in paths]
+                            ),       
+                            eventSetupPathsKey = cms.string(''), # not empty => use read paths from AlCaRecoTriggerBitsRcd via this key
+                            andOr = cms.bool(True),              # how to deal with multiple triggers: True (OR) accept if ANY is true, False (AND) accept if ALL are true
+                            throw = cms.bool(True),              # throw exception on unknown path names
 )
 
 #electronsTriggerSequence = cms.Sequence(
@@ -123,3 +127,30 @@ countTrgElectrons = cms.EDFilter(
 #    electronTrgSelector,
 #    countTrgElectrons,
 #)
+
+# ---------------------------------------
+# MODIFIERS FOR TRIGGER MATCHING STUDIES
+
+from PhysicsTools.BParkingNano.modifiers_cff import *
+
+triggerMatchingStudy.toModify(myPFTriggerMatches,
+    maxDeltaR = cms.double(2.0),
+    maxDPtRel = cms.double(1.0),
+    resolveAmbiguities    = cms.bool( False ),
+    resolveByMatchQuality = cms.bool( False ),
+)
+
+triggerMatchingStudy.toModify(myLPTriggerMatches,
+    maxDeltaR = cms.double(2.0),
+    maxDPtRel = cms.double(1.0),
+    resolveAmbiguities    = cms.bool( False ),
+    resolveByMatchQuality = cms.bool( False ),
+)
+
+# triggerMatchingStudy.toModify(countTrgElectrons,
+#     minNumber = cms.uint32(0),
+# )
+
+triggerMatchingStudy.toModify(hltHighLevel,
+    HLTPaths = cms.vstring([]) # disable HLT selection
+)

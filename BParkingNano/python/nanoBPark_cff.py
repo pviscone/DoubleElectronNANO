@@ -42,7 +42,7 @@ def nanoAOD_customizeEle(process):
         +mySlimmedPFElectronsWithEmbeddedTrigger
         +mySlimmedLPElectronsWithEmbeddedTrigger
         +electronTrgSelector
-        +countTrgElectrons)
+        +hltHighLevel)
     return process
 
 def nanoAOD_customizeMuonTriggerBPark(process):
@@ -55,6 +55,10 @@ def nanoAOD_customizeTrackFilteredBPark(process):
 
 def nanoAOD_customizeElectronFilteredBPark(process):
     process.nanoDiEleSequence     = cms.Sequence(electronsBParkSequence + electronBParkTables)
+    return process
+
+def nanoAOD_customizeElectronTriggerSelectionBPark(process):
+    process.nanoDiEleSequence = cms.Sequence( process.nanoDiEleSequence + electronBParkTriggerSelection)
     return process
 
 def nanoAOD_customizeTriggerBitsBPark(process):

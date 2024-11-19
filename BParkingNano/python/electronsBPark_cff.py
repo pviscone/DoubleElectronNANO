@@ -107,7 +107,7 @@ electronsForAnalysis = cms.EDProducer(
   pf_ptMin = cms.double(1.),
   ptMin = cms.double(0.5),
   etaMax = cms.double(2.5),
-  bdtMin = cms.double(-100.), # Open this up and rely on L/M/T WPs. was -2.5, this cut can be used to deactivate low pT e if set to >12
+  bdtMin = cms.double(-200.), # Open this up and rely on L/M/T WPs. was -2.5, this cut can be used to deactivate low pT e if set to >12
   useRegressionModeForP4 = cms.bool(False),
   useGsfModeForP4 = cms.bool(False), # If False, use REGRESSED energy for both PF and LowPt eles; else, use GSF (track) energy
   sortOutputCollections = cms.bool(True),
@@ -119,13 +119,30 @@ electronsForAnalysis = cms.EDProducer(
   addUserVarsExtra = cms.bool(False),
 )
 
-#cuts minimun number in B both mu and e, min number of trg, dz electron, dz and dr track, 
-countTrgElectrons = cms.EDFilter("PATCandViewCountFilter",
-    minNumber = cms.uint32(1),
-    maxNumber = cms.uint32(999999),
-    src = cms.InputTag("electronTrgSelector", "trgElectrons")
+# finer trigger skim -- only select events that have >= 2 reco trigger-matched electrons
+# (here considers both PF and lowPt electrons, after overlap removal)
+
+uniqueTriggerElectrons = cms.EDFilter("PATElectronSelector",
+    src = cms.InputTag("electronsForAnalysis:SelectedElectrons"),
+    cut = cms.string("userInt('isPFoverlap') == 0 && userInt('isTriggering') == 1"),
 )
 
+countTrgElectrons = cms.EDFilter(
+    "PATCandViewCountFilter",
+    minNumber = cms.uint32(2),
+    maxNumber = cms.uint32(999999),
+    src = cms.InputTag("uniqueTriggerElectrons"),
+)
+
+# # Previous implementation: only checks for PF trigger-matched electrons
+# countTrgElectrons = cms.EDFilter(
+#     "PATCandViewCountFilter",
+#     minNumber = cms.uint32(2),
+#     maxNumber = cms.uint32(999999),
+#     src = cms.InputTag("electronTrgSelector", "trgElectrons"),
+# )
+
+# Saving analysis electrons
 electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
  src = cms.InputTag("electronsForAnalysis:SelectedElectrons"),
  cut = cms.string(""),
@@ -269,7 +286,6 @@ electronsBParkMCMatchForTable = cms.EDProducer("MCMatcher",  # cut on deltaR, de
     maxDPtRel   = cms.double(0.5),              # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(False),    # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),    # False = just match input in order; True = pick lowest deltaR pair first
-    
 )
 
 selectedElectronsMCMatchEmbedded = cms.EDProducer(
@@ -299,7 +315,20 @@ electronsBParkSequence = cms.Sequence(
     electronsForAnalysis
 )
 
-electronBParkMC = cms.Sequence(electronsBParkSequence + electronsBParkMCMatchForTable + selectedElectronsMCMatchEmbedded + electronBParkMCTable)
+electronBParkMC = cms.Sequence(
+    electronsBParkSequence + 
+    electronsBParkMCMatchForTable + 
+    selectedElectronsMCMatchEmbedded + 
+    electronBParkMCTable
+)
+
+# defining separate sequence to be correctly inserted at the end of nanoDiEleSequence
+# (electronBParkMC must go BEFORE because of dependencies)
+electronBParkTriggerSelection = cms.Sequence(
+    uniqueTriggerElectrons +
+    countTrgElectrons
+)
+
 electronBParkTables = cms.Sequence(electronBParkTable)
 
 ###########
