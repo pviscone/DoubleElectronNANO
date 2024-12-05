@@ -1,4 +1,4 @@
-from CRABClient.UserUtilities import config, ClientException, getUsernameFromCRIC
+from CRABClient.UserUtilities import config
 import yaml
 import datetime
 from fnmatch import fnmatch
@@ -10,11 +10,13 @@ config = config()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.workArea = 'BParkingNANO_{:s}'.format(production_tag)
+config.General.workArea = 'DoubleElectronNANO_{:s}'.format(production_tag)
 
 config.section_('Data')
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/phys_bphys/DiElectronX/production/samples/{:s}'.format(config.General.workArea)
+# config.Data.outLFNDirBase = '/store/group/phys_bphys/DiElectronX/production/samples/{:s}'.format(config.General.workArea)
+config.Data.outLFNDirBase = '/store/group/cmst3/group/xee/DoubleElectronNANO/{:s}'.format(config.General.workArea)
+
 config.Data.inputDBS = 'global'
 
 config.section_('JobType')
@@ -46,6 +48,7 @@ if __name__ == '__main__':
   parser.add_argument('-y', '--yaml', default = 'samples_Run3.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
   parser.add_argument('-r', '--lhcRun', type=int, default=3, help = 'Run 2 or 3 (default)')
+  parser.add_argument('-yy', '--year', type=int, default=2023, help = 'Year of the dataset')
   args = parser.parse_args()
 
   with open(args.yaml) as f:
@@ -99,10 +102,11 @@ if __name__ == '__main__':
             'tag={:s}'.format(production_tag),
             'globalTag={:s}'.format(globaltag),
             'lhcRun={:.0f}'.format(args.lhcRun),
+            'year={:.0f}'.format(args.year),
         ]
 
-        config.JobType.outputFiles = ['_'.join(['BParkingNANO', 'Run3' if args.lhcRun==3 else 'Run2', 'mc' if isMC else 'data', production_tag])+'.root']
+        config.JobType.outputFiles = ['_'.join(['DoubleElectronNANO', 'Run3' if args.lhcRun==3 else 'Run2', str(args.year), 'mc' if isMC else 'data', production_tag])+'.root']
 
         print()
         print(config)
-        submit(config)
+        # submit(config)

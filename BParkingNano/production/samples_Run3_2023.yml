@@ -1,0 +1,24 @@
+common:
+  data:
+    splitting: 20
+    globaltag: 130X_dataRun3_PromptAnalysis_v1
+    lumimask: https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions23/Cert_Collisions2023_366442_370790_Golden.json
+  mc:
+    splitting: 1
+    globaltag: 130X_mcRun3_2023_realistic_v14
+samples:
+  Run2023C:
+    dataset: /ParkingDoubleElectronLowMass/Run2023C-22Sep2023_v4-v1/MINIAOD
+    isMC: False
+  Run2023D:
+    dataset: /ParkingDoubleElectronLowMass/Run2023D-22Sep2023_v2-v1/MINIAOD
+    isMC: False
+  BuToKJpsi_Toee_2023preBPix:
+    dataset: /BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM
+    isMC: True
+    dbs: global
+  BuToKJpsi_Toee_2023BPix:
+    dataset: /BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v2-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_postBPix_v2
+    dbs: global
