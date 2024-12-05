@@ -71,13 +71,15 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
   
   for(size_t l1_idx = 0; l1_idx < leptons->size(); ++l1_idx) {
     edm::Ptr<Lepton> l1_ptr(leptons, l1_idx);
-    if(!l1_selection_(*l1_ptr)) continue; 
+    if(!l1_selection_(*l1_ptr) && !filter_by_selection_) continue;
     
     for(size_t l2_idx = l1_idx + 1; l2_idx < leptons->size(); ++l2_idx) {
       edm::Ptr<Lepton> l2_ptr(leptons, l2_idx);
-      if(!l2_selection_(*l2_ptr)) continue;
+      if(!l2_selection_(*l2_ptr) && !filter_by_selection_) continue;
 
       pat::CompositeCandidate lepton_pair;
+      lepton_pair.addUserInt("l1_sel", l1_selection_(*l1_ptr));
+      lepton_pair.addUserInt("l2_sel", l2_selection_(*l2_ptr));
       lepton_pair.setP4(l1_ptr->p4() + l2_ptr->p4());
       lepton_pair.setCharge(l1_ptr->charge() + l2_ptr->charge());
       lepton_pair.addUserFloat("lep_deltaR", reco::deltaR(*l1_ptr, *l2_ptr));

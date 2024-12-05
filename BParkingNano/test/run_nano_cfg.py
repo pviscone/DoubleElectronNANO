@@ -51,6 +51,12 @@ options.register('lhcRun', 3,
     "LHC Run 2 or 3 (default)"
 )
 
+options.register('mode', "reco",
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "Run standard reco ('reco'), efficiency study ('eff'), or trigger matching study ('trg')"
+)
+
 options.setDefault('maxEvents', 1000)
 options.setDefault('tag', '130X')
 options.parseArguments()
@@ -71,7 +77,9 @@ if options._beenSet['globalTag']: globaltag = options.globalTag
 print("Using global tag ", globaltag)
 
 ext1 = {False:'data', True:'mc'}
-outputFileNANO = cms.untracked.string('_'.join(['BParkingNANO',
+ext2 = {3 : 'Run3', 2 : 'Run2'}
+outputFileNANO = cms.untracked.string('_'.join(['DoubleElectronNANO',
+                                                ext2[options.lhcRun],
                                                 str(options.year),
                                                 ext1[options.isMC],
                                                 options.tag])+'.root')
@@ -114,17 +122,61 @@ if not options.inputFiles:
             'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/60000/8dfdf330-83f9-475a-b057-c405baf43d3d.root',
             'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v2/60000/6db4a541-5fc9-4dbc-a799-d69a1be12d1f.root',
         ] if options.isMC else [
-            # 2022C files
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/170/00000/45c0f2ed-eb5b-4292-abc8-3117424d9432.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/371/00000/b160219b-02dd-4858-a408-a3b1828ea504.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/375/00000/0487e761-50b3-4816-9b50-214915af2a6d.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/377/00000/5d8a23be-8541-498b-bc7c-4377a3108cc7.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/71ac56a4-be9f-4f67-ba3f-580e9cb2afa1.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/37c50324-b780-4536-b137-11ab9fafdbd8.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/322/00000/c90b0b8a-26f4-446e-a393-80e277d8678b.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/82f33586-4556-41da-8f11-52472be77bd4.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/84e04fbb-f944-4b4e-900e-43f6b2777bfd.root',
-            'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/323/00000/0c9dba33-d8dc-4118-8fba-2ab5cff57f5e.root',
+            # # 2022C - split 0
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/170/00000/45c0f2ed-eb5b-4292-abc8-3117424d9432.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/371/00000/b160219b-02dd-4858-a408-a3b1828ea504.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass0/MINIAOD/PromptReco-v1/000/356/375/00000/0487e761-50b3-4816-9b50-214915af2a6d.root',
+            # # 2022C - split 1
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass1/MINIAOD/PromptReco-v1/000/356/170/00000/07cf47be-67de-4b52-8956-261221ac18a9.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass1/MINIAOD/PromptReco-v1/000/356/323/00000/4667ef56-54e3-4152-a6da-1100c492cd74.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass1/MINIAOD/PromptReco-v1/000/356/321/00000/18c138a4-8ddc-4d82-a033-fd610386063c.root',
+            # # 2022C - split 2
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass2/MINIAOD/PromptReco-v1/000/356/170/00000/57130a2d-1e3e-4013-9236-e38cdfd81181.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass2/MINIAOD/PromptReco-v1/000/356/321/00000/da302835-c83d-4017-aa97-95f033ed118f.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass2/MINIAOD/PromptReco-v1/000/356/323/00000/3072ba5a-b5a6-45ed-b90c-9e489f75be80.root',
+            # # 2022C - split 3
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass3/MINIAOD/PromptReco-v1/000/356/170/00000/2f693ac8-1454-4889-954c-9a77e07c82a8.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass3/MINIAOD/PromptReco-v1/000/356/371/00000/f474031f-6531-4ff6-b96f-c7d1961a7333.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass3/MINIAOD/PromptReco-v1/000/356/375/00000/d17eb325-c272-4823-b410-c132613d1602.root',
+            # # 2022C - split 4
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass4/MINIAOD/PromptReco-v1/000/356/170/00000/8e4588b3-e391-4e2b-8507-a72dad99a244.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass4/MINIAOD/PromptReco-v1/000/356/316/00000/56545734-9a23-40dd-87d8-64534cddfdd8.root',
+            # 'root://xrootds-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass4/MINIAOD/PromptReco-v1/000/356/321/00000/1000916f-8fd0-4e11-9550-43232984cae2.root',
+            # # 2022C - split 5
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass5/MINIAOD/PromptReco-v1/000/356/170/00000/e247937b-47c5-4088-b39d-e0e631882072.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass5/MINIAOD/PromptReco-v1/000/356/309/00000/b84ab1ae-f20b-4ed9-89a2-301212d7adf5.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022C/ParkingDoubleElectronLowMass5/MINIAOD/PromptReco-v1/000/356/309/00000/cc1a5ecb-683b-4fd2-8ce3-81706a68d634.root',
+            # # 2022G - split 0
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/70000/9100e1f2-e6fb-4ad3-9201-c421c75031b8.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/4f3add8f-0e5d-4912-a551-1190126880d0.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/72ae4983-b3a9-415d-a0fe-8255914514f0.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/c2305f06-0a01-4ae4-bc3b-e56a83c8fc05.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/c53ba0e4-ca63-416b-8e3d-f4054994146d.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/1a5c9680-b43e-499a-9ce8-942b58ed205a.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/bd11a2df-4042-4b1f-848b-53d0e3dd4b6a.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/f98d00a9-9fae-4b43-a493-8d2c6570edae.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/1bcce943-0b63-4d77-b42e-e229fdbd9d88.root',
+            'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass0/MINIAOD/22Sep2023-v1/60000/b8ea45a7-0b5e-4ee4-b8bb-5b20d7c8b2a0.root',
+            # # 2022G - split 1
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass1/MINIAOD/22Sep2023-v1/2560000/5380218e-9582-4fe6-8e79-c85ac7cc4394.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass1/MINIAOD/22Sep2023-v1/2560000/be9acaeb-0508-43bf-aa72-c0cbf7c7efb2.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass1/MINIAOD/22Sep2023-v1/2560000/d150d646-c63f-4593-91a1-f8895c06cf73.root',
+            # # 2022G - split 2
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass2/MINIAOD/22Sep2023-v1/2560000/a4c2d9bb-1551-402b-8d60-fe303bf578c6.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass2/MINIAOD/22Sep2023-v1/2560000/835a7801-9cc5-4779-a90b-69cae583b7a9.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass2/MINIAOD/22Sep2023-v1/2560000/d1f0dc66-24f1-4745-bb61-6d240625d9f9.root',
+            # # 2022G - split 3
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass3/MINIAOD/22Sep2023-v1/60000/2957ba96-cea0-4e95-a2db-e3f6b438e4d3.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass3/MINIAOD/22Sep2023-v1/60000/3d7a5ade-1ec6-4e91-b473-bffd75073301.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass3/MINIAOD/22Sep2023-v1/2560000/8afb3455-9168-467c-9c2b-b155c6e1a8a9.root',
+            # # 2022G - split 4
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass4/MINIAOD/22Sep2023-v1/70000/64d1b128-5603-4e97-9689-4506823c8c93.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass4/MINIAOD/22Sep2023-v1/70000/7cd48ff8-c656-4ab1-9352-af3dd9661364.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass4/MINIAOD/22Sep2023-v1/70000/16de8e0d-6a9d-4085-b556-1ee379dc7a7f.root',
+            # # 2022G - split 5
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass5/MINIAOD/22Sep2023-v1/2560000/7e5b3c93-a615-4d64-abde-0226dfeadfae.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass5/MINIAOD/22Sep2023-v1/2560000/490d9a00-380b-4bfd-8ec6-4c6970e8c611.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2022G/ParkingDoubleElectronLowMass5/MINIAOD/22Sep2023-v1/2560000/aa4c5c0b-3498-412c-a1f8-81ca67f75f17.root',
         ]
     elif options.year == 2023:
         options.inputFiles = [
@@ -144,29 +196,52 @@ if not options.inputFiles:
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/074180a5-76f9-4e1b-a1ed-c58dd85a6d55.root',
             'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/a48687cb-7819-4e17-ad8b-e239729c7a40.root',
         ] if options.isMC else [
-            # 2023C files
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/5050267e-e959-4aec-a51c-8725965c8598.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550001/fd2e547d-6ec2-46ff-b4dd-c9e8bc4f3a11.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/cc7a5cda-ba6e-4269-aa3f-4b73002b64c5.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/9f9ff739-9ac6-47f8-88a8-d1a79ef5bcf3.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/4e24d9ca-589f-4fce-aa44-21ca6c4b8985.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550001/78c4aaba-0fe7-4088-80d2-9bc5a3ca788d.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/83cd7f48-ebd1-4325-a8f2-af19d911de02.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/24f87d86-965d-4ff2-8396-a97d2c992369.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/037e1859-dbd8-4115-bfc1-957529813110.root',
-            'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550001/de4ec1b4-3abe-44c1-a525-793b73f22e2d.root',
+            # # 2023C files
+            # 'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/5050267e-e959-4aec-a51c-8725965c8598.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550001/fd2e547d-6ec2-46ff-b4dd-c9e8bc4f3a11.root',
+            # 'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/cc7a5cda-ba6e-4269-aa3f-4b73002b64c5.root',
+            # 2023D 
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/95e1791e-7dec-499f-8a11-3ee133300eb5.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/12117d01-dc26-496c-9dcd-0c8310a008e3.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/c46bf23a-9284-4f7e-8d6b-7305fe7a9a70.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/f305f435-af66-4db3-ba8e-91ce02e6b431.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/981369cd-255b-40f4-bc0d-84b0d41216a8.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/a984038b-a2c1-4b1d-b793-64a0f47b6738.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/fb49ceb2-8472-4801-9f7b-66e9a51b4953.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/a524cd8c-c707-4318-917c-c1de5c08101a.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/98134754-f152-4ff5-8020-e60188f42d70.root',
+            'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/cdd08e76-70dc-4ee1-bc2e-9f531cd1d1ab.root',
         ]
+
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 # Process   
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
-process = cms.Process('BParkNANO', eras.Run3) #removed DiEle modifier -- useless with 1 process
-# # Trigger matching study:
-# #   removes all trigger selections and opens up deltaR max value for trigger-matching
-# #   ambiguities not resolved -- looking at best match for each electron.
-# process = cms.Process('BParkNANO', eras.Run3, triggerMatchingStudy)
+# Attaching modifiers
+modifiers = []
+
+if options.mode not in ["reco", "eff", "trg"]:
+    raise ValueError("Mode must be reco (standard reconstruction), eff (efficiency study mode) or trg (trigger matching study mode)")
+
+if options.mode == "eff":
+    # Efficiency study:
+    #     removes all selections among:
+    #      - trigger selection (hltHighLevel filter)
+    #      - electron selection (all selections inside electronsForAnalysis filter)
+    #      - dielectron fit (both pre- and post-fit selections)
+    #     Electron and dielectron-level selections are replaced by flags in the output,
+    #     so that efficiency can be studied differentially separately.
+    #     Trigger selection efficiency is evaluated using trgTable values.
+    modifiers.append(efficiencyStudy)
+elif options.mode == "trg":
+    # Trigger matching study:
+    #   removes all trigger selections and opens up deltaR max value for trigger-matching
+    #   ambiguities not resolved -- looking at best match for each electron.
+    modifiers.append(triggerMatchingStudy)
+
+process = cms.Process('BParkNANO', eras.Run3, *modifiers)
 
 # import of standard configurations
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')

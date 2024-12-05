@@ -4,16 +4,23 @@ from PhysicsTools.BParkingNano.electronsBPark_cff import electronsForAnalysis
 
 electronPairs = cms.EDProducer(
     'DiElectronBuilder',
-    src = cms.InputTag('electronsForAnalysis', 'SelectedElectrons'),
-    transientTracksSrc = cms.InputTag('electronsForAnalysis', 'SelectedTransientElectrons'),
+    src = cms.InputTag("electronsForAnalysis:SelectedElectrons"),
+    transientTracksSrc = cms.InputTag('electronsForAnalysis:SelectedTransientElectrons'),
     lep1Selection = cms.string('pt > 1.3'),
     lep2Selection = cms.string(''),
     filterBySelection = cms.bool(True),
     preVtxSelection = cms.string(
-        'abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 6 '
-        f'&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()} && userInt("nlowpt") < 3'  
+        'abs(userCand("l1").vz - userCand("l2").vz) <= 1.'
+        f'&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()}'  
     ),
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
+)
+
+# introduce counter of dielectron candidates (skip event if none)
+countDiElectrons = cms.EDFilter(
+    "CandViewCountFilter",
+    src = cms.InputTag("electronPairs:SelectedDiLeptons"),
+    minNumber = cms.uint32(1),
 )
 
 electronPairsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -27,6 +34,8 @@ electronPairsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         lep_deltaR = Var("userFloat('lep_deltaR')", float, doc="deltaR between the two leptons"),
         l1idx = Var("userInt('l1_idx')", int, doc="index of the first electron (leading)"),
         l2idx = Var("userInt('l2_idx')", int, doc="index of the second electron (subleading)"),
+        l1_sel = Var("userInt('l1_sel')", int, doc="Satisfies leading lepton selection?"),
+        l2_sel = Var("userInt('l2_sel')", int, doc="Satisfies subleading lepton selection?"),
         l1_postfit_pt = Var("userFloat('l1_postfit_pt')", float, doc="pt of the first electron after vertexing"),
         l1_postfit_eta = Var("userFloat('l1_postfit_eta')", float, doc="eta of the first electron after vertexing"),
         l1_postfit_phi = Var("userFloat('l1_postfit_phi')", float, doc="phi of the first electron after vertexing"),
@@ -49,6 +58,7 @@ electronPairsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 
 DiElectronSequence = cms.Sequence(
     electronPairs + 
+    countDiElectrons +
     electronPairsTable
 )
 
@@ -67,3 +77,11 @@ DiElectronSequence = cms.Sequence(
 #                                  '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03'),
 #     postVtxSelection = electronPairs.postVtxSelection,
 # )
+
+## MODIFIERS
+
+from PhysicsTools.BParkingNano.modifiers_cff import *
+
+efficiencyStudy.toModify(electronPairs, 
+    filterBySelection = cms.bool(False),
+)

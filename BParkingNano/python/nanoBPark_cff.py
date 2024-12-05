@@ -11,7 +11,7 @@ from PhysicsTools.BParkingNano.trgbits_cff import *
 from PhysicsTools.BParkingNano.genparticlesBPark_cff import *
 from PhysicsTools.BParkingNano.particlelevelBPark_cff import *
 from PhysicsTools.BParkingNano.triggerObjectsBPark_cff import *
-from PhysicsTools.BParkingNano.muonsBPark_cff import * 
+# from PhysicsTools.BParkingNano.muonsBPark_cff import * 
 
 ## filtered input collections
 from PhysicsTools.BParkingNano.electronsBPark_cff import * 
@@ -45,13 +45,13 @@ def nanoAOD_customizeEle(process):
         +hltHighLevel)
     return process
 
-def nanoAOD_customizeMuonTriggerBPark(process):
-    process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)#+ muonTriggerMatchedTables)   ###comment in this extra table in case you want to create the TriggerMuon collection again.
-    return process
+# def nanoAOD_customizeMuonTriggerBPark(process):
+#     process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)#+ muonTriggerMatchedTables)   ###comment in this extra table in case you want to create the TriggerMuon collection again.
+#     return process
 
-def nanoAOD_customizeTrackFilteredBPark(process):
-    process.nanoTracksSequence = cms.Sequence( tracksBParkSequence + tracksBParkTables)
-    return process
+# def nanoAOD_customizeTrackFilteredBPark(process):
+#     process.nanoTracksSequence = cms.Sequence( tracksBParkSequence + tracksBParkTables)
+#     return process
 
 def nanoAOD_customizeElectronFilteredBPark(process):
     process.nanoDiEleSequence     = cms.Sequence(electronsBParkSequence + electronBParkTables)
@@ -80,6 +80,6 @@ def nanoAOD_customizeMC(process):
 
         # modify the path to include mc-specific info
         path.insert(0, nanoSequenceMC)
-        path.replace(process.muonBParkSequence, process.muonBParkMC)
+        # path.replace(process.muonBParkSequence, process.muonBParkMC)
         path.replace(process.electronsBParkSequence, process.electronBParkMC)
         path.replace(process.tracksBParkSequence, process.tracksBParkMC)

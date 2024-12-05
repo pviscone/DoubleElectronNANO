@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 paths = []
 seeds = []
 
-is_new = False #2024 triggers only?
+is_new = False #If True, 2024 triggers only
 
 if is_new:
     paths = ['HLT_DoubleEle6p5_eta1p22_mMax6',
@@ -98,8 +98,8 @@ electronTrgSelector = cms.EDProducer(
     filterElectron = cms.bool(True),
     ptMin = cms.double(2.),
     absEtaMax = cms.double(1.25),
-    HLTPaths=cms.vstring(paths),
-    L1seeds=cms.vstring(seeds),
+    HLTPaths = cms.vstring(paths),
+    L1seeds = cms.vstring(seeds),
 )
 
 # first skim based on trigger -- discard events that don't fire any of the paths
@@ -147,10 +147,10 @@ triggerMatchingStudy.toModify(myLPTriggerMatches,
     resolveByMatchQuality = cms.bool( False ),
 )
 
-# triggerMatchingStudy.toModify(countTrgElectrons,
-#     minNumber = cms.uint32(0),
-# )
-
 triggerMatchingStudy.toModify(hltHighLevel,
+    HLTPaths = cms.vstring([]) # disable HLT selection
+)
+
+efficiencyStudy.toModify(hltHighLevel,
     HLTPaths = cms.vstring([]) # disable HLT selection
 )

@@ -16,7 +16,6 @@ mvaConfigsForEleProducer.append( mvaEleID_Fall17_noIso_V2_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 mvaConfigsForEleProducer.append( mvaEleID_RunIIIWinter22_noIso_V1_producer_config )
 
-
 # change modifiedLowPtElectrons input to use embedded trigger matching
 modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
 
@@ -95,10 +94,10 @@ electronsForAnalysis = cms.EDProducer(
   pfmvaId_Run3 = cms.InputTag(""), #use embedded values
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger lepton [-1 == no cut] 
-  drForCleaning_wrtTrgLepton = cms.double(-1), # do not check for dR matching to trg objs
-  dzForCleaning_wrtTrgLepton = cms.double(-1), # do not check for dZ matching to trg objs
-  ## trigger matching parameter
-  drMaxTrgMatching = cms.double(0.3),
+  ## NB: even if cuts are turned off, electron will be skipped if trigger lepton collection is empty. DISABLE filterEle TO AVOID.
+  filterEle = cms.bool(False), # If True, skip electrons too close to trigger electron OR from different PV (see flags below)
+  drForCleaning_wrtTrgLepton = cms.double(-1.), # do not check for dR matching to trg objs
+  dzForCleaning_wrtTrgLepton = cms.double(-1.), # do not check for dZ matching to trg objs
   ## cleaning between pfEle and lowPtGsf
   drForCleaning = cms.double(0.05),
   dzForCleaning = cms.double(0.5), ##keep tighter dZ to check overlap of pfEle with lowPt (?)
@@ -108,15 +107,17 @@ electronsForAnalysis = cms.EDProducer(
   ptMin = cms.double(0.5),
   etaMax = cms.double(2.5),
   bdtMin = cms.double(-200.), # Open this up and rely on L/M/T WPs. was -2.5, this cut can be used to deactivate low pT e if set to >12
-  useRegressionModeForP4 = cms.bool(False),
-  useGsfModeForP4 = cms.bool(False), # If False, use REGRESSED energy for both PF and LowPt eles; else, use GSF (track) energy
+  useRegressionModeForP4 = cms.bool(False), # If True, use REGRESSED energy and eta and phi from track; else...
+  useGsfModeForP4 = cms.bool(False), # If True, use TRACK energy and GSF phi/eta for both PF and LowPt eles.
+  # If both are false, use regressed energy
   sortOutputCollections = cms.bool(True),
   saveLowPtE = cms.bool(True), # Use low-pT eles
-  filterEle = cms.bool(True),
   # conversions
   conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
   beamSpot = cms.InputTag("offlineBeamSpot"),
+  # module flags
   addUserVarsExtra = cms.bool(False),
+  efficiencyStudy = cms.bool(False), # If True, flag electron selections instead of cutting; saves extra variables
 )
 
 # finer trigger skim -- only select events that have >= 2 reco trigger-matched electrons
@@ -166,7 +167,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         preRegEnergy = Var("superCluster().rawEnergy()",float,doc="energy before correction",precision=10),
         trackPt = Var("gsfTrack().ptMode()",float,doc="pt of the gsf track", precision=10),
         correctedEnergy = Var("correctedEcalEnergy()",float,doc="energy after correction",precision=10),
-        # regressedEnergy = Var("ecalTrackRegressionEnergy()",float,doc="energy after regression",precision=10),
+        trackRegressedEnergy = Var("ecalTrackRegressionEnergy()",float,doc="energy after regression",precision=10),
 
         # START MVA ID input variabiles (from RecoEgamma/ElectronIdentification/data/ElectronIDVariablesRun3.txt)
         deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
@@ -217,7 +218,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 
         tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
         convVeto = Var("passConversionVeto()",bool,doc="pass conversion veto"),
-#        lostHits = Var("gsfTrack.hitPattern.numberOfLostHits('MISSING_INNER_HITS')","uint8",doc="number of missing inner hits"),
+    #    lostHits = Var("gsfTrack.hitPattern.numberOfLostHits('MISSING_INNER_HITS')","uint8",doc="number of missing inner hits"),
         trkRelIso = Var("trackIso/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
         isPF = Var("userInt('isPF')",bool,doc="electron is PF candidate"),
         isLowPt = Var("userInt('isLowPt')",bool,doc="electron is LowPt candidate"),
@@ -279,13 +280,17 @@ if electronsForAnalysis.addUserVarsExtra :
 electronsBParkMCMatchForTable = cms.EDProducer("MCMatcher",  # cut on deltaR, deltaPt/Pt; pick best by deltaR
     src         = electronBParkTable.src,                 # final reco collection
     matched     = cms.InputTag("finalGenParticlesBPark"), # final mc-truth particle collection
-    mcPdgId     = cms.vint32(11,22),                 # one or more PDG ID (11 = el, 22 = pho); absolute values (see below)
+    mcPdgId     = cms.vint32(11),                 # one or more PDG ID (11 = el, 22 = pho); absolute values (see below)
     checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge  
     mcStatus    = cms.vint32(1),                # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
-    maxDeltaR   = cms.double(0.03),             # Minimum deltaR for the match
-    maxDPtRel   = cms.double(0.5),              # Minimum deltaPt/Pt for the match
-    resolveAmbiguities    = cms.bool(False),    # Forbid two RECO objects to match to the same GEN object
-    resolveByMatchQuality = cms.bool(True),    # False = just match input in order; True = pick lowest deltaR pair first
+    maxDeltaR   = cms.double(0.03),             # Maximum deltaR for the match
+    maxDPtRel   = cms.double(0.5),              # Maximum deltaPt/Pt for the match
+    # maxDeltaR   = cms.double(0.05),             # Maximum deltaR for the match
+    # maxDPtRel   = cms.double(0.5),              # Maximum deltaPt/Pt for the match
+    # TODO: check changes
+    resolveAmbiguities    = cms.bool(True),    # Forbid two RECO objects to match to the same GEN object
+    # NB: resolveAmbiguities = False before. Why?
+    resolveByMatchQuality = cms.bool(True),     # False = just match input in order; True = pick lowest deltaR pair first
 )
 
 selectedElectronsMCMatchEmbedded = cms.EDProducer(
@@ -335,6 +340,21 @@ electronBParkTables = cms.Sequence(electronBParkTable)
 # Modifiers
 ###########
 
-# from PhysicsTools.BParkingNano.modifiers_cff import *
+from PhysicsTools.BParkingNano.modifiers_cff import *
 
 # DiEle.toModify(electronsForAnalysis, ...)
+
+triggerMatchingStudy.toModify(countTrgElectrons, minNumber = cms.uint32(0))
+
+efficiencyStudy.toModify(electronsForAnalysis, efficiencyStudy = cms.bool(True))
+
+efficiencyStudy.toModify(electronBParkTable, 
+        variables = cms.PSet(
+            electronBParkTable.variables,
+            selection_ptCut = Var("userInt('selection_pTcut')",bool,doc="Passes pT cut"),
+            selection_etaCut = Var("userInt('selection_etaCut')",bool,doc="Passes eta cut"),
+            selection_convVeto = Var("userInt('selection_convVeto')",bool,doc="Passes conversion veto"),
+        )
+)
+
+efficiencyStudy.toModify(countTrgElectrons, minNumber = cms.uint32(0))

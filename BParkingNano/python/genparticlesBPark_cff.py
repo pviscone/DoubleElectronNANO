@@ -9,8 +9,12 @@ from  PhysicsTools.NanoAOD.genparticles_cff import *
 finalGenParticlesBPark = finalGenParticles.clone(
   src = cms.InputTag("mergedGenParticles"),
   select = cms.vstring(
-    "keep *",
+	  "drop *",
+    "++keep abs(pdgId) == 11",  #keep all electrons/positrons + ancestors
   )
+  # select = cms.vstring(
+  #   "keep *",
+  # )
   # select = cms.vstring(
 	# "drop *",
   #       "keep++ (abs(pdgId) == 511 || abs(pdgId) == 521)",  #keep all B0(=511) and B+/-(521) + their daughters and granddaughters

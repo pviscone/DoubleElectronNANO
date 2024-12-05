@@ -58,11 +58,13 @@ cmsRun run_nano_cfg.py        # by default, runs over Run 3 2023 data
 cmsRun run_nano_cfg.py isMC=1 # runs over BuToKJPsi_JPsiToEE MC for 2023
 ```
 
-### Submit CRAB jobs to process Run 3 data and 2022 MC 
+### Submit CRAB jobs to process Run 3 data and MC for 2022/2023
 
 ```shell
 cd $CMSSW_BASE/src/PhysicsTools/BParkingNano/production
+source /cvmfs/cms.cern.ch/common/crab-setup.sh
 python3 submit_on_crab.py
+# or ./run.sh for preconfig commands
 ```
 
 ---
