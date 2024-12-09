@@ -57,7 +57,6 @@ public:
     beamSpot_{ consumes<reco::BeamSpot> ( cfg.getParameter<edm::InputTag>("beamSpot") )},
     drTrg_cleaning_{cfg.getParameter<double>("drForCleaning_wrtTrgLepton")},
     dzTrg_cleaning_{cfg.getParameter<double>("dzForCleaning_wrtTrgLepton")},
-    drMaxTrgMatching_{cfg.getParameter<double>("drMaxTrgMatching")},
     dr_cleaning_{cfg.getParameter<double>("drForCleaning")},
     dz_cleaning_{cfg.getParameter<double>("dzForCleaning")},
     flagAndclean_{cfg.getParameter<bool>("flagAndclean")},
@@ -70,7 +69,8 @@ public:
     sortOutputCollections_{cfg.getParameter<bool>("sortOutputCollections")},
     saveLowPtE_{cfg.getParameter<bool>("saveLowPtE")},
     filterEle_{cfg.getParameter<bool>("filterEle")},
-    addUserVarsExtra_{cfg.getParameter<bool>("addUserVarsExtra")}
+    addUserVarsExtra_{cfg.getParameter<bool>("addUserVarsExtra")},
+    efficiencyStudy_{cfg.getParameter<bool>("efficiencyStudy")}
     {
       produces<pat::ElectronCollection>("SelectedElectrons");
       produces<TransientTrackCollection>("SelectedTransientElectrons");  
@@ -110,7 +110,6 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamSpot_;
   const double drTrg_cleaning_;
   const double dzTrg_cleaning_;
-  const double drMaxTrgMatching_;
   const double dr_cleaning_;
   const double dz_cleaning_;
   const bool flagAndclean_;
@@ -124,6 +123,7 @@ private:
   const bool saveLowPtE_;
   const bool filterEle_;
   const bool addUserVarsExtra_;
+  const bool efficiencyStudy_;
 
 };
 
@@ -176,10 +176,18 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 			<< ", ele.p = " << ele.p() << std::endl;
 
    //cuts
-   if (ele.pt()<ptMin_ || ele.pt() < pf_ptMin_) continue;
-   if (fabs(ele.eta())>etaMax_) continue;
-   // apply conversion veto unless we want conversions
-   if (!ele.passConversionVeto()) continue;
+   bool pTcut = ele.pt()<ptMin_ || ele.pt() < pf_ptMin_;
+   bool etaCut = fabs(ele.eta()) > etaMax_;
+   bool convVeto = !ele.passConversionVeto();
+   
+   if(!efficiencyStudy_){
+     if(pTcut || etaCut || convVeto) continue;
+   }
+   else {
+     ele.addUserInt("selection_pTcut", !pTcut); // True if cut is passed -- use as mask
+     ele.addUserInt("selection_etaCut", !etaCut);
+     ele.addUserInt("selection_convVeto", !convVeto);
+   }
 
    // take modes?
    if (use_regression_for_p4_) {
@@ -305,10 +313,18 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    }
 
    //same cuts as in PF
-   if (ele.pt()<ptMin_) continue;
-   if (fabs(ele.eta())>etaMax_) continue;
-   // apply conversion veto?
-   if (!ele.passConversionVeto()) continue;
+   bool pTcut = ele.pt() < ptMin_;
+   bool etaCut = fabs(ele.eta()) > etaMax_;
+   bool convVeto = !ele.passConversionVeto();
+   
+   if(!efficiencyStudy_){
+     if(pTcut || etaCut || convVeto) continue;
+   }
+   else {
+     ele.addUserInt("selection_pTcut", !pTcut); // True if cut is passed -- use as mask
+     ele.addUserInt("selection_etaCut", !etaCut);
+     ele.addUserInt("selection_convVeto", !convVeto);
+   }
 
    //assigning BDT values
    float mva_id = ( ele.isElectronIDAvailable("ID") ? ele.electronID("ID") : -100. );
