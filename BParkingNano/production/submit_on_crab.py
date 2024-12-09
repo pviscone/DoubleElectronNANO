@@ -109,4 +109,4 @@ if __name__ == '__main__':
 
         print()
         print(config)
-        # submit(config)
+        submit(config)
