@@ -324,7 +324,7 @@ from PhysicsTools.BParkingNano.electronsTrigger_cff import *
 process = nanoAOD_customizeEle(process)
 process = nanoAOD_customizeElectronFilteredBPark(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)
-process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
+# process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
 process = nanoAOD_customizeDiElectron(process)
 
 process.nanoAOD_DiEle_step = cms.Path(process.nanoSequence

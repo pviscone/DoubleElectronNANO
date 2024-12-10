@@ -353,7 +353,7 @@ efficiencyStudy.toModify(electronBParkTable,
             electronBParkTable.variables,
             selection_ptCut = Var("userInt('selection_pTcut')",bool,doc="Passes pT cut"),
             selection_etaCut = Var("userInt('selection_etaCut')",bool,doc="Passes eta cut"),
-            selection_convVeto = Var("userInt('selection_convVeto')",bool,doc="Passes conversion veto"),
+            # convVeto var already saved
         )
 )
 

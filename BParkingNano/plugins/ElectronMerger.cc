@@ -178,15 +178,13 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    //cuts
    bool pTcut = ele.pt()<ptMin_ || ele.pt() < pf_ptMin_;
    bool etaCut = fabs(ele.eta()) > etaMax_;
-   bool convVeto = !ele.passConversionVeto();
    
    if(!efficiencyStudy_){
-     if(pTcut || etaCut || convVeto) continue;
+     if(pTcut || etaCut) continue;
    }
    else {
      ele.addUserInt("selection_pTcut", !pTcut); // True if cut is passed -- use as mask
      ele.addUserInt("selection_etaCut", !etaCut);
-     ele.addUserInt("selection_convVeto", !convVeto);
    }
 
    // take modes?
@@ -315,15 +313,13 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    //same cuts as in PF
    bool pTcut = ele.pt() < ptMin_;
    bool etaCut = fabs(ele.eta()) > etaMax_;
-   bool convVeto = !ele.passConversionVeto();
-   
+
    if(!efficiencyStudy_){
-     if(pTcut || etaCut || convVeto) continue;
+     if(pTcut || etaCut) continue;
    }
    else {
      ele.addUserInt("selection_pTcut", !pTcut); // True if cut is passed -- use as mask
      ele.addUserInt("selection_etaCut", !etaCut);
-     ele.addUserInt("selection_convVeto", !convVeto);
    }
 
    //assigning BDT values

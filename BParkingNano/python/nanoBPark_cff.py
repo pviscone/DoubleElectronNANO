@@ -41,8 +41,8 @@ def nanoAOD_customizeEle(process):
         +myLPTriggerMatches
         +mySlimmedPFElectronsWithEmbeddedTrigger
         +mySlimmedLPElectronsWithEmbeddedTrigger
-        +electronTrgSelector
-        +hltHighLevel)
+        +electronTrgSelector)
+        #+hltHighLevel)
     return process
 
 # def nanoAOD_customizeMuonTriggerBPark(process):

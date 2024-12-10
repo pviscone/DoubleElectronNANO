@@ -6,12 +6,12 @@ electronPairs = cms.EDProducer(
     'DiElectronBuilder',
     src = cms.InputTag("electronsForAnalysis:SelectedElectrons"),
     transientTracksSrc = cms.InputTag('electronsForAnalysis:SelectedTransientElectrons'),
-    lep1Selection = cms.string('pt > 1.3'),
+    lep1Selection = cms.string(''),
     lep2Selection = cms.string(''),
     filterBySelection = cms.bool(True),
     preVtxSelection = cms.string(
-        'abs(userCand("l1").vz - userCand("l2").vz) <= 1.'
-        f'&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()}'  
+        f'mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()}'  
+        # '&& abs(userCand("l1").vz - userCand("l2").vz) <= 1.'
     ),
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
 )
@@ -32,6 +32,7 @@ electronPairsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     extension = cms.bool(False),                                                
     variables = cms.PSet(P4Vars,
         lep_deltaR = Var("userFloat('lep_deltaR')", float, doc="deltaR between the two leptons"),
+        lep_deltaVz = Var('abs(userCand("l1").vz - userCand("l2").vz)', float, doc="deltaVz between the two leptons"),
         l1idx = Var("userInt('l1_idx')", int, doc="index of the first electron (leading)"),
         l2idx = Var("userInt('l2_idx')", int, doc="index of the second electron (subleading)"),
         l1_sel = Var("userInt('l1_sel')", int, doc="Satisfies leading lepton selection?"),
