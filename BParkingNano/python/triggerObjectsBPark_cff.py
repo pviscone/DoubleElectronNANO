@@ -36,12 +36,29 @@ electronTriggerObjectBParkTable = cms.EDProducer("ElectronTriggerObjectTableBPar
         cms.PSet(
             name = cms.string("Electron"),
             id = cms.int32(11),
-            sel = cms.string("type(92) && pt > 3 && coll('hltEgammaCandidates')"), #type 82 (TriggerElectron) or 92 (TriggerCluster)?
-            l1seed = cms.string("type(-98)"), l1deltaR = cms.double(0.3), #l2 seed not needed for electrons
+            sel = cms.string("(type(82) || type(92)) && pt > 3 && coll('hltEgammaCandidates')"), #type 82 (TriggerElectron) or 92 (TriggerCluster)
+            l1seed = cms.string("type(-82)"), # here is stage 1, before was type(-98) i.e. stage 2 TriggerL1EG
+            l1deltaR = cms.double(0.3),
+            #l2 seed not needed for electrons
             skipObjectsNotPassingQualityBits = cms.bool(True),
             qualityBits = cms.string("filter('hltDoubleEle*')"), qualityBitsDoc = cms.string("1 = Electron filters for BPH parking"),
         ),
     ),
 )
 
-electronTriggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + electronTriggerObjectBParkTable )
+myl1EGTable = cms.EDProducer("SimpleTriggerL1EGFlatTableProducer",
+    src = cms.InputTag("caloStage2Digis","EGamma"),
+    minBX = cms.int32(-2),
+    maxBX = cms.int32(2),
+    cut = cms.string(""),
+    name= cms.string("L1EG"),
+    doc = cms.string(""),
+    extension = cms.bool(False),
+    variables = cms.PSet(
+        pt = Var("pt()", float, precision=12),
+        phi = Var("phi()", float, precision=12),
+        eta = Var("eta()", float, precision=12),
+    ),
+)
+
+electronTriggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + electronTriggerObjectBParkTable + myl1EGTable)
