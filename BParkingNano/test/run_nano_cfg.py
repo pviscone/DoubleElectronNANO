@@ -181,7 +181,7 @@ if not options.inputFiles:
     elif options.year == 2023:
         options.inputFiles = [
             # # Z' SAMPLES
-            f'file:/eos/cms/store/group/phys_susy/SOS/DarkPhoton_130X_Run3/MINIAOD/HAHM_ZdToEE_M5/HAHM_ZdToEE_M5.job{i}.root' for i in range(30)
+            f'file:/eos/cms/store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024/HAHM_ZpToEE_012jets_VBF_INCLUSIVE_noVBFcuts_Leta1p22_LpT5_M5_k2e_4_eps0p05_13p6TeV_MINIAOD.root'
             # f'file:/eos/cms/store/group/phys_susy/SOS/DarkPhoton_130X_Run3/MINIAOD/HAHM_ZdToEE_M15/HAHM_ZdToEE_M15.job{i}.root' for i in range(30)
         ] if options.isMC and options.isSignal else [
             # central BuToKJpsi_JPsiToEE (should be similar), mini v4 2023
