@@ -86,3 +86,7 @@ from PhysicsTools.BParkingNano.modifiers_cff import *
 efficiencyStudy.toModify(electronPairs, 
     filterBySelection = cms.bool(False),
 )
+
+efficiencyStudy.toModify(countDiElectrons,
+    minNumber = cms.uint32(0),
+)
