@@ -7,10 +7,22 @@ common:
     splitting: 1
     globaltag: 130X_mcRun3_2023_realistic_v14
 samples:
-  Run2023C:
+  Run2023Cv1:
+    dataset: /ParkingDoubleElectronLowMass/Run2023C-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  Run2023Cv2:
+    dataset: /ParkingDoubleElectronLowMass/Run2023C-22Sep2023_v2-v1/MINIAOD
+    isMC: False
+  Run2023Cv3:
+    dataset: /ParkingDoubleElectronLowMass/Run2023C-22Sep2023_v3-v1/MINIAOD
+    isMC: False
+  Run2023Cv4:
     dataset: /ParkingDoubleElectronLowMass/Run2023C-22Sep2023_v4-v1/MINIAOD
     isMC: False
-  Run2023D:
+  Run2023Dv1:
+    dataset: /ParkingDoubleElectronLowMass/Run2023D-22Sep2023_v1-v1/MINIAOD
+    isMC: False
+  Run2023Dv2:
     dataset: /ParkingDoubleElectronLowMass/Run2023D-22Sep2023_v2-v1/MINIAOD
     isMC: False
   BuToKJpsi_Toee_2023preBPix:
