@@ -19,6 +19,17 @@ options.register('isSignal', False,
     VarParsing.varType.bool,
     "Run this on signal MC (else J/psi)")
 
+
+options.register("isPromptJpsi", False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Run this on prompt J/psi MC (else J/psi)")
+
+options.register("isPromptUpsilon", False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Run this on prompt Upsilon MC (else J/psi)")
+
 options.register('globalTag', 'NOTSET',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
@@ -68,7 +79,9 @@ if options.year == 2022:
     globaltag = '124X_mcRun3_2022_realistic_postEE_v3' if options.isMC else '124X_dataRun3_PromptAnalysis_v1'
     # NB for DATA: use 124X_dataRun3_PromptAnalysis_v1 for PromptReco, 124X_dataRun3_v15 for ReReco
 elif options.year == 2023:
-    globaltag = "130X_mcRun3_2023_realistic_v14" if options.isMC else "130X_dataRun3_PromptAnalysis_v1"
+    globaltag = "130X_mcRun3_2023_realistic_postBPix_v2" if options.isMC else "130X_dataRun3_PromptAnalysis_v1"
+    if options.isPromptJpsi:
+        globaltag = "130X_mcRun3_2023_realistic_v14" 
 else:
     raise ValueError("Year must be 2022 or 2023")
 
@@ -184,17 +197,50 @@ if not options.inputFiles:
             f'file:/eos/cms/store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024/HAHM_ZpToEE_012jets_VBF_INCLUSIVE_noVBFcuts_Leta1p22_LpT5_M5_k2e_4_eps0p05_13p6TeV_MINIAOD.root'
             # f'file:/eos/cms/store/group/phys_susy/SOS/DarkPhoton_130X_Run3/MINIAOD/HAHM_ZdToEE_M15/HAHM_ZdToEE_M15.job{i}.root' for i in range(30)
         ] if options.isMC and options.isSignal else [
-            # central BuToKJpsi_JPsiToEE (should be similar), mini v4 2023
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/40000/bc890edb-7cd8-4416-8938-42710506e833.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/30000/0b8d58b6-fed7-4b68-9391-962bf73de310.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/621b77eb-3b4c-4360-a056-4838d45f3e6c.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/f71f3d75-cecb-4418-b04f-c7c0cab95334.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/d5abfef3-f02c-4e89-bbe1-66ca3961eabe.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/98b9286c-bf31-4678-86c1-739c249d3339.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/7c043b6f-4d22-4022-8a0b-445bcb9ca444.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/d955f561-8613-4600-896d-5d05feb499ad.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/074180a5-76f9-4e1b-a1ed-c58dd85a6d55.root',
-            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/a48687cb-7819-4e17-ad8b-e239729c7a40.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/4e7a0372-833c-42b9-9b12-b66323d58da7.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/d17b2e6c-57b1-4847-a9b1-c4b499035a34.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/a9ff0f8a-a896-47b2-bd6b-c01a4778166c.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/ae1fbe5b-aed2-4eb3-bcb2-b36b748872fe.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/09ad3d9d-c180-4be7-8fa3-8367f06ff0fc.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/3487564d-db3e-4737-9e8d-e7233ebb3239.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/1c55667a-c1d0-441e-8067-66537cfbe765.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/128fcafa-d605-44d7-8553-cbdea27218e0.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/b4ffc90f-79bd-4c5e-99be-1a29b4f4f980.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v15-v2/140000/bd99c6d8-f670-489d-b14e-c3ed2aa8cef3.root',
+        ] if options.isMC and options.isPromptJpsi else [
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/c269e0a6-3b8c-40de-a1bb-b922341b8475.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/0b263174-e6e1-4697-9b48-399165df2b0a.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/e1a5407d-cabf-4a6c-a416-b268701aa758.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/5d574d53-dd86-4833-a4dd-fb38afef8428.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/7c2c77e6-c5ec-4e9c-a5e9-7cb8071b2abd.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/9ad0c981-7067-43dd-839c-2f3119db16ce.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/8e0d20b5-08d0-4aa7-a208-d70a64145761.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/a38802fc-4e47-45a6-9622-c931ffbc42e8.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/c2f71616-b3f1-4c25-84d5-6da16e7785a5.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v6-v2/140000/28bc6e29-271c-4958-931f-ec0df8024210.root',
+        ] if options.isMC and options.isPromptUpsilon else [
+            # # central BuToKJpsi_JPsiToEE (should be similar), mini v4 2023, 2023 pre-BPix
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/40000/bc890edb-7cd8-4416-8938-42710506e833.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/30000/0b8d58b6-fed7-4b68-9391-962bf73de310.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/621b77eb-3b4c-4360-a056-4838d45f3e6c.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/f71f3d75-cecb-4418-b04f-c7c0cab95334.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/d5abfef3-f02c-4e89-bbe1-66ca3961eabe.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/98b9286c-bf31-4678-86c1-739c249d3339.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/7c043b6f-4d22-4022-8a0b-445bcb9ca444.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/d955f561-8613-4600-896d-5d05feb499ad.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/074180a5-76f9-4e1b-a1ed-c58dd85a6d55.root',
+            # 'root://xrootd-cms.infn.it///store/mc/Run3Summer23MiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/2820000/a48687cb-7819-4e17-ad8b-e239729c7a40.root',
+            # central BuToKJpsi_JPsiToEE (should be similar), mini v4 2023, 2023 POST-BPix
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/9bba4db3-9e00-4e97-b918-b4eda3059c15.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/a4551d66-6e54-47de-94d1-72cbeee6ea4e.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/4d776a87-a092-4c50-868b-34c54f040aa0.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/a73d0ecd-1f89-4d62-b08b-d46362f6f2fb.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/477dabc6-6a4b-46f2-935e-c902b68e2cf4.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/1b24c2db-675b-40ec-8d4d-3cd265db6f6a.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/104f45f4-3468-4f2d-8fe6-031f1e6af303.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/50478a74-da13-410a-a681-70fc6397db4b.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/011a365c-8ce2-4945-9b64-9fba5b2c79ed.root',
+            'root://xrootd-cms.infn.it///store/mc/Run3Summer23BPixMiniAODv4/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/130X_mcRun3_2023_realistic_postBPix_v2-v3/2820000/384a64cc-db68-4f50-a7e2-2da6ba9bfd70.root',
         ] if options.isMC else [
             # # 2023C files
             # 'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/5050267e-e959-4aec-a51c-8725965c8598.root',
@@ -321,13 +367,15 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
 from PhysicsTools.BParkingNano.electronsTrigger_cff import *
 
+process = nanoAOD_customizeEgammaPostRecoTools(process)
 process = nanoAOD_customizeEle(process)
 process = nanoAOD_customizeElectronFilteredBPark(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)
 # process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
 process = nanoAOD_customizeDiElectron(process)
 
-process.nanoAOD_DiEle_step = cms.Path(process.nanoSequence
+process.nanoAOD_DiEle_step = cms.Path(process.egammaPostRecoSeq
+                                    + process.nanoSequence
                                     + process.nanoEleSequence
                                     + process.nanoDiEleSequence)
 
