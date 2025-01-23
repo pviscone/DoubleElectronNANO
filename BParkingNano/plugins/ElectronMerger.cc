@@ -226,37 +226,63 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    if (filterEle_ && skipEle) continue;
 
    // for PF e we set BDT outputs to much higher number than the max
+   // No Iso scores
    edm::Ref<pat::ElectronCollection> ref(pf,ipfele);
    float pf_mva_id = 20.;
    if ( !pf_mvaId_src_Tag_.label().empty() ) { pf_mva_id = float((*pfmvaId)[ref]); }
-   else pf_mva_id = ele.userFloat("pfmvaId"); // needed for 2022 when manually embedding Run 3 WP; refs to electronMVAValueMapProducer products are not usable here
+   else pf_mva_id = ele.userFloat("ElectronMVAEstimatorRun2BParkRetrainRawValues"); // needed for 2022 PromptReco, when manually embedding Run 3 WP; refs to electronMVAValueMapProducer products are not usable here
 
    float pf_mva_id_run2 = 20.;
    if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { pf_mva_id_run2 = float((*pfmvaId_run2)[ref]); }
-   else pf_mva_id_run2 = ele.userFloat("pfmvaId_Run2"); // same as above
-
+   else pf_mva_id_run2 = ele.userFloat("ElectronMVAEstimatorRun2Fall17NoIsoV2Values"); // same as above
+   
    float pf_mva_id_run3 = 20.;
    if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { pf_mva_id_run3 = float((*pfmvaId_run3)[ref]); }
-   else pf_mva_id_run3 = ele.userFloat("pfmvaId_Run3"); // same as above
+   else pf_mva_id_run3 = ele.userFloat("ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1Values"); // same as above
+   
+   // Iso scores
+   float pf_mva_id_run2_iso = ele.userFloat("ElectronMVAEstimatorRun2Fall17IsoV2Values");
+   float pf_mva_id_run3_iso = ele.userFloat("ElectronMVAEstimatorRun2RunIIIWinter22IsoV1Values");
+
 
    ele.addUserInt("isPF", 1);
    ele.addUserInt("isLowPt", 0);
    // Custom IDs
-   ele.addUserFloat("LPEleSeed_Fall17PtBiasedV1RawValue", 20.); // was called "ptBiased"
-   ele.addUserFloat("LPEleSeed_Fall17UnBiasedV1RawValue", 20.); // was called "unBiased"
-   ele.addUserFloat("LPEleMvaID_2020Sept15RawValue", 20.); // was called "mvaId"
-   ele.addUserFloat("PFEleMvaID_RetrainedRawValue", pf_mva_id); // was called "pfmvaId"
+   ele.addUserFloat("LPEleSeed_Fall17PtBiasedV1Value", 20.); // was called "ptBiased"
+   ele.addUserFloat("LPEleSeed_Fall17UnBiasedV1Value", 20.); // was called "unBiased"
+   ele.addUserFloat("LPEleMvaID_2020Sept15Value", 20.); // was called "mvaId"
+   ele.addUserFloat("PFEleMvaID_RetrainedValue", pf_mva_id); // was called "pfmvaId"
+
    // Run-2 PF ele ID
-   ele.addUserFloat("PFEleMvaID_Fall17NoIsoV2RawValue", pf_mva_id_run2);
-   ele.addUserInt("PFEleMvaID_Fall17NoIsoV1wpLoose", ref->electronID("mvaEleID-Fall17-noIso-V1-wpLoose")); //@@ to be deprecated
+   //   mva no iso
+   ele.addUserFloat("PFEleMvaID_Fall17NoIsoV2Value", pf_mva_id_run2);
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wpLoose", ref->electronID("mvaEleID-Fall17-noIso-V2-wpLoose"));
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp90", ref->electronID("mvaEleID-Fall17-noIso-V2-wp90"));
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp80", ref->electronID("mvaEleID-Fall17-noIso-V2-wp80"));
+   //   mva iso
+   ele.addUserFloat("PFEleMvaID_Fall17IsoV2Value", pf_mva_id_run2_iso);
+   ele.addUserInt("PFEleMvaID_Fall17IsoV2wpLoose", ref->electronID("mvaEleID-Fall17-iso-V2-wpLoose"));
+   ele.addUserInt("PFEleMvaID_Fall17IsoV2wp90", ref->electronID("mvaEleID-Fall17-iso-V2-wp90"));
+   ele.addUserInt("PFEleMvaID_Fall17IsoV2wp80", ref->electronID("mvaEleID-Fall17-iso-V2-wp80"));
+   //   cut based
+   ele.addUserInt("PFEleCutID_Fall17V2wpLoose", ref->electronID("cutBasedElectronID-Fall17-94X-V2-loose"));
+   ele.addUserInt("PFEleCutID_Fall17V2wpMedium", ref->electronID("cutBasedElectronID-Fall17-94X-V2-medium"));
+   ele.addUserInt("PFEleCutID_Fall17V2wpTight", ref->electronID("cutBasedElectronID-Fall17-94X-V2-tight"));
 
    // Run-3 PF ele ID
-   ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", pf_mva_id_run3);
-  //  ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp90"));
-  //  ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp80"));
+   // mva no iso
+   ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1Value", pf_mva_id_run3);
+   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp90"));
+   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", ref->electronID("mvaEleID-RunIIIWinter22-noIso-V1-wp80"));
+   // mva iso
+   ele.addUserFloat("PFEleMvaID_Winter22IsoV1Value", pf_mva_id_run3_iso);
+   ele.addUserInt("PFEleMvaID_Winter22IsoV1wp90", ref->electronID("mvaEleID-RunIIIWinter22-iso-V1-wp90"));
+   ele.addUserInt("PFEleMvaID_Winter22IsoV1wp80", ref->electronID("mvaEleID-RunIIIWinter22-iso-V1-wp80"));
+   // cut based
+   ele.addUserInt("PFEleCutID_Winter22V1wpLoose", ref->electronID("cutBasedElectronID-RunIIIWinter22-V1-loose"));
+   ele.addUserInt("PFEleCutID_Winter22V1wpMedium", ref->electronID("cutBasedElectronID-RunIIIWinter22-V1-medium"));
+   ele.addUserInt("PFEleCutID_Winter22V1wpTight", ref->electronID("cutBasedElectronID-RunIIIWinter22-V1-tight"));
+
    ele.addUserFloat("chargeMode", ele.charge());
    ele.addUserInt("isPFoverlap", 0);
    ele.addUserFloat("dzTrg", dzTrg);
@@ -359,24 +385,40 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    float ptbiased_seedBDT = ( ele.isElectronIDAvailable("ptbiased") ? ele.electronID("ptbiased") : -100. );
    ele.addUserInt("isPF", 0);
    ele.addUserInt("isLowPt", 1);
+
    // Custom IDs
-   ele.addUserFloat("LPEleSeed_Fall17PtBiasedV1RawValue", ptbiased_seedBDT); // was called "ptBiased"
-   ele.addUserFloat("LPEleSeed_Fall17UnBiasedV1RawValue", unbiased_seedBDT); // was called "unBiased"
-   ele.addUserFloat("LPEleMvaID_2020Sept15RawValue", mva_id); // was called "mvaId"
-   ele.addUserFloat("PFEleMvaID_RetrainedRawValue", 20.); // was called "pfmvaId"
-   // Run-2 PF ele ID
-   ele.addUserFloat("PFEleMvaID_Fall17NoIsoV2RawValue", 20.); // Run 2 ID
+   ele.addUserFloat("LPEleSeed_Fall17PtBiasedV1Value", ptbiased_seedBDT); // was called "ptBiased"
+   ele.addUserFloat("LPEleSeed_Fall17UnBiasedV1Value", unbiased_seedBDT); // was called "unBiased"
+   ele.addUserFloat("LPEleMvaID_2020Sept15Value", mva_id); // was called "mvaId"
+   ele.addUserFloat("PFEleMvaID_RetrainedValue", 20.); // was called "pfmvaId"
 
    //need to add as placeholders
-   ele.addUserInt("PFEleMvaID_Fall17NoIsoV1wpLoose", 0); //@@ to be deprecated
+   // Run-2 PF ele ID
+   ele.addUserFloat("PFEleMvaID_Fall17NoIsoV2Value", 20.); // Run 2 ID
+   ele.addUserFloat("PFEleMvaID_Fall17IsoV2Value", 20.); // Run 2 ID
+
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wpLoose", 0);
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp90", 0);
    ele.addUserInt("PFEleMvaID_Fall17NoIsoV2wp80", 0);
+   ele.addUserInt("PFEleMvaID_Fall17IsoV2wpLoose", 0);
+   ele.addUserInt("PFEleMvaID_Fall17IsoV2wp90", 0);
+   ele.addUserInt("PFEleMvaID_Fall17IsoV2wp80", 0);
+   ele.addUserInt("PFEleCutID_Fall17V2wpLoose", 0);
+   ele.addUserInt("PFEleCutID_Fall17V2wpMedium", 0);
+   ele.addUserInt("PFEleCutID_Fall17V2wpTight", 0);
 
    // Run-3 PF ele ID
-   ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1RawValue", 20.); // Run 3 ID
-   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", 0); //placeholder
-   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", 0); //placeholder
+   ele.addUserFloat("PFEleMvaID_Winter22NoIsoV1Value", 20.); // Run 3 ID
+   ele.addUserFloat("PFEleMvaID_Winter22IsoV1Value", 20.); // Run 3 ID
+
+   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp90", 0);
+   ele.addUserInt("PFEleMvaID_Winter22NoIsoV1wp80", 0);
+   ele.addUserInt("PFEleMvaID_Winter22IsoV1wp90", 0);
+   ele.addUserInt("PFEleMvaID_Winter22IsoV1wp80", 0);
+   ele.addUserInt("PFEleCutID_Winter22V1wpLoose", 0);
+   ele.addUserInt("PFEleCutID_Winter22V1wpMedium", 0);
+   ele.addUserInt("PFEleCutID_Winter22V1wpTight", 0);
+
    ele.addUserFloat("chargeMode", ele.gsfTrack()->chargeMode());
    ele.addUserFloat("dzTrg", dzTrg);
    ele.addUserInt("skipEle",skipEle);

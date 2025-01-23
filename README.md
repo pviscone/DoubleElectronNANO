@@ -12,8 +12,8 @@ Currently using release CMSSW_13_0_13 to be able to run on 2023 samples.
 
 ```shell
 scram list CMSSW
-cmsrel CMSSW_13_0_13
-cd CMSSW_13_0_13/src
+cmsrel CMSSW_13_3_0
+cd CMSSW_13_3_0/src
 cmsenv
 ```
 
@@ -29,24 +29,23 @@ git cms-merge-topic -u DiElectronX:GsfTransientTracks_124X # unsafe checkout (no
 git cms-merge-topic -u DiElectronX:fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
 ```
 
-### Add the BParkingNano package
+### Add the DoubleElectronNANO package
 
 ```shell
 git clone -b dev git@github.com:noepalm/DoubleElectronNANO.git ./PhysicsTools
 ```
 
-### Add fixed NanoAOD 130X module
+### Add fixed NanoAOD 130X module + isolation and iso-correction for lowPt electrons
 
 ```shell
-git cms-merge-topic -u noepalm:nanoaod_fix_DoubleElectronNANO # unsafe checkout (no checkdeps), but suggested here
+git cms-merge-topic -u noepalm:DoubleElectronNANO_nanoaodFix_leptonIso_1330  # unsafe checkout (no checkdeps), but suggested here
 ```
 
-### Adding isolation and iso-correction for lowPt electrons
+### Adding EgammaPostRecoTools for Run 3 noIso electron ID fix
 
 ```shell
-git cms-merge-topic -u Pmeiring:leptonIso_13013 # unsafe checkout (no checkdeps), but suggested here
+git clone git@github.com:cms-egamma/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
 ```
-
 
 ### Build and run on a test file
 

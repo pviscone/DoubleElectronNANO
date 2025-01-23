@@ -32,6 +32,30 @@ nanoSequence = cms.Sequence(nanoMetadata +
 nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
                               cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable)
 
+from EgammaUser.EgammaPostRecoTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+
+def nanoAOD_customizeEgammaPostRecoTools(process):
+    setupEgammaPostRecoSeq(process,
+                            runEnergyCorrections=False,
+                            runVID=True,
+                            era='2022-Prompt',
+                            eleIDModules=[
+                                # Run 3
+                                'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter22_iso_V1_cff',
+                                'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter22_noIso_V1_cff',
+                                'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Winter22_122X_V1_cff',
+                                # Run 2
+                                'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_noIso_V2_cff',
+                                'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_iso_V2_cff',
+                                'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V2_cff',
+                                # # Run 2 BPark retrain
+                                # 'PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff',
+                                # 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_BParkRetrain_cff',
+                            ],
+                            isMiniAOD=True,
+                        )
+    return process
+
 from PhysicsTools.BParkingNano.electronsTrigger_cff import *
 
 def nanoAOD_customizeEle(process):
