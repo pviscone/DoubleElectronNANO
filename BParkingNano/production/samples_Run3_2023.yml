@@ -34,3 +34,18 @@ samples:
     isMC: True
     globaltag: 130X_mcRun3_2023_realistic_postBPix_v2
     dbs: global
+  HAHM_13p6TeV_M5:
+    dataset: /store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024
+    isMC: True
+    userInputFiles:
+      - /store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024/HAHM_ZpTEE_012jets_VBF_INCLUSIVE_noVBFcuts_Leta1p22_LpT5_M5_k1e_10_eps0p02_13p6TeV_MINIAOD.root
+  HAHM_13p6TeV_M3p1:
+    dataset: /store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024
+    isMC: True
+    userInputFiles:
+      - /store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024/HAHM_ZpToEE_M3p1_012jets_Leta1p22_LpT5_k1e_10_eps0p02_136TeV_MINIAOD.job0.root
+  HAHM_13p6TeV_M1:
+    dataset: /store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024
+    isMC: True
+    userInputFiles:
+      - /store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024/HAHM_ZpTEE_M1_012jets_Leta1p22_LpT5_k1e_10_eps0p02_13P6TeV_MINIAOD.root
