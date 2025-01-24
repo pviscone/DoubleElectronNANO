@@ -296,6 +296,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load('PhysicsTools.NanoAOD.nano_cff')
 process.load('PhysicsTools.BParkingNano.nanoBPark_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -350,7 +351,7 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
     ),
     fileName = outputFileNANO,
     outputCommands = cms.untracked.vstring(
-      'drop *',
+      # 'drop *',
       "keep nanoaodFlatTable_*Table_*_*",     # event data
       "keep nanoaodUniqueString_nanoMetadata_*_*",   # basic metadata
       "keep nanoaodMergeableCounterTable_*Table_*_*", # run data
@@ -366,6 +367,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
 from PhysicsTools.BParkingNano.electronsTrigger_cff import *
+from PhysicsTools.NanoAOD.nano_cff import *
 
 process = nanoAOD_customizeEgammaPostRecoTools(process)
 process = nanoAOD_customizeEle(process)
