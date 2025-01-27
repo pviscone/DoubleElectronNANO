@@ -9,11 +9,11 @@ electronPairs = cms.EDProducer(
     lep1Selection = cms.string(''),
     lep2Selection = cms.string(''),
     filterBySelection = cms.bool(True),
-    preVtxSelection = cms.string('1'),
-        # f'mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()}'  
+    preVtxSelection = cms.string(
+        f'mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > {electronsForAnalysis.drForCleaning.value()}'  
         # '&& abs(userCand("l1").vz - userCand("l2").vz) <= 1.'
-    # ),
-    postVtxSelection = cms.string('1'),#'userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
+    ),
+    postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
 )
 
 # introduce counter of dielectron candidates (skip event if none)
