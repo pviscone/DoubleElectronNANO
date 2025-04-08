@@ -20,7 +20,7 @@ electronPairs = cms.EDProducer(
 countDiElectrons = cms.EDFilter(
     "CandViewCountFilter",
     src = cms.InputTag("electronPairs:SelectedDiLeptons"),
-    minNumber = cms.uint32(0),
+    minNumber = cms.uint32(1),
 )
 
 electronPairsTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
