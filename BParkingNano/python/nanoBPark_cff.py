@@ -29,8 +29,18 @@ nanoSequenceOnlyFullSim = cms.Sequence(electronTriggerObjectBParkTables + l1bits
 #                             # triggerObjectBParkTables + l1bits)
 #                             electronTriggerObjectBParkTables + l1bits)
 
-nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
-                              cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable)
+nanoSequenceMC = cms.Sequence(cms.Sequence(genParticleTask)
+                            + cms.Sequence(particleLevelTask)
+                            + cms.Sequence(jetMCTask)
+                            + cms.Sequence(muonMCTask)
+                            # + cms.Sequence(electronMCTask) # gen-matching for (lowpt/ged) electrons already done
+                            # + cms.Sequence(lowPtElectronMCTask)
+                            + cms.Sequence(photonMCTask)
+                            + cms.Sequence(metMCTable)
+                            + cms.Sequence(genVertexTablesTask)
+                            + particleLevelBParkSequence + genParticleBParkSequence
+                            + cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable
+    )
 
 from EgammaUser.EgammaPostRecoTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
 
