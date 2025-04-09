@@ -106,7 +106,6 @@ def nanoAOD_customizeDiElectron(process):
 
 def nanoAOD_customizeNanoContent(process):
     process.nanoSequence = cms.Sequence( PhysicsTools.NanoAOD.nano_cff.nanoSequence + electronTriggerObjectBParkTables + l1bits )
-    # process.nanoSequence = PhysicsTools.NanoAOD.nano_cff.nanoSequence
     return process
 
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag
