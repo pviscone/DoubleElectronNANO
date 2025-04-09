@@ -45,6 +45,11 @@ options.register('wantFullRECO', False,
     VarParsing.varType.bool,
     "Save full RECO event"
 )
+options.register('saveAllNanoContent', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Store the standard NanoAOD collections"
+)
 options.register('reportEvery', 10,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
@@ -367,11 +372,12 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
 from PhysicsTools.BParkingNano.electronsTrigger_cff import *
-from PhysicsTools.NanoAOD.nano_cff import *
 
 process = nanoAOD_customizeEgammaPostRecoTools(process)
 process = nanoAOD_customizeEle(process)
 process = nanoAOD_customizeElectronFilteredBPark(process)
+if options.saveAllNanoContent:
+    process = nanoAOD_customizeNanoContent(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)
 # process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
 process = nanoAOD_customizeDiElectron(process)
@@ -384,7 +390,7 @@ process.nanoAOD_DiEle_step = cms.Path(process.egammaPostRecoSeq
 # customisation of the process.
 if options.isMC:
     from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
-    nanoAOD_customizeMC(process)
+    nanoAOD_customizeMC(process, options.saveAllNanoContent)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)

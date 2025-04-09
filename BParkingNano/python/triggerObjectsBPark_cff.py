@@ -29,7 +29,7 @@ triggerObjectBParkTables = cms.Sequence( unpackedPatTrigger + triggerObjectBPark
 # also inspired by https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/NanoAOD/python/triggerObjects_cff.py
 
 electronTriggerObjectBParkTable = cms.EDProducer("ElectronTriggerObjectTableBParkProducer",
-    name= cms.string("TrigObj"),
+    name= cms.string("EGTrigObj"),
     src = cms.InputTag("unpackedPatTrigger"),
     l1EGamma = cms.InputTag("caloStage2Digis","EGamma"),
     selections = cms.VPSet(
