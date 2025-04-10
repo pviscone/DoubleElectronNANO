@@ -49,6 +49,8 @@ if __name__ == '__main__':
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
   parser.add_argument('-r', '--lhcRun', type=int, default=3, help = 'Run 2 or 3 (default)')
   parser.add_argument('-yy', '--year', type=int, default=2023, help = 'Year of the dataset')
+  parser.add_argument('-m', '--mode', type=str, default="reco", help= 'Reconstruction mode (reco = apply skim, eff = disable all selections)')
+  parser.add_argument('-s', '--saveAllNanoContent', type=bool, default=False, help= 'Save all nano content (default = False)')
   args = parser.parse_args()
 
   with open(args.yaml) as f:
@@ -103,9 +105,26 @@ if __name__ == '__main__':
             'globalTag={:s}'.format(globaltag),
             'lhcRun={:.0f}'.format(args.lhcRun),
             'year={:.0f}'.format(args.year),
+            'mode={:s}'.format(args.mode),
+            'saveAllNanoContent={:.0f}'.format(int(args.saveAllNanoContent)),
         ]
 
-        config.JobType.outputFiles = ['_'.join(['DoubleElectronNANO', 'Run3' if args.lhcRun==3 else 'Run2', str(args.year), 'mc' if isMC else 'data', production_tag])+'.root']
+        ext1 = {False:'data', True:'mc'}
+        ext2 = {3 : 'Run3', 2 : 'Run2'}
+        ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
+        ext4 = {True: 'allNano', False: ''}
+
+        ext1 = {False:'data', True:'mc'}
+        ext2 = {3 : 'Run3', 2 : 'Run2'}
+        ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
+        ext4 = {True: 'allNano', False: ''}
+        config.JobType.outputFiles = ['_'.join(['DoubleElectronNANO',
+                                                ext2[args.lhcRun],
+                                                str(args.year),
+                                                ext1[isMC],
+                                                ext3[args.mode],
+                                                ext4[args.saveAllNanoContent],
+                                                production_tag])+'.root']
 
         print()
         print(config)

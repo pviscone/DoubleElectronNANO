@@ -96,12 +96,18 @@ print("Using global tag ", globaltag)
 
 ext1 = {False:'data', True:'mc'}
 ext2 = {3 : 'Run3', 2 : 'Run2'}
+ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
+ext4 = {True: 'allNano', False: ''}
 outputFileNANO = cms.untracked.string('_'.join(['DoubleElectronNANO',
                                                 ext2[options.lhcRun],
                                                 str(options.year),
                                                 ext1[options.isMC],
+                                                ext3[options.mode],
+                                                ext4[options.saveAllNanoContent],
                                                 options.tag])+'.root')
                                                 
+print("Output file name: ", outputFileNANO)
+
 outputFileFEVT = cms.untracked.string('_'.join(['BParkingFullEvt',
                                                 str(options.year),
                                                 ext1[options.isMC],
