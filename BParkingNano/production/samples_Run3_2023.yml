@@ -34,6 +34,46 @@ samples:
     isMC: True
     globaltag: 130X_mcRun3_2023_realistic_postBPix_v2
     dbs: global
+  JPsiToEE_pth0to10_TuneCP5_13p6TeV_pythia8_2023preBPix:
+    dataset: /JPsiToEE_pth0to10_TuneCP5_13p6TeV_pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v15-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_v15
+    dbs: global
+  JPsiToEE_pth0to10_TuneCP5_13p6TeV_pythia8_2023BPix:
+    dataset: /JPsiToEE_pth0to10_TuneCP5_13p6TeV_pythia8/Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v6-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_postBPix_v6
+    dbs: global
+  JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8_2023preBPix:
+    dataset: /JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v15-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_v15
+    dbs: global
+  JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8_2023BPix:
+    dataset: /JPsiToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v6-v3/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_postBPix_v6
+    dbs: global
+  UpsilonToEE_pth0to10_TuneCP5_13p6TeV_pythia8_2023preBPix:
+    dataset: /UpsilonToEE_pth0to10_TuneCP5_13p6TeV_pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v15-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_v15
+    dbs: global
+  UpsilonToEE_pth0to10_TuneCP5_13p6TeV_pythia8_2023BPix:
+    dataset: /UpsilonToEE_pth0to10_TuneCP5_13p6TeV_pythia8/Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v6-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_postBPix_v6
+    dbs: global
+  UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8_2023preBPix:
+    dataset: /UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v15-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_v15
+    dbs: global
+  UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8_2023BPix:
+    dataset: /UpsilonToEE_pth10toInf_TuneCP5_13p6TeV_pythia8/Run3Summer23BPixMiniAODv4-130X_mcRun3_2023_realistic_postBPix_v6-v2/MINIAODSIM
+    isMC: True
+    globaltag: 130X_mcRun3_2023_realistic_postBPix_v6
+    dbs: global
   HAHM_13p6TeV_M5:
     dataset: /store/cmst3/group/xee/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024
     isMC: True
