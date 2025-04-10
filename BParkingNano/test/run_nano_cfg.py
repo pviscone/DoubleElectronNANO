@@ -45,6 +45,11 @@ options.register('wantFullRECO', False,
     VarParsing.varType.bool,
     "Save full RECO event"
 )
+options.register('saveAllNanoContent', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Store the standard NanoAOD collections"
+)
 options.register('reportEvery', 10,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
@@ -296,6 +301,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load('PhysicsTools.NanoAOD.nano_cff')
 process.load('PhysicsTools.BParkingNano.nanoBPark_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -350,7 +356,7 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
     ),
     fileName = outputFileNANO,
     outputCommands = cms.untracked.vstring(
-      'drop *',
+      # 'drop *',
       "keep nanoaodFlatTable_*Table_*_*",     # event data
       "keep nanoaodUniqueString_nanoMetadata_*_*",   # basic metadata
       "keep nanoaodMergeableCounterTable_*Table_*_*", # run data
@@ -370,6 +376,8 @@ from PhysicsTools.BParkingNano.electronsTrigger_cff import *
 process = nanoAOD_customizeEgammaPostRecoTools(process)
 process = nanoAOD_customizeEle(process)
 process = nanoAOD_customizeElectronFilteredBPark(process)
+if options.saveAllNanoContent:
+    process = nanoAOD_customizeNanoContent(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)
 # process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
 process = nanoAOD_customizeDiElectron(process)
@@ -382,7 +390,7 @@ process.nanoAOD_DiEle_step = cms.Path(process.egammaPostRecoSeq
 # customisation of the process.
 if options.isMC:
     from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
-    nanoAOD_customizeMC(process)
+    nanoAOD_customizeMC(process, options.saveAllNanoContent)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)

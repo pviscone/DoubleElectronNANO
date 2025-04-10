@@ -32,6 +32,17 @@ nanoSequence = cms.Sequence(nanoMetadata +
 nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
                               cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable)
 
+nanoSequenceMC_extra = cms.Sequence(cms.Sequence(genParticleTask)
+                            + cms.Sequence(particleLevelTask)
+                            + cms.Sequence(jetMCTask)
+                            + cms.Sequence(muonMCTask)
+                            # + cms.Sequence(electronMCTask) # gen-matching for (lowpt/ged) electrons already done
+                            # + cms.Sequence(lowPtElectronMCTask)
+                            + cms.Sequence(photonMCTask)
+                            + cms.Sequence(metMCTable)
+                            + cms.Sequence(genVertexTablesTask)
+    )
+
 from EgammaUser.EgammaPostRecoTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
 
 def nanoAOD_customizeEgammaPostRecoTools(process):
@@ -93,8 +104,12 @@ def nanoAOD_customizeDiElectron(process):
     process.nanoDiEleSequence = cms.Sequence( process.nanoDiEleSequence + DiElectronSequence)
     return process
 
+def nanoAOD_customizeNanoContent(process):
+    process.nanoSequence = cms.Sequence( PhysicsTools.NanoAOD.nano_cff.nanoSequence + electronTriggerObjectBParkTables + l1bits )
+    return process
+
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag
-def nanoAOD_customizeMC(process):
+def nanoAOD_customizeMC(process, saveAllNanoContent=False):
     for name, path in process.paths.iteritems():
         # replace all the non-match embedded inputs with the matched ones
         massSearchReplaceAnyInputTag(path, 'muonTrgSelector:SelectedMuons', 'selectedMuonsMCMatchEmbedded')
@@ -104,6 +119,7 @@ def nanoAOD_customizeMC(process):
 
         # modify the path to include mc-specific info
         path.insert(0, nanoSequenceMC)
+        if saveAllNanoContent: path.insert(0, nanoSequenceMC_extra)
         # path.replace(process.muonBParkSequence, process.muonBParkMC)
         path.replace(process.electronsBParkSequence, process.electronBParkMC)
         path.replace(process.tracksBParkSequence, process.tracksBParkMC)
