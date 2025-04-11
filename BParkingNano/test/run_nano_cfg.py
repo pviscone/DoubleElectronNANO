@@ -98,15 +98,15 @@ ext1 = {False:'data', True:'mc'}
 ext2 = {3 : 'Run3', 2 : 'Run2'}
 ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
 ext4 = {True: 'allNano', False: ''}
-outputFileNANO = cms.untracked.string('_'.join(['DoubleElectronNANO',
-                                                ext2[options.lhcRun],
-                                                str(options.year),
-                                                ext1[options.isMC],
-                                                ext3[options.mode],
-                                                ext4[options.saveAllNanoContent],
-                                                options.tag])+'.root')
-                                                
-print("Output file name: ", outputFileNANO)
+
+output_flags = ["DoubleElectronNANO", ext2[options.lhcRun], str(options.year), ext1[options.isMC]]
+if options.mode == "eff":
+    output_flags.append(ext3[options.mode])
+if options.saveAllNanoContent:
+    output_flags.append(ext4[options.saveAllNanoContent])
+output_flags.append(options.tag)
+
+outputFileNANO = cms.untracked.string('_'.join(output_flags)+'.root')
 
 outputFileFEVT = cms.untracked.string('_'.join(['BParkingFullEvt',
                                                 str(options.year),

@@ -113,17 +113,14 @@ if __name__ == '__main__':
         ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
         ext4 = {True: 'allNano', False: ''}
 
-        ext1 = {False:'data', True:'mc'}
-        ext2 = {3 : 'Run3', 2 : 'Run2'}
-        ext3 = {"eff" : "noskim", "reco" : "", "trg" : ""}
-        ext4 = {True: 'allNano', False: ''}
-        config.JobType.outputFiles = ['_'.join(['DoubleElectronNANO',
-                                                ext2[args.lhcRun],
-                                                str(args.year),
-                                                ext1[isMC],
-                                                ext3[args.mode],
-                                                ext4[args.saveAllNanoContent],
-                                                production_tag])+'.root']
+        output_flags = ["DoubleElectronNANO", ext2[args.lhcRun], str(args.year), ext1[isMC]]
+        if args.mode == "eff":
+            output_flags.append(ext3[args.mode])
+        if args.saveAllNanoContent:
+            output_flags.append(ext4[args.saveAllNanoContent])
+        output_flags.append(production_tag)
+
+        config.JobType.outputFiles = ['_'.join(output_flags)+'.root']
 
         if "HAHM" in name:
             config.Data.outLFNDirBase += '/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024'
@@ -144,4 +141,4 @@ if __name__ == '__main__':
 
         print()
         print(config)
-        submit(config)
+        # submit(config)
