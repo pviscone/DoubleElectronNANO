@@ -14,8 +14,7 @@ config.General.workArea = 'DoubleElectronNANO_{:s}'.format(production_tag)
 
 config.section_('Data')
 config.Data.publication = False
-# config.Data.outLFNDirBase = '/store/group/phys_bphys/DiElectronX/production/samples/{:s}'.format(config.General.workArea)
-config.Data.outLFNDirBase = '/store/group/cmst3/group/xee/DoubleElectronNANO/{:s}'.format(config.General.workArea)
+config.Data.outLFNDirBase = '/store/group/cmst3/group/xee'
 
 config.Data.inputDBS = 'global'
 
@@ -125,6 +124,23 @@ if __name__ == '__main__':
                                                 ext3[args.mode],
                                                 ext4[args.saveAllNanoContent],
                                                 production_tag])+'.root']
+
+        if "HAHM" in name:
+            config.Data.outLFNDirBase += '/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024'
+        elif "Run20" in name:
+            config.Data.outLFNDirBase += '/data'
+        else:
+            config.Data.outLFNDirBase += '/backgroundSamples'
+
+        last_subfolder_pieces = []
+
+        if args.mode == "eff":
+            last_subfolder_pieces.append('noskim')
+        if args.saveAllNanoContent:
+            last_subfolder_pieces.append('allnanoColl')
+        
+        if len(last_subfolder_pieces) > 0:
+            config.Data.outLFNDirBase += '/' + '_'.join(last_subfolder_pieces)
 
         print()
         print(config)
