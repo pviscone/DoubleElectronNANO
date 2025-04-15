@@ -19,6 +19,10 @@ options.register('isSignal', False,
     VarParsing.varType.bool,
     "Run this on signal MC (else J/psi)")
 
+options.register("isMinBias", False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Run this on inclusive dilepton MinBias MC")
 
 options.register("isPromptJpsi", False,
     VarParsing.multiplicity.singleton,
@@ -124,6 +128,17 @@ if not options.inputFiles:
             'root://cmsxrootd.fnal.gov///store/user/marlow/EtaToGammaTM_TMToEE_2022/EtaToGammaTM_TMToEE_2022_MINIAOD_60.root',
             'root://cmsxrootd.fnal.gov///store/user/marlow/EtaToGammaTM_TMToEE_2022/EtaToGammaTM_TMToEE_2022_MINIAOD_19.root',
         ] if options.isMC and options.isSignal else [
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/3b3036b2-c738-4b32-b2f2-b3ba86ad0026.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/06120290-a3a0-44ea-bd8e-d45d9b8a4306.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/98cb2d23-4e66-4afa-baac-ea186cee8c0a.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/50097c68-e4cf-4bea-a2c9-3b0b741dc1de.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/c44ad042-7fbb-48e1-be51-c9370b962ecb.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/7cce6998-4154-4f35-be76-91ffa863a57b.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/ae736234-0f08-416d-8d5c-60664ab29440.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/25696625-f81d-45b3-a6d0-42d5efc09be6.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/38fcb833-c4b1-4c31-9044-3867054bdd62.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/95b2a773-125c-4b1e-8f3f-188a25a96bee.root',
+        ] if options.isMC and options.isMinBias else [
             # central BuToKJpsi_JPsiToEE (should be similar), mini v1 bc of CMSSW compatibility reasons
             # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/0cc74dad-0a95-430d-82f1-113feb060680.root',            
             # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/79ca5368-3191-42f6-877d-28760fbae9d8.root',
@@ -385,7 +400,7 @@ process = nanoAOD_customizeElectronFilteredBPark(process)
 if options.saveAllNanoContent:
     process = nanoAOD_customizeNanoContent(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)
-# process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
+process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
 process = nanoAOD_customizeDiElectron(process)
 
 process.nanoAOD_DiEle_step = cms.Path(process.egammaPostRecoSeq
