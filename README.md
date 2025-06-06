@@ -32,7 +32,7 @@ git cms-merge-topic -u pviscone:14_X_fixKinParticleVtxFitter_124X # unsafe check
 ### Add the DoubleElectronNANO package
 
 ```shell
-git clone -b dev git@github.com:noepalm/DoubleElectronNANO.git ./PhysicsTools
+git clone -b 14_2_2 git@github.com:pviscone/DoubleElectronNANO.git ./PhysicsTools
 ```
 
 ### Add fixed NanoAOD 130X module + isolation and iso-correction for lowPt electrons
