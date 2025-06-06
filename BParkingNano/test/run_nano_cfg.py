@@ -8,7 +8,7 @@ options.register('year', 2023,
     VarParsing.varType.int,
     "Year to process between 2022 or 2023 (default)")
 
-options.register('isMC', False, 
+options.register('isMC', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on real data"
@@ -90,7 +90,9 @@ if options.year == 2022:
 elif options.year == 2023:
     globaltag = "130X_mcRun3_2023_realistic_postBPix_v2" if options.isMC else "130X_dataRun3_PromptAnalysis_v1"
     if options.isPromptJpsi:
-        globaltag = "130X_mcRun3_2023_realistic_v14" 
+        globaltag = "130X_mcRun3_2023_realistic_v14"
+elif options.year == 2024:
+    pass
 else:
     raise ValueError("Year must be 2022 or 2023")
 
@@ -140,7 +142,7 @@ if not options.inputFiles:
             'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22MiniAODv4/InclusiveDileptonMinBias_TuneCP5Plus_13p6TeV_pythia8/MINIAODSIM/validDigi_130X_mcRun3_2022_realistic_v5-v4/2540000/95b2a773-125c-4b1e-8f3f-188a25a96bee.root',
         ] if options.isMC and options.isMinBias else [
             # central BuToKJpsi_JPsiToEE (should be similar), mini v1 bc of CMSSW compatibility reasons
-            # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/0cc74dad-0a95-430d-82f1-113feb060680.root',            
+            # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/0cc74dad-0a95-430d-82f1-113feb060680.root',
             # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/79ca5368-3191-42f6-877d-28760fbae9d8.root',
             # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/904980f9-5a94-493d-8e6c-3673b289ca30.root',
             # 'root://cmsxrootd.fnal.gov///store/mc/Run3Summer22EEMiniAODv3/BuToKJPsi_JPsiToEE_SoftQCD_TuneCP5_13p6TeV_pythia8-evtgen/MINIAODSIM/124X_mcRun3_2022_realistic_postEE_v1-v2/2550000/adc7d31b-a38b-41a1-8df9-e71e0a7e1d40.root',
@@ -272,7 +274,7 @@ if not options.inputFiles:
             # 'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/5050267e-e959-4aec-a51c-8725965c8598.root',
             # 'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550001/fd2e547d-6ec2-46ff-b4dd-c9e8bc4f3a11.root',
             # 'root://xrootd-cms.infn.it///store/data/Run2023C/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v4-v1/2550000/cc7a5cda-ba6e-4269-aa3f-4b73002b64c5.root',
-            # 2023D 
+            # 2023D
             'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/95e1791e-7dec-499f-8a11-3ee133300eb5.root',
             'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/12117d01-dc26-496c-9dcd-0c8310a008e3.root',
             'root://xrootd-cms.infn.it///store/data/Run2023D/ParkingDoubleElectronLowMass/MINIAOD/22Sep2023_v2-v1/2560000/c46bf23a-9284-4f7e-8d6b-7305fe7a9a70.root',
@@ -287,7 +289,7 @@ if not options.inputFiles:
 
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
-# Process   
+# Process
 from Configuration.StandardSequences.Eras import eras
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
