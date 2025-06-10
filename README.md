@@ -4,9 +4,9 @@ The focus is on RK/K*/phi analyses.
 
 ## Recipe
 
-This recipe is for 14_0_21, based on the updated working on 13_3_0 which is based on original working on 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
+This recipe is for 14_0_21_patch1, based on the updated working on 13_3_0 which is based on original working on 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
 
-Currently using release CMSSW_14_0_21 to be able to run on 2024 samples and to run EgammaPostRecoTools with the correct weights for Run 3 noIso MVA electron ID.
+Currently using release CMSSW_14_0_21_patch1 to be able to run on 2024 samples and to run EgammaPostRecoTools with the correct weights for Run 3 noIso MVA electron ID.
 
 ### Getting started
 
