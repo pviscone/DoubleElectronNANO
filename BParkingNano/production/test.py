@@ -108,7 +108,7 @@ elif options.year == 2024:
 else:
     raise ValueError("Year must be 2022 or 2023")
 
-if options._beenSet['globalTag']: globaltag = options.globalTag
+globaltag = options.globalTag
 
 print("Using global tag ", globaltag)
 
