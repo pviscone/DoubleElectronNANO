@@ -19,7 +19,7 @@ git cms-merge-topic -u pviscone:14_0_21_GsfTransientTracks_124X # unsafe checkou
 # Add modifications to KinematicParticleVertexFitter
 git cms-merge-topic -u pviscone:14_0_21_fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
 # Add the DoubleElectronNANO package
-git clone -b 14_2_2 git@github.com:pviscone/DoubleElectronNANO.git ./PhysicsTools
+git clone -b 14_0_21 git@github.com:pviscone/DoubleElectronNANO.git ./PhysicsTools
 # Add fixed NanoAOD 130X module + isolation and iso-correction for lowPt electrons
 git cms-merge-topic -u pviscone:14_0_21_DoubleElectronNANO_nanoaodFix_leptonIso_1330  # unsafe checkout (no checkdeps), but suggested here
 # Add CMSSW changes necessary to (optionally) save all NANOAOD collections in the event
