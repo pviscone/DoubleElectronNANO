@@ -10,7 +10,7 @@ from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
 
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 
-# evaluate MVA IDs for PF electrons 
+# evaluate MVA IDs for PF electrons
 # (Note:  custom IDs computed here instead of using PostRecoTools)
 myelectronMVAValueMapProducer = cms.EDProducer(
     'ElectronMVAValueMapProducer',
@@ -61,7 +61,7 @@ electronsForAnalysis = cms.EDProducer(
   pfmvaId_Run2 = cms.InputTag(""), #use embedded values
   pfmvaId_Run3 = cms.InputTag(""), #use embedded values
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
-  ## cleaning wrt trigger lepton [-1 == no cut] 
+  ## cleaning wrt trigger lepton [-1 == no cut]
   ## NB: even if cuts are turned off, electron will be skipped if trigger lepton collection is empty. DISABLE filterEle TO AVOID.
   filterEle = cms.bool(False), # If True, skip electrons too close to trigger electron OR from different PV (see flags below)
   drForCleaning_wrtTrgLepton = cms.double(-1.), # do not check for dR matching to trg objs
@@ -155,7 +155,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         conversionVertexFitProbability = Var("convVtxFitProb()",float,doc="conversion vertex fit probability"),
         eoverp = Var("eSuperClusterOverP()",float,doc="E/P of the electron",precision=10),
         eeleoverpout = Var("eEleClusterOverPout()",float,doc="E/E_{SC} of the electron",precision=10),
-        IoEmIop = Var("1.0/ecalEnergy()-1.0/trackMomentumAtVtx().R()",float,doc="1/E - 1/P of the electron",precision=10),
+        IoEmIop = Var("1.0/ecalEnergy()-1.0/trackMomentumAtVtx().R()",float,doc="1/E - 1/P of the electron",precision=10, lazyEval=True),
         deltaetain = Var("abs(deltaEtaSuperClusterTrackAtVtx())",float,doc="delta eta (SC,track) with sign",precision=10),
         deltaphiin = Var("abs(deltaPhiSuperClusterTrackAtVtx())",float,doc="delta phi (SC,track) with sign",precision=10),
         deltaetaseed = Var("abs(deltaEtaSeedClusterTrackAtCalo())",float,doc="delta eta (seed,track) with sign",precision=10),
@@ -199,12 +199,12 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         PFEleMvaID_Fall17NoIsoV2wpLoose = Var("userInt('PFEleMvaID_Fall17NoIsoV2wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wpLoose"),
         PFEleMvaID_Fall17NoIsoV2wp90    = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp90"),
         PFEleMvaID_Fall17NoIsoV2wp80    = Var("userInt('PFEleMvaID_Fall17NoIsoV2wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-noIso-V2-wp80"),
-        
+
         PFEleMvaID_Fall17IsoV2Value     = Var("userFloat('PFEleMvaID_Fall17IsoV2Value')",float,doc="MVA ID for PF electrons, mvaEleID-Fall17-iso-V2"),
         PFEleMvaID_Fall17IsoV2wpLoose   = Var("userInt('PFEleMvaID_Fall17IsoV2wpLoose')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-iso-V2-wpLoose"),
         PFEleMvaID_Fall17IsoV2wp90      = Var("userInt('PFEleMvaID_Fall17IsoV2wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-iso-V2-wp90"),
         PFEleMvaID_Fall17IsoV2wp80      = Var("userInt('PFEleMvaID_Fall17IsoV2wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-Fall17-iso-V2-wp80"),
-        
+
         PFEleCutID_Fall17V2wpLoose      = Var("userInt('PFEleCutID_Fall17V2wpLoose')",bool,doc="Cut ID for PF electrons, Fall17V2wpLoose"),
         PFEleCutID_Fall17V2wpMedium     = Var("userInt('PFEleCutID_Fall17V2wpMedium')",bool,doc="Cut ID for PF electrons, Fall17V2wpMedium"),
         PFEleCutID_Fall17V2wpTight      = Var("userInt('PFEleCutID_Fall17V2wpTight')",bool,doc="Cut ID for PF electrons, Fall17V2wpTight"),
@@ -213,11 +213,11 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         PFEleMvaID_Winter22NoIsoV1wp90  = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp90"),
         PFEleMvaID_Winter22NoIsoV1wp80  = Var("userInt('PFEleMvaID_Winter22NoIsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-noIso-V1-wp80"),
 
-        PFEleMvaID_Winter22IsoV1Value = Var("userFloat('PFEleMvaID_Winter22IsoV1Value')",float,doc="MVA ID for PF electrons: RunIIIWinter22IsoV1Values"), 
+        PFEleMvaID_Winter22IsoV1Value = Var("userFloat('PFEleMvaID_Winter22IsoV1Value')",float,doc="MVA ID for PF electrons: RunIIIWinter22IsoV1Values"),
         PFEleMvaID_Winter22IsoV1wp90  = Var("userInt('PFEleMvaID_Winter22IsoV1wp90')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-iso-V1-wp90"),
         PFEleMvaID_Winter22IsoV1wp80  = Var("userInt('PFEleMvaID_Winter22IsoV1wp80')",bool,doc="MVA ID for PF electrons, mvaEleID-RunIIIWinter22-iso-V1-wp80"),
 
-        PFEleCutID_Winter22V1wpLoose  = Var("userInt('PFEleCutID_Winter22V1wpLoose')",bool,doc="Cut ID for PF electrons, Winter22V1wpLoose"),        
+        PFEleCutID_Winter22V1wpLoose  = Var("userInt('PFEleCutID_Winter22V1wpLoose')",bool,doc="Cut ID for PF electrons, Winter22V1wpLoose"),
         PFEleCutID_Winter22V1wpMedium = Var("userInt('PFEleCutID_Winter22V1wpMedium')",bool,doc="Cut ID for PF electrons, Winter22V1wpMedium"),
         PFEleCutID_Winter22V1wpTight  = Var("userInt('PFEleCutID_Winter22V1wpTight')",bool,doc="Cut ID for PF electrons, Winter22V1wpTight"),
 
@@ -236,7 +236,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         )
 )
 
-if electronsForAnalysis.addUserVarsExtra : 
+if electronsForAnalysis.addUserVarsExtra :
     electronBParkTable.variables = cms.PSet(
         electronBParkTable.variables,
         convValid = Var("userInt('convValid')",bool,doc="Valid conversion"),
@@ -260,12 +260,12 @@ if electronsForAnalysis.addUserVarsExtra :
         convDeltaExpectedNHitsInner = Var("userInt('convDeltaExpectedNHitsInner')",int,doc="Delta number of expected hits before vertex"),
         convDeltaCotFromPin = Var("userFloat('convDeltaCotFromPin')",float,doc="Delta cotangent theta from inner momenta"),
     )
-    
+
 electronsBParkMCMatchForTable = cms.EDProducer("MCMatcher",  # cut on deltaR, deltaPt/Pt; pick best by deltaR
     src         = electronBParkTable.src,                 # final reco collection
     matched     = cms.InputTag("finalGenParticlesBPark"), # final mc-truth particle collection
     mcPdgId     = cms.vint32(11),                 # one or more PDG ID (11 = el, 22 = pho); absolute values (see below)
-    checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge  
+    checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge
     mcStatus    = cms.vint32(1),                # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
     maxDeltaR   = cms.double(0.03),             # Maximum deltaR for the match
     maxDPtRel   = cms.double(0.5),              # Maximum deltaPt/Pt for the match
@@ -291,7 +291,7 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
     branchName = cms.string("genPart"),
     docString = cms.string("MC matching to status==1 electrons or photons"),
 )
-    
+
 electronsBParkSequence = cms.Sequence(
     modifiedLowPtElectrons +
     updatedLowPtElectrons +
@@ -304,9 +304,9 @@ electronsBParkSequence = cms.Sequence(
 )
 
 electronBParkMC = cms.Sequence(
-    electronsBParkSequence + 
-    electronsBParkMCMatchForTable + 
-    selectedElectronsMCMatchEmbedded + 
+    electronsBParkSequence +
+    electronsBParkMCMatchForTable +
+    selectedElectronsMCMatchEmbedded +
     electronBParkMCTable
 )
 
@@ -331,7 +331,7 @@ triggerMatchingStudy.toModify(countTrgElectrons, minNumber = cms.uint32(0))
 
 efficiencyStudy.toModify(electronsForAnalysis, efficiencyStudy = cms.bool(True))
 
-efficiencyStudy.toModify(electronBParkTable, 
+efficiencyStudy.toModify(electronBParkTable,
         variables = cms.PSet(
             electronBParkTable.variables,
             selection_ptCut = Var("userInt('selection_pTcut')",bool,doc="Passes pT cut"),
