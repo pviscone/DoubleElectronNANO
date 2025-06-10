@@ -25,34 +25,10 @@ git cms-merge-topic -u pviscone:14_0_21_DoubleElectronNANO_nanoaodFix_leptonIso_
 # Add CMSSW changes necessary to (optionally) save all NANOAOD collections in the event
 git cms-merge-topic -u pviscone:14_0_21_dev_allNanoColl_cmssw1330  # unsafe checkout (no checkdeps), but suggested here
 # Adding EgammaPostRecoTools for Run 3 noIso electron ID fix
-git clone git@github.com:cms-egamma/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
+git clone git@github.com:pviscone/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
 
-# Remove CMSSW_14_X exception in EGammaPostRecoTools
-cd EgammaUser/EgammaPostRecoTools
-cat >> EGMPostReco.patch << EOF
-diff --git a/python/EgammaPostRecoTools.py b/python/EgammaPostRecoTools.py
-index f9e0e25..63667dd 100644
---- a/python/EgammaPostRecoTools.py
-+++ b/python/EgammaPostRecoTools.py
-@@ -20,10 +20,10 @@ def _validRelease():
-                 
-     if majorVersion not in allowedVersions:
-         allowedStr = ', '.join(str(x) for x in allowedVersions.keys())
--        raise Exception("EgammaPostRecoTools: CMSSW major version {} is not supported; allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,allowedStr))
-+        #raise Exception("EgammaPostRecoTools: CMSSW major version {} is not supported; allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,allowedStr))
-     elif minorVersion not in allowedVersions[majorVersion]:
-         allowedStr = ', '.join(str(x) for x in allowedVersions[majorVersion])
--        raise Exception("EgammaPostRecoTools: CMSSW major version {} is supported, but minor version {} is not, allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,minorVersion,allowedStr))
-+        #raise Exception("EgammaPostRecoTools: CMSSW major version {} is supported, but minor version {} is not, allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,minorVersion,allowedStr))
- 
- def _isULDataformat():
-     cmsswVersion =_getCMSSWVersion()
-
-EOF
-git apply EGMPostReco.patch
+# Build
 cd $CMSSW_BASE/src
-
-# Build 
 scram b -j `nproc`
 ```
 
