@@ -11,52 +11,52 @@ Currently using release CMSSW_14_2_2 to be able to run on 2024 samples and to ru
 ### Getting started
 
 ```shell
-scram list CMSSW
 cmsrel CMSSW_14_2_2
 cd CMSSW_14_2_2/src
 cmsenv
-```
-
-### Add modifications needed to use post-fit quantities for electrons
-
-```shell
+# Add modifications needed to use post-fit quantities for electrons
 git cms-merge-topic -u pviscone:14_X_GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
-```
-
-### Add modifications to KinematicParticleVertexFitter
-
-```shell
+# Add modifications to KinematicParticleVertexFitter
 git cms-merge-topic -u pviscone:14_X_fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
-```
-
-### Add the DoubleElectronNANO package
-
-```shell
+# Add the DoubleElectronNANO package
 git clone -b 14_2_2 git@github.com:pviscone/DoubleElectronNANO.git ./PhysicsTools
-```
-
-### Add fixed NanoAOD 130X module + isolation and iso-correction for lowPt electrons
-
-```shell
+# Add fixed NanoAOD 130X module + isolation and iso-correction for lowPt electrons
 git cms-merge-topic -u pviscone:14_X_DoubleElectronNANO_nanoaodFix_leptonIso_1330  # unsafe checkout (no checkdeps), but suggested here
-```
-
-### Add CMSSW changes necessary to (optionally) save all NANOAOD collections in the event
-```shell
+# Add CMSSW changes necessary to (optionally) save all NANOAOD collections in the event
 git cms-merge-topic -u pviscone:14_X_dev_allNanoColl_cmssw1330  # unsafe checkout (no checkdeps), but suggested here
-```
-
-### Adding EgammaPostRecoTools for Run 3 noIso electron ID fix
-
-```shell
+# Adding EgammaPostRecoTools for Run 3 noIso electron ID fix
 git clone git@github.com:cms-egamma/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
+# Build 
+scram b -j `nproc`
+
+
+# Remove CMSSW_14_X exception in EGammaPostRecoTools
+cd EgammaUser/EgammaPostRecoTools
+cat >> EGMPostReco.patch << EOF                                                                                                                                                                                                                    (master !?)
+diff --git a/python/EgammaPostRecoTools.py b/python/EgammaPostRecoTools.py
+index f9e0e25..63667dd 100644
+--- a/python/EgammaPostRecoTools.py
++++ b/python/EgammaPostRecoTools.py
+@@ -20,10 +20,10 @@ def _validRelease():
+
+     if majorVersion not in allowedVersions:
+         allowedStr = ', '.join(str(x) for x in allowedVersions.keys())
+-        raise Exception("EgammaPostRecoTools: CMSSW major version {} is not supported; allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,allowedStr))
++        #raise Exception("EgammaPostRecoTools: CMSSW major version {} is not supported; allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,allowedStr))
+     elif minorVersion not in allowedVersions[majorVersion]:
+         allowedStr = ', '.join(str(x) for x in allowedVersions[majorVersion])
+-        raise Exception("EgammaPostRecoTools: CMSSW major version {} is supported, but minor version {} is not, allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,minorVersion,allowedStr))
++        #raise Exception("EgammaPostRecoTools: CMSSW major version {} is supported, but minor version {} is not, allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,minorVersion,allowedStr))
+
+ def _isULDataformat():
+     cmsswVersion =_getCMSSWVersion()
+EOF
+git apply EGMPostReco.patch
+cd $CMSSW_BASE/src
 ```
 
-### Build and run on a test file
-
+### Run on a test file
 ```shell
-cd $CMSSW_BASE/src/
-scram b -j 8
 cd PhysicsTools/BParkingNano/test
 cmsRun run_nano_cfg.py        # by default, runs over Run 3 2023 data
 cmsRun run_nano_cfg.py isMC=1 # runs over BuToKJPsi_JPsiToEE MC for 2023
