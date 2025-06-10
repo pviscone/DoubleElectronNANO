@@ -1,4 +1,4 @@
-// Merges the PF and LowPT collections, sets the isPF and isLowPt 
+// Merges the PF and LowPT collections, sets the isPF and isLowPt
 // UserInt's accordingly
 
 #include "FWCore/Framework/interface/global/EDProducer.h"
@@ -36,7 +36,7 @@ class ElectronMerger : public edm::global::EDProducer<> {
 
 
 public:
-  bool debug=false; 
+  bool debug=false;
 
   explicit ElectronMerger(const edm::ParameterSet &cfg):
     ttbToken_(esConsumes(edm::ESInputTag{"","TransientTrackBuilder"})),
@@ -73,7 +73,7 @@ public:
     efficiencyStudy_{cfg.getParameter<bool>("efficiencyStudy")}
     {
       produces<pat::ElectronCollection>("SelectedElectrons");
-      produces<TransientTrackCollection>("SelectedTransientElectrons");  
+      produces<TransientTrackCollection>("SelectedTransientElectrons");
       if ( !pf_mvaId_src_Tag_.label().empty() ) {
         pf_mvaId_src_ = consumes<edm::ValueMap<float> > ( cfg.getParameter<edm::InputTag>("pfmvaId") );
       }
@@ -86,11 +86,11 @@ public:
     }
 
   ~ElectronMerger() override {}
-  
+
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
 
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
-  
+
 private:
   const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> ttbToken_;
   const edm::EDGetTokenT<edm::View<reco::Candidate> > triggerLeptons_;
@@ -133,12 +133,12 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   edm::Handle<edm::View<reco::Candidate> > trgLepton;
   evt.getByToken(triggerLeptons_, trgLepton);
   edm::Handle<edm::TriggerResults> triggerBits;
-  evt.getByToken(triggerBits_, triggerBits);  
+  evt.getByToken(triggerBits_, triggerBits);
   edm::Handle<pat::ElectronCollection> lowpt;
   if ( saveLowPtE_ ) evt.getByToken(lowpt_src_, lowpt);
   edm::Handle<pat::ElectronCollection> pf;
   evt.getByToken(pf_src_, pf);
-  edm::Handle<edm::ValueMap<float> > pfmvaId;  
+  edm::Handle<edm::ValueMap<float> > pfmvaId;
   if ( !pf_mvaId_src_Tag_.label().empty() ) { evt.getByToken(pf_mvaId_src_, pfmvaId); }
   edm::Handle<edm::ValueMap<float> > pfmvaId_run2;
   if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { evt.getByToken(pf_mvaId_src_run2_, pfmvaId_run2); }
@@ -163,13 +163,13 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   std::unique_ptr<TransientTrackCollection> trans_ele_out(new TransientTrackCollection);
   std::vector<std::pair<float, float>> pfEtaPhi;
   std::vector<float> pfVz;
-  
-  // -> changing order of loops ert Arabella's fix this without need for more vectors  
+
+  // -> changing order of loops ert Arabella's fix this without need for more vectors
   size_t ipfele=-1;
-  for(auto ele : *pf) {
+  for(pat::Electron ele : *pf) {
    ipfele++;
 
-   if (debug) std::cout << "ElectronMerger, Event " << (evt.id()).event() 
+   if (debug) std::cout << "ElectronMerger, Event " << (evt.id()).event()
 			<< " => PF: ele.superCluster()->rawEnergy() = " << ele.superCluster()->rawEnergy()
 			<< ", ele.correctedEcalEnergy() = " << ele.correctedEcalEnergy()
 			<< ", ele gsf track chi2 = " << ele.gsfTrack()->normalizedChi2()
@@ -178,7 +178,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    //cuts
    bool pTcut = ele.pt()<ptMin_ || ele.pt() < pf_ptMin_;
    bool etaCut = fabs(ele.eta()) > etaMax_;
-   
+
    if(!efficiencyStudy_){
      if(pTcut || etaCut) continue;
    }
@@ -235,11 +235,11 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    float pf_mva_id_run2 = 20.;
    if ( !pf_mvaId_src_Tag_run2_.label().empty() ) { pf_mva_id_run2 = float((*pfmvaId_run2)[ref]); }
    else pf_mva_id_run2 = ele.userFloat("ElectronMVAEstimatorRun2Fall17NoIsoV2Values"); // same as above
-   
+
    float pf_mva_id_run3 = 20.;
    if ( !pf_mvaId_src_Tag_run3_.label().empty() ) { pf_mva_id_run3 = float((*pfmvaId_run3)[ref]); }
    else pf_mva_id_run3 = ele.userFloat("ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1Values"); // same as above
-   
+
    // Iso scores
    float pf_mva_id_run2_iso = ele.userFloat("ElectronMVAEstimatorRun2Fall17IsoV2Values");
    float pf_mva_id_run3_iso = ele.userFloat("ElectronMVAEstimatorRun2RunIIIWinter22IsoV1Values");
@@ -307,12 +307,12 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   for(auto ele : *lowpt) {
     iele++;
 
-    if (debug) std::cout << "ElectronMerger, Event " << (evt.id()).event() 
+    if (debug) std::cout << "ElectronMerger, Event " << (evt.id()).event()
 			 << " => LPT: ele.superCluster()->rawEnergy() = " << ele.superCluster()->rawEnergy()
 			 << ", ele.correctedEcalEnergy() = " << ele.correctedEcalEnergy()
 			 << ", ele gsf track chi2 = " << ele.gsfTrack()->normalizedChi2()
 			 << ", ele.p = " << ele.p() << std::endl;
-   
+
    // take modes?
    if (use_regression_for_p4_) {
      // pt from regression, eta and phi from gsf track mode
@@ -363,12 +363,12 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
         continue;
      skipEle=false;
      dzTrg = ele.vz() - trg.vz();
-     break;  // one trg muon is enough 
+     break;  // one trg muon is enough
    }
    // same here Do we need evts without trg muon? now we skip them
    if (filterEle_ && skipEle) continue;
 
-   //pf cleaning    
+   //pf cleaning
    bool clean_out = false;
    for(unsigned int iEle=0; iEle<pfSelectedSize; ++iEle) {
 
@@ -428,7 +428,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ConversionInfo::match(beamSpot,conversions,ele,info);
    info.addUserVars(ele);
    if ( addUserVarsExtra_ ) { info.addUserVarsExtra(ele); }
-   if (debug && info.wpOpen()) { 
+   if (debug && info.wpOpen()) {
      std::cout << "[ElectronMerger::produce]"
 	       << " iele: " << iele
 	       << ", convOpen: " << (info.wpOpen()?1:0)
@@ -445,7 +445,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
   // Isolation (+ correction)
   size_t ie=-1;
-  for(auto &ele : *ele_out){
+  for(pat::Electron &ele : *ele_out){
     ie+=1;
     // Isolation
     auto ea = ea_pfiso_->getEffectiveArea(fabs(ele.superCluster()->eta()));
@@ -457,7 +457,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
     float tosub0p4=0.;
 
     size_t ilp=-1;
-    for(auto &lp : *ele_out){
+    for(pat::Electron &lp : *ele_out){
       ilp+=1;
       if ((lp.userInt("isPF")) || lp.userInt("isPFoverlap")) continue; // skip if lp is known to overlap with PF ele --> no correction needed
       if (!lp.closestCtfTrackRef().isNonnull()) continue;       // skip if lp has no associated CTF track --> no correction possible
@@ -487,11 +487,11 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   // TRIGGER MATCHING
 
   // save useful information related to matched trigger object
-  for(auto &ele : *ele_out){
+  for(pat::Electron &ele : *ele_out){
     bool isTriggering = false;
     float drTrg = 999.;
     float dPtOverPtTrg = 999.;
-    
+
     if(ele.triggerObjectMatches().size() != 0){
       isTriggering = true;
       for(auto &trg : ele.triggerObjectMatches()){ //size always 1 since ambiguity resolved
@@ -506,7 +506,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
   }
 
   // build transient track collection
-  for(auto &ele : *ele_out){
+  for(pat::Electron &ele : *ele_out){
     float regErrorRatio = std::abs(ele.corrections().combinedP4Error/ele.p()/ele.gsfTrack()->qoverpModeError()*ele.gsfTrack()->qoverpMode());
     const reco::TransientTrack eleTT = use_regression_for_p4_ ?
       theB.buildfromReg(ele.gsfTrack(), math::XYZVector(ele.corrections().combinedP4), regErrorRatio) : theB.buildfromGSF( ele.gsfTrack() );
@@ -531,7 +531,7 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
     d0_err = PV.isValid() ? result.second.error() : -1.0;
     ele.setDB(d0_corr, d0_err, pat::Electron::PV3D);
   }
-   
+
   //adding label to be consistent with the muon and track naming
   evt.put(std::move(ele_out),      "SelectedElectrons");
   evt.put(std::move(trans_ele_out),"SelectedTransientElectrons");
