@@ -4,26 +4,26 @@ The focus is on RK/K*/phi analyses.
 
 ## Recipe
 
-This recipe is for 14_2_2, based on the updated working on 13_3_0 which is based on original working on 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
+This recipe is for 14_0_21, based on the updated working on 13_3_0 which is based on original working on 12_4_X. The original recipe for 10_2_X can be found [here](https://github.com/CMSBParking/BParkingNANO/blob/master/README.md).
 
-Currently using release CMSSW_14_2_2 to be able to run on 2024 samples and to run EgammaPostRecoTools with the correct weights for Run 3 noIso MVA electron ID.
+Currently using release CMSSW_14_0_21 to be able to run on 2024 samples and to run EgammaPostRecoTools with the correct weights for Run 3 noIso MVA electron ID.
 
 ### Getting started
 
 ```shell
-cmsrel CMSSW_14_2_2
-cd CMSSW_14_2_2/src
+cmsrel CMSSW_14_0_21
+cd CMSSW_14_0_21/src
 cmsenv
 # Add modifications needed to use post-fit quantities for electrons
-git cms-merge-topic -u pviscone:14_X_GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
+git cms-merge-topic -u pviscone:14_0_21_GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
 # Add modifications to KinematicParticleVertexFitter
-git cms-merge-topic -u pviscone:14_X_fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
+git cms-merge-topic -u pviscone:14_0_21_fixKinParticleVtxFitter_124X # unsafe checkout (no checkdeps), but suggested here
 # Add the DoubleElectronNANO package
 git clone -b 14_2_2 git@github.com:pviscone/DoubleElectronNANO.git ./PhysicsTools
 # Add fixed NanoAOD 130X module + isolation and iso-correction for lowPt electrons
-git cms-merge-topic -u pviscone:14_X_DoubleElectronNANO_nanoaodFix_leptonIso_1330  # unsafe checkout (no checkdeps), but suggested here
+git cms-merge-topic -u pviscone:14_0_21_DoubleElectronNANO_nanoaodFix_leptonIso_1330  # unsafe checkout (no checkdeps), but suggested here
 # Add CMSSW changes necessary to (optionally) save all NANOAOD collections in the event
-git cms-merge-topic -u pviscone:14_X_dev_allNanoColl_cmssw1330  # unsafe checkout (no checkdeps), but suggested here
+git cms-merge-topic -u pviscone:14_0_21_dev_allNanoColl_cmssw1330  # unsafe checkout (no checkdeps), but suggested here
 # Adding EgammaPostRecoTools for Run 3 noIso electron ID fix
 git clone git@github.com:cms-egamma/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
 # Build 
