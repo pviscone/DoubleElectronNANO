@@ -49,7 +49,7 @@ git cms-merge-topic -u pviscone:14_X_dev_allNanoColl_cmssw1330  # unsafe checkou
 
 ### Add CMSSW changes to fix the lazy_eval [issues in SimpleFlatTableProducer](https://github.com/cms-sw/cmssw/pull/44782)
 ```shell
-git cms-merge-topic -u pviscone:lazyeval 
+git cms-merge-topic -u pviscone:14_X_lazy-eval-dev 
 ```
 
 ### Adding EgammaPostRecoTools for Run 3 noIso electron ID fix
