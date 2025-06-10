@@ -35,7 +35,7 @@ index f9e0e25..63667dd 100644
 --- a/python/EgammaPostRecoTools.py
 +++ b/python/EgammaPostRecoTools.py
 @@ -20,10 +20,10 @@ def _validRelease():
-
+                 
      if majorVersion not in allowedVersions:
          allowedStr = ', '.join(str(x) for x in allowedVersions.keys())
 -        raise Exception("EgammaPostRecoTools: CMSSW major version {} is not supported; allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,allowedStr))
@@ -44,9 +44,10 @@ index f9e0e25..63667dd 100644
          allowedStr = ', '.join(str(x) for x in allowedVersions[majorVersion])
 -        raise Exception("EgammaPostRecoTools: CMSSW major version {} is supported, but minor version {} is not, allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,minorVersion,allowedStr))
 +        #raise Exception("EgammaPostRecoTools: CMSSW major version {} is supported, but minor version {} is not, allowed versions: {}.\nPlease contact E/gamma POG to see if this version should be supported".format(majorVersion,minorVersion,allowedStr))
-
+ 
  def _isULDataformat():
      cmsswVersion =_getCMSSWVersion()
+
 EOF
 git apply EGMPostReco.patch
 cd $CMSSW_BASE/src
