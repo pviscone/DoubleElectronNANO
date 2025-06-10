@@ -46,6 +46,12 @@ git cms-merge-topic -u pviscone:14_X_DoubleElectronNANO_nanoaodFix_leptonIso_133
 git cms-merge-topic -u pviscone:14_X_dev_allNanoColl_cmssw1330  # unsafe checkout (no checkdeps), but suggested here
 ```
 
+
+### Add CMSSW changes to fix the lazy_eval [issues in SimpleFlatTableProducer](https://github.com/cms-sw/cmssw/pull/44782)
+```shell
+git cms-merge-topic -u pviscone:lazyeval 
+```
+
 ### Adding EgammaPostRecoTools for Run 3 noIso electron ID fix
 
 ```shell
