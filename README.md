@@ -11,8 +11,8 @@ Currently using release CMSSW_14_0_21 to be able to run on 2024 samples and to r
 ### Getting started
 
 ```shell
-cmsrel CMSSW_14_0_21
-cd CMSSW_14_0_21/src
+cmsrel CMSSW_14_0_21_patch1
+cd CMSSW_14_0_21_patch1/src
 cmsenv
 # Add modifications needed to use post-fit quantities for electrons
 git cms-merge-topic -u pviscone:14_0_21_GsfTransientTracks_124X # unsafe checkout (no checkdeps), but suggested here
