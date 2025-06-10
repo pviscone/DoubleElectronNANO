@@ -26,9 +26,6 @@ git cms-merge-topic -u pviscone:14_0_21_DoubleElectronNANO_nanoaodFix_leptonIso_
 git cms-merge-topic -u pviscone:14_0_21_dev_allNanoColl_cmssw1330  # unsafe checkout (no checkdeps), but suggested here
 # Adding EgammaPostRecoTools for Run 3 noIso electron ID fix
 git clone git@github.com:cms-egamma/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
-# Build 
-scram b -j `nproc`
-
 
 # Remove CMSSW_14_X exception in EGammaPostRecoTools
 cd EgammaUser/EgammaPostRecoTools
@@ -53,6 +50,9 @@ index f9e0e25..63667dd 100644
 EOF
 git apply EGMPostReco.patch
 cd $CMSSW_BASE/src
+
+# Build 
+scram b -j `nproc`
 ```
 
 ### Run on a test file
