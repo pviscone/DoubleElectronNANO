@@ -29,7 +29,7 @@ git clone git@github.com:cms-egamma/EgammaPostRecoTools.git EgammaUser/EgammaPos
 
 # Remove CMSSW_14_X exception in EGammaPostRecoTools
 cd EgammaUser/EgammaPostRecoTools
-cat >> EGMPostReco.patch << EOF                                                                                                                                                                                                                    (master !?)
+cat >> EGMPostReco.patch << EOF
 diff --git a/python/EgammaPostRecoTools.py b/python/EgammaPostRecoTools.py
 index f9e0e25..63667dd 100644
 --- a/python/EgammaPostRecoTools.py
