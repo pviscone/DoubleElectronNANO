@@ -15,7 +15,7 @@ cmsrel CMSSW_14_0_18
 cd CMSSW_14_0_18/src
 cmsenv
 git cms-merge-topic -u pviscone:14_0_18_dpee-refitter
-git clone git@github.com:pviscone/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
+git clone -b dpee git@github.com:pviscone/EgammaPostRecoTools.git EgammaUser/EgammaPostRecoTools
 git clone -b 14_0_18 git@github.com:pviscone/DoubleElectronNANO.git PhysicsToolsTemp
 mv PhysicsToolsTemp/BParkingNano PhysicsTools
 rm -rf PhysicsToolsTemp
