@@ -58,7 +58,7 @@ myPFTriggerMatches = cms.EDProducer(
     # "PATTriggerMatcherDEtaLessByDR", # match by DeltaEta only, best match by DeltaR
     #"PATTriggerMatcherDEtaLessByDEta", # match by DeltaEta only, best match by DeltaEta
     "PATTriggerMatcherDRDPtLessByR", # match by DeltaR only, best match by DeltaR
-    src = cms.InputTag("slimmedElectrons"),
+    src = cms.InputTag("customSlimmedElectrons"),
     matched = cms.InputTag("myUnpackedPatTrigger"),
     matchedCuts = cms.string(paths_OR), # e.g. 'path("HLT_DoubleEle6_eta1p22_mMax6_v*")'
     maxDeltaR = cms.double(0.3),
@@ -76,7 +76,7 @@ myLPTriggerMatches = myPFTriggerMatches.clone(
 # https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/PatAlgos/plugins/PATTriggerMatchEmbedder.cc
 mySlimmedPFElectronsWithEmbeddedTrigger = cms.EDProducer(
     "PATTriggerMatchElectronEmbedder",
-    src = cms.InputTag("slimmedElectrons"),
+    src = cms.InputTag("customSlimmedElectrons"),
     matches = cms.VInputTag('myPFTriggerMatches'),
 )
 

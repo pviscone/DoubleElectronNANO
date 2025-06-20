@@ -401,6 +401,7 @@ process = nanoAOD_customizeEle(process)
 process = nanoAOD_customizeElectronFilteredBPark(process)
 if options.saveAllNanoContent:
     process = nanoAOD_customizeNanoContent(process)
+    process = nanoAOD_customizeCommon(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)
 process = nanoAOD_customizeElectronTriggerSelectionBPark(process)
 process = nanoAOD_customizeDiElectron(process)

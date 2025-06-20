@@ -1,7 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
-from PhysicsTools.NanoAOD.electrons_cff import *
-from PhysicsTools.NanoAOD.lowPtElectrons_cff import *
+from PhysicsTools.NanoAOD.lowPtElectrons_cff import modifiedLowPtElectrons, updatedLowPtElectrons
 
 # Electron ID MVA raw values
 mvaConfigsForEleProducer = cms.VPSet()
@@ -19,11 +18,16 @@ myelectronMVAValueMapProducer = cms.EDProducer(
 )
 
 # change modifiedLowPtElectrons input to use embedded trigger matching
-modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
+customModifiedLowPtElectrons = modifiedLowPtElectrons.clone(
+                                    src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
+                                )
+customUpdatedLowPtElectrons = updatedLowPtElectrons.clone(
+                                src = cms.InputTag("customModifiedLowPtElectrons")
+                                )
 
 # compute electron seed gain
 seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"))
-seedGainEleLowPt = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("updatedLowPtElectrons"))
+seedGainEleLowPt = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("customUpdatedLowPtElectrons"))
 
 # embed IDs and additional variables in slimmedElectrons collection
 slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
@@ -37,7 +41,7 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
 )
 
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
-    src = cms.InputTag("updatedLowPtElectrons"),
+    src = cms.InputTag("customUpdatedLowPtElectrons"),
     userInts = cms.PSet(
         seedGain = cms.InputTag("seedGainEleLowPt"),
     ),
@@ -293,8 +297,8 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 )
 
 electronsBParkSequence = cms.Sequence(
-    modifiedLowPtElectrons +
-    updatedLowPtElectrons +
+    customModifiedLowPtElectrons +
+    customUpdatedLowPtElectrons +
     myelectronMVAValueMapProducer +
     seedGainElePF +
     seedGainEleLowPt +
