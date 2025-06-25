@@ -330,7 +330,8 @@ electronBParkTables = cms.Sequence(electronBParkTable)
 from PhysicsTools.BParkingNano.modifiers_cff import *
 
 # DiEle.toModify(electronsForAnalysis, ...)
-
+vbfSkimming2023.toModify(countTrgElectrons, minNumber = cms.uint32(0))
+vbfSkimming2024.toModify(countTrgElectrons, minNumber = cms.uint32(0))
 triggerMatchingStudy.toModify(countTrgElectrons, minNumber = cms.uint32(0))
 
 efficiencyStudy.toModify(electronsForAnalysis, efficiencyStudy = cms.bool(True))

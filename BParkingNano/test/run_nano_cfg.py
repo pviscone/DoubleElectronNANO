@@ -296,7 +296,7 @@ from PhysicsTools.BParkingNano.modifiers_cff import *
 # Attaching modifiers
 modifiers = []
 
-if options.mode not in ["reco", "eff", "trg"]:
+if options.mode not in ["reco", "eff", "trg", "vbf"]:
     raise ValueError("Mode must be reco (standard reconstruction), eff (efficiency study mode) or trg (trigger matching study mode)")
 
 if options.mode == "eff":
@@ -314,6 +314,14 @@ elif options.mode == "trg":
     #   removes all trigger selections and opens up deltaR max value for trigger-matching
     #   ambiguities not resolved -- looking at best match for each electron.
     modifiers.append(triggerMatchingStudy)
+elif options.mode == "vbf":
+    if options.year == 2022:
+        raise ValueError("VBF mode is not supported for 2022 data")
+    elif options.year == 2023:
+        raise NotImplementedError("VBF mode is not implemented for 2023 data yet")
+    elif options.year == 2024:
+        modifiers.append(vbfSkimming2024)
+
 
 process = cms.Process('BParkNANO', eras.Run3, *modifiers)
 
