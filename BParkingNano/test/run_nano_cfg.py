@@ -38,6 +38,16 @@ options.register("isPromptUpsilon", False,
     VarParsing.varType.bool,
     "Run this on prompt Upsilon MC (else J/psi)")
 
+options.register("isElectronFlat", False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Run this on flat electron MC (else J/psi)")
+
+options.register("isECALIdealIC", False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "When running on flat electron MC, use ECAL ideal intercalibrations (real otherwise)")
+
 options.register('wantSummary', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
@@ -73,8 +83,14 @@ options.register('mode', "reco",
     VarParsing.varType.string,
     "Run standard reco for DoubleEle ('reco') or VBF ('vbf'), efficiency study ('eff'), or trigger matching study ('trg')")
 
+options.register("saveRegressionVars", False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Add regression variables to the output")
+
 options.setDefault('maxEvents', 100)
 options.setDefault('tag', '150X')
+
 options.parseArguments()
 print(options)
 
@@ -119,6 +135,20 @@ if not options.inputFiles:
             ]
         elif options.isMC and options.isPromptJpsi:    pass # not implemented
         elif options.isMC and options.isPromptUpsilon: pass # not implemented
+        elif options.isMC and options.isElectronFlat and options.isECALIdealIC:
+            options.inputFiles = [
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/7bf837da-3304-4c96-901d-42211b796f52.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/cf130663-fa52-4c45-910a-4b74f471984f.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/45207133-41c4-4491-ae48-155fbf212250.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70ECALIdeal_122X_mcRun3_2021_realistic_v9-v3/60000/a0fe60dc-4231-4b16-be2d-6187d4a9ac3c.root',
+            ]
+        elif options.isMC and options.isElectronFlat:
+            options.inputFiles = [
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/50000/e332bb2f-ef2a-4b98-a2ad-4defea95069f.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/50000/78dbd3b1-fe0f-48a8-b885-df2a65939735.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/50000/02f9c9a8-071c-4d30-ae1c-5c636c4dd8db.root',
+            'root://cmsxrootd.fnal.gov///store/mc/Run3Winter22MiniAOD/DoubleElectron_FlatPt-1To500_13p6TeV/MINIAODSIM/FlatPU0to70_122X_mcRun3_2021_realistic_v9-v2/50000/f36892f2-58d9-41c4-80f7-55a34c4cc77c.root',
+            ]
         elif options.isMC:                             pass # not implemented
         else:
             options.inputFiles = [
@@ -246,6 +276,11 @@ elif options.mode == "vbf":
         raise NotImplementedError("VBF mode is not implemented for 2023 data yet")
     elif options.year == 2024:
         modifiers.append(vbfSkimming2024)
+
+if options.saveRegressionVars:
+    # Save regression variables
+    # see python/electronsBPark_cff.py for list
+    modifiers.append(regressionVars)
 
 era=eras.Run3 if options.year==2022 else eras.Run3_2023 if options.year==2023 else eras.Run3_2024
 process = cms.Process('BParkNANO', era, *modifiers)
