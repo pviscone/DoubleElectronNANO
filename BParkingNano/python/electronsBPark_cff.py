@@ -29,6 +29,8 @@ customUpdatedLowPtElectrons = updatedLowPtElectrons.clone(
                                 computePfIso = cms.bool(True), #fix low pt isolation
                                 src = cms.InputTag("customModifiedLowPtElectrons")
                                 )
+modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
+#updatedLowPtElectrons.src  = cms.InputTag("modifiedLowPtElectrons")
 
 # compute electron seed gain
 seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"))
@@ -47,10 +49,16 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     )
 )
 
+modifiedIDLowPtElectrons.src = cms.InputTag("updatedLowPtElectrons")
+
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("customUpdatedLowPtElectrons"),
+    userFloats = cms.PSet(
+        ids = cms.InputTag("modifiedIDLowPtElectrons:ids"),
+    ),
     userInts = cms.PSet(
         seedGain = cms.InputTag("seedGainEleLowPt"),
+        matchedToGenEle = cms.InputTag("modifiedIDLowPtElectrons:matchedToGenEle"),
     ),
 )
 
@@ -249,6 +257,8 @@ electronBParkTable = cms.EDProducer("SimplePATElectronFlatTableProducer",
         convTrail = Var("userInt('convTrail')",bool,doc="Matched to trailing track from conversion"),
         convExtra = Var("userInt('convExtra')",bool,doc="Flag to indicate if all conversion variables are stored"),
         skipEle = Var("userInt('skipEle')",bool,doc="Is ele skipped (due to small dR or large dZ w.r.t. trigger)?"),
+        newID = Var("userFloat('ids')", float, doc="new run3 ID", precision=6),
+        matchedToGenEle = Var("userInt('matchedToGenEle')", int, doc="matched to gen ele"),
         )
 )
 
@@ -314,6 +324,7 @@ electronsBParkSequence = cms.Sequence(
     myelectronMVAValueMapProducer +
     seedGainElePF +
     seedGainEleLowPt +
+    modifiedIDLowPtElectrons +
     slimmedPFElectronsWithUserData +
     slimmedLowPtElectronsWithUserData +
     electronsForAnalysis
