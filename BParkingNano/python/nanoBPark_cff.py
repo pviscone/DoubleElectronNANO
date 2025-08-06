@@ -89,6 +89,7 @@ def nanoAOD_customizeEgammaPostRecoTools(process):
                                 # # Run 2 BPark retrain
                                 # 'DoubleElectronNANO.BParkingNano.mvaElectronID_BParkRetrain_cff',
                                 # 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_BParkRetrain_cff',
+                                'DoubleElectronNANO.BParkingNano.mvaElectronID_RunIII_custom_JPsitoEE_cff',
                             ],
                             isMiniAOD=True,
                         )
