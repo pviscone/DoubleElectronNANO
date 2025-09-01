@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-from PhysicsTools.BParkingNano.common_cff import *
-from PhysicsTools.BParkingNano.electronsBPark_cff import electronsForAnalysis
+from DoubleElectronNANO.BParkingNano.common_cff import *
+from DoubleElectronNANO.BParkingNano.electronsBPark_cff import electronsForAnalysis
 
 electronPairs = cms.EDProducer(
     'DiElectronBuilder',
@@ -81,7 +81,7 @@ DiElectronSequence = cms.Sequence(
 
 ## MODIFIERS
 
-from PhysicsTools.BParkingNano.modifiers_cff import *
+from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 efficiencyStudy.toModify(electronPairs,
     filterBySelection = cms.bool(False),

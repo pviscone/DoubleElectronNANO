@@ -131,7 +131,7 @@ hltHighLevel = cms.EDFilter("HLTHighLevel",
 # ---------------------------------------
 # MODIFIERS FOR TRIGGER MATCHING STUDIES
 
-from PhysicsTools.BParkingNano.modifiers_cff import *
+from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 triggerMatchingStudy.toModify(myPFTriggerMatches,
     maxDeltaR = cms.double(2.0),

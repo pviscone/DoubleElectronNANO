@@ -7,7 +7,7 @@ from os import path
 
 mvaTag = "BParkRetrain"
 
-weightFileDir = "PhysicsTools/BParkingNano/data/PFRetrainWeightFiles"
+weightFileDir = "DoubleElectronNANO/BParkingNano/data/PFRetrainWeightFiles"
 
 mvaWeightFiles = [
      path.join(weightFileDir, "BParkRetrain_LowPt_unbiased.xml.gz"),

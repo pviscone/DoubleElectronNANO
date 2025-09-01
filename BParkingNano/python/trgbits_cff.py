@@ -70,7 +70,7 @@ trgTables = cms.Sequence(trgTable)
 # Modifiers
 ###########
 
-# from PhysicsTools.BParkingNano.modifiers_cff import *
+# from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 # old modifier:
 # DiEle.toModify(trgTable, paths = [], seeds = [])

@@ -144,7 +144,7 @@ muonTriggerMatchedTables = cms.Sequence(muonTriggerMatchedTable)   ####
 # Modifiers
 ###########
 
-from PhysicsTools.BParkingNano.modifiers_cff import *
+from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 # BToKMuMu_DiMuon.toModify(muonTrgSelector,
 #                          ptMin=4.0,

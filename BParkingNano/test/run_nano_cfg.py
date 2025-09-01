@@ -291,7 +291,7 @@ annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 # Process
 from Configuration.StandardSequences.Eras import eras
-from PhysicsTools.BParkingNano.modifiers_cff import *
+from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 # Attaching modifiers
 modifiers = []
@@ -333,7 +333,7 @@ process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('PhysicsTools.NanoAOD.nano_cff')
-process.load('PhysicsTools.BParkingNano.nanoBPark_cff')
+process.load('DoubleElectronNANO.BParkingNano.nanoBPark_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -401,8 +401,8 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
-from PhysicsTools.BParkingNano.nanoBPark_cff import *
-from PhysicsTools.BParkingNano.electronsTrigger_cff import *
+from DoubleElectronNANO.BParkingNano.nanoBPark_cff import *
+from DoubleElectronNANO.BParkingNano.electronsTrigger_cff import *
 
 process = nanoAOD_customizeEgammaPostRecoTools(process)
 process = nanoAOD_customizeEle(process)
@@ -421,7 +421,7 @@ process.nanoAOD_DiEle_step = cms.Path(process.egammaPostRecoSeq
 
 # customisation of the process.
 if options.isMC:
-    from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
+    from DoubleElectronNANO.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
     nanoAOD_customizeMC(process, options.saveAllNanoContent)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)

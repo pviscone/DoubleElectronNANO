@@ -3,7 +3,7 @@
 
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "PhysicsTools/BParkingNano/plugins/KinVtxFitter.h"
+#include "DoubleElectronNANO/BParkingNano/plugins/KinVtxFitter.h"
 #include <vector>
 
 

@@ -91,6 +91,6 @@ tracksBParkMC = cms.Sequence(tracksBParkSequence + tracksBParkMCMatchForTable + 
 # Modifiers
 ###########
 
-# from PhysicsTools.BParkingNano.modifiers_cff import *
+# from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 # DiEle.toModify(tracksBPark)

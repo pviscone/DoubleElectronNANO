@@ -19,7 +19,7 @@ cd $CMSSW_BASE/src
 echo "Compiling..."
 scram b -j 4
 echo "...Done!"
-cd $CMSSW_BASE/src/PhysicsTools/BParkingNano/test
+cd $CMSSW_BASE/src/DoubleElectronNANO/BParkingNano/test
 TAG=HEAD
 echo "Getting reference for data..."
 cmsRun run_nano_cfg.py maxEvents=1000 reportEvery=10 tag=$TAG &> nano_$TAG'_data.log'
@@ -32,9 +32,9 @@ git checkout official_current_master -b TEST_PR$PRID
 git merge --no-edit TEMP_PR$PRID
 cd $CMSSW_BASE/src
 echo "Compiling..."
-scram b -j 4 > PhysicsTools/BParkingNano/test/compilation_PR$PRID.log
+scram b -j 4 > DoubleElectronNANO/BParkingNano/test/compilation_PR$PRID.log
 echo "...Done!"
-cd $CMSSW_BASE/src/PhysicsTools/BParkingNano/test
+cd $CMSSW_BASE/src/DoubleElectronNANO/BParkingNano/test
 TAG=PR$PRID
 echo "Testing on data..."
 cmsRun run_nano_cfg.py maxEvents=1000 reportEvery=10 tag=$TAG &> nano_$TAG'_data.log'
@@ -64,4 +64,4 @@ git branch -D TEST_PR$PRID
 git branch -D TEMP_PR$PRID
 git branch -D official_current_master
 
-echo "EVERYTHING DONE! you can find the validation plots and html-based text in:" $CMSSW_BASE/src/PhysicsTools/BParkingNano/test/$TAG
+echo "EVERYTHING DONE! you can find the validation plots and html-based text in:" $CMSSW_BASE/src/DoubleElectronNANO/BParkingNano/test/$TAG

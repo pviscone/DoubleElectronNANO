@@ -1,23 +1,48 @@
 from __future__ import print_function
 import FWCore.ParameterSet.Config as cms
+
 from PhysicsTools.NanoAOD.common_cff import *
 from PhysicsTools.NanoAOD.nano_cff import *
 from PhysicsTools.NanoAOD.vertices_cff import *
 from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
-from PhysicsTools.BParkingNano.trgbits_cff import *
+
+from PhysicsTools.NanoAOD.jetsAK4_CHS_cff import *
+from PhysicsTools.NanoAOD.jetsAK4_Puppi_cff import *
+from PhysicsTools.NanoAOD.jetsAK8_cff import *
+from PhysicsTools.NanoAOD.jetMC_cff import *
+from PhysicsTools.NanoAOD.muons_cff import *
+from PhysicsTools.NanoAOD.taus_cff import *
+from PhysicsTools.NanoAOD.boostedTaus_cff import *
+from PhysicsTools.NanoAOD.photons_cff import *
+from PhysicsTools.NanoAOD.globals_cff import *
+from PhysicsTools.NanoAOD.extraflags_cff import *
+from PhysicsTools.NanoAOD.ttbarCategorization_cff import *
+from PhysicsTools.NanoAOD.genparticles_cff import *
+from PhysicsTools.NanoAOD.particlelevel_cff import *
+from PhysicsTools.NanoAOD.genWeightsTable_cfi import *
+from PhysicsTools.NanoAOD.genVertex_cff import *
+from PhysicsTools.NanoAOD.met_cff import *
+from PhysicsTools.NanoAOD.triggerObjects_cff import *
+from PhysicsTools.NanoAOD.isotracks_cff import *
+from PhysicsTools.NanoAOD.protons_cff import *
+from PhysicsTools.NanoAOD.fsrPhotons_cff import *
+from PhysicsTools.NanoAOD.softActivity_cff import *
+from PhysicsTools.NanoAOD.l1trig_cff import *
+
+from DoubleElectronNANO.BParkingNano.trgbits_cff import *
 
 ##for gen and trigger muon
-from PhysicsTools.BParkingNano.genparticlesBPark_cff import *
-from PhysicsTools.BParkingNano.particlelevelBPark_cff import *
-from PhysicsTools.BParkingNano.triggerObjectsBPark_cff import *
-# from PhysicsTools.BParkingNano.muonsBPark_cff import * 
+from DoubleElectronNANO.BParkingNano.genparticlesBPark_cff import *
+from DoubleElectronNANO.BParkingNano.particlelevelBPark_cff import *
+from DoubleElectronNANO.BParkingNano.triggerObjectsBPark_cff import *
+# from DoubleElectronNANO.BParkingNano.muonsBPark_cff import * 
 
 ## filtered input collections
-from PhysicsTools.BParkingNano.electronsBPark_cff import * 
-from PhysicsTools.BParkingNano.tracksBPark_cff import *
+from DoubleElectronNANO.BParkingNano.electronsBPark_cff import * 
+from DoubleElectronNANO.BParkingNano.tracksBPark_cff import *
 
 ## Dielectron collection
-from PhysicsTools.BParkingNano.dielectron_cff import *
+from DoubleElectronNANO.BParkingNano.dielectron_cff import *
 
 # nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
 nanoSequenceOnlyFullSim = cms.Sequence(electronTriggerObjectBParkTables + l1bits)
@@ -59,14 +84,14 @@ def nanoAOD_customizeEgammaPostRecoTools(process):
                                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_iso_V2_cff',
                                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V2_cff',
                                 # # Run 2 BPark retrain
-                                # 'PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff',
+                                # 'DoubleElectronNANO.BParkingNano.mvaElectronID_BParkRetrain_cff',
                                 # 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_BParkRetrain_cff',
                             ],
                             isMiniAOD=True,
                         )
     return process
 
-from PhysicsTools.BParkingNano.electronsTrigger_cff import *
+from DoubleElectronNANO.BParkingNano.electronsTrigger_cff import *
 
 def nanoAOD_customizeEle(process):
     process.nanoEleSequence = cms.Sequence(
@@ -104,7 +129,29 @@ def nanoAOD_customizeDiElectron(process):
     return process
 
 def nanoAOD_customizeNanoContent(process):
-    process.nanoSequence = cms.Sequence( PhysicsTools.NanoAOD.nano_cff.nanoSequence + electronTriggerObjectBParkTables + l1bits )
+    custom_nanoTableTaskCommon = cms.Task(
+        cms.Task(nanoMetadata), 
+        jetPuppiTask, jetPuppiForMETTask, jetAK8Task,
+        extraFlagsProducersTask, muonTask, tauTask, boostedTauTask,
+        electronTask , lowPtElectronTask, photonTask,
+        vertexTask, isoTrackTask, jetAK8LepTask,  # must be after all the leptons
+        softActivityTask,
+        cms.Task(linkedObjects),
+        jetPuppiTablesTask, jetAK8TablesTask,
+        muonTablesTask, fsrTablesTask, tauTablesTask, boostedTauTablesTask,
+        #electronTablesTask, lowPtElectronTablesTask, 
+        photonTablesTask,
+        globalTablesTask, vertexTablesTask, metTablesTask, extraFlagsTableTask,
+        isoTrackTablesTask,softActivityTablesTask
+    )
+
+    custom_nanoSequenceCommon = cms.Sequence(custom_nanoTableTaskCommon)
+
+    custom_nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectTablesTask)
+    custom_nanoSequenceOnlyData = cms.Sequence(cms.Sequence(protonTablesTask) + lhcInfoTable)
+
+    custom_nanoSequence = cms.Sequence(custom_nanoSequenceCommon + custom_nanoSequenceOnlyData + custom_nanoSequenceOnlyFullSim)
+    process.nanoSequence = cms.Sequence( custom_nanoSequence + electronTriggerObjectBParkTables + l1bits )
     return process
 
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag

@@ -4,7 +4,7 @@ from PhysicsTools.NanoAOD.lowPtElectrons_cff import modifiedLowPtElectrons, upda
 
 # Electron ID MVA raw values
 mvaConfigsForEleProducer = cms.VPSet()
-from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
+from DoubleElectronNANO.BParkingNano.mvaElectronID_BParkRetrain_cff \
     import mvaEleID_BParkRetrain_producer_config
 
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
@@ -22,6 +22,7 @@ customModifiedLowPtElectrons = modifiedLowPtElectrons.clone(
                                     src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
                                 )
 customUpdatedLowPtElectrons = updatedLowPtElectrons.clone(
+                                computePfIso = cms.bool(True), #fix low pt isolation
                                 src = cms.InputTag("customModifiedLowPtElectrons")
                                 )
 
@@ -327,7 +328,7 @@ electronBParkTables = cms.Sequence(electronBParkTable)
 # Modifiers
 ###########
 
-from PhysicsTools.BParkingNano.modifiers_cff import *
+from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 # DiEle.toModify(electronsForAnalysis, ...)
 vbfSkimming2023.toModify(countTrgElectrons, minNumber = cms.uint32(0))

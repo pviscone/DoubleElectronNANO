@@ -1,3 +1,4 @@
+
 from FWCore.ParameterSet.VarParsing import VarParsing
 import FWCore.ParameterSet.Config as cms
 
@@ -90,7 +91,7 @@ options.lhcRun = 3
 options.year = 2024
 options.mode = 'vbf'
 options.saveAllNanoContent = 1
-options.inputFiles = ["file:/afs/cern.ch/work/p/pviscone/CMSSW/CMSSW_14_0_18/src/test.root"]
+options.inputFiles = ["root://cms-xrd-global.cern.ch//store/data/Run2024I/ParkingVBF1/MINIAOD/MINIv6NANOv15_v2-v3/90000/f6550b8f-2a31-4f6d-8ef8-1b513ad6abb1.root"]
 
 print(options)
 
@@ -303,7 +304,7 @@ annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 # Process
 from Configuration.StandardSequences.Eras import eras
-from PhysicsTools.BParkingNano.modifiers_cff import *
+from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 # Attaching modifiers
 modifiers = []
@@ -345,7 +346,7 @@ process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('PhysicsTools.NanoAOD.nano_cff')
-process.load('PhysicsTools.BParkingNano.nanoBPark_cff')
+process.load('DoubleElectronNANO.BParkingNano.nanoBPark_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -413,8 +414,8 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
-from PhysicsTools.BParkingNano.nanoBPark_cff import *
-from PhysicsTools.BParkingNano.electronsTrigger_cff import *
+from DoubleElectronNANO.BParkingNano.nanoBPark_cff import *
+from DoubleElectronNANO.BParkingNano.electronsTrigger_cff import *
 
 process = nanoAOD_customizeEgammaPostRecoTools(process)
 process = nanoAOD_customizeEle(process)
@@ -433,7 +434,7 @@ process.nanoAOD_DiEle_step = cms.Path(process.egammaPostRecoSeq
 
 # customisation of the process.
 if options.isMC:
-    from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
+    from DoubleElectronNANO.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
     nanoAOD_customizeMC(process, options.saveAllNanoContent)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
