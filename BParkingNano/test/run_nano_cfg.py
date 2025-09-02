@@ -8,11 +8,15 @@ options.register('year', 2023,
     VarParsing.varType.int,
     "Year to process between 2022 or 2023 (default)")
 
+options.register('subera', 0,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.int,
+    "Subera of the given year. 0 is preEE (2022) or preBPix (2023), 1 is post~. No difference for 2024")
+
 options.register('isMC', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
-    "Run this on real data"
-)
+    "Run this on real data")
 
 options.register('isSignal', False,
     VarParsing.multiplicity.singleton,
@@ -34,71 +38,56 @@ options.register("isPromptUpsilon", False,
     VarParsing.varType.bool,
     "Run this on prompt Upsilon MC (else J/psi)")
 
-options.register('globalTag', 'NOTSET',
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.string,
-    "Set global tag"
-)
 options.register('wantSummary', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
-    "Request summary"
-)
+    "Request summary")
+
 options.register('wantFullRECO', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
-    "Save full RECO event"
-)
-options.register('saveAllNanoContent', False,
+    "Save full RECO event")
+
+options.register('saveAllNanoContent', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
-    "Store the standard NanoAOD collections"
-)
+    "Store the standard NanoAOD collections")
+
 options.register('reportEvery', 10,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
-    "Report every N events"
-)
+    "Report every N events")
+
 options.register('skip', 0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
-    "Skip first N events"
-)
+    "Skip first N events")
 
 options.register('lhcRun', 3,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
-    "LHC Run 2 or 3 (default)"
-)
+    "LHC Run 2 or 3 (default)")
 
 options.register('mode', "reco",
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
-    "Run standard reco ('reco'), efficiency study ('eff'), or trigger matching study ('trg')"
-)
+    "Run standard reco for DoubleEle ('reco') or VBF ('vbf'), efficiency study ('eff'), or trigger matching study ('trg')")
 
-options.setDefault('maxEvents', 1000)
-options.setDefault('tag', '130X')
+options.setDefault('maxEvents', 100)
+options.setDefault('tag', '150X')
 options.parseArguments()
 print(options)
 
 globaltag = None
+if options.year==2022:
+    globaltag='auto:phase1_2022_realistic' if options.subera==0 else 'auto:phase1_2022_realistic_postEE'
+if options.year==2023:
+    globaltag='auto:phase1_2023_realistic' if options.subera==0 else 'auto:phase1_2023_realistic_postBPix'
+if options.year==2024:
+    globaltag='auto:phase1_2024_realistic'
+if not options.isMC:
+    globaltag='auto:run3_data'
 
-if options.year == 2022:
-    globaltag = '124X_mcRun3_2022_realistic_postEE_v3' if options.isMC else '124X_dataRun3_PromptAnalysis_v1'
-    # NB for DATA: use 124X_dataRun3_PromptAnalysis_v1 for PromptReco, 124X_dataRun3_v15 for ReReco
-elif options.year == 2023:
-    globaltag = "130X_mcRun3_2023_realistic_postBPix_v2" if options.isMC else "130X_dataRun3_PromptAnalysis_v1"
-    if options.isPromptJpsi:
-        globaltag = "130X_mcRun3_2023_realistic_v14"
-elif options.year == 2024:
-    pass
-else:
-    raise ValueError("Year must be 2022 or 2023")
-
-if options._beenSet['globalTag']: globaltag = options.globalTag
-
-print("Using global tag ", globaltag)
 
 ext1 = {False:'data', True:'mc'}
 ext2 = {3 : 'Run3', 2 : 'Run2'}
@@ -291,10 +280,14 @@ annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 # Process
 from Configuration.StandardSequences.Eras import eras
+from Configuration.Eras.Modifier_run3_nanoAOD_pre142X_cff import run3_nanoAOD_pre142X
 from DoubleElectronNANO.BParkingNano.modifiers_cff import *
 
 # Attaching modifiers
 modifiers = []
+
+# Do nano-v15 light for MiniAODv<6 (year<2024)
+if options.year!=2024: modifiers.append(run3_nanoAOD_pre142X)
 
 if options.mode not in ["reco", "eff", "trg", "vbf"]:
     raise ValueError("Mode must be reco (standard reconstruction), eff (efficiency study mode) or trg (trigger matching study mode)")
