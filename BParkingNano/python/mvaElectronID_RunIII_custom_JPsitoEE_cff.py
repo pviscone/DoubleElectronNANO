@@ -6,8 +6,8 @@ from os import path
 #https://indico.cern.ch/event/1220628/contributions/5134878/attachments/2546114/4384580/Run%203%20Electron%20MVA%20based%20ID%20training.pdf
 
 mvaTag = "RunIIICustomJPsitoEE"
-mvaVariablesFileRun3custom = "PhysicsTools/BParkingNano/data/ElectronIDVariables.txt"
-weightFileDir = "PhysicsTools/BParkingNano/data/PFRetrainWeightFiles/"
+mvaVariablesFileRun3custom = "DoubleElectronNANO/BParkingNano/data/ElectronIDVariables.txt"
+weightFileDir = "DoubleElectronNANO/BParkingNano/data/PFRetrainWeightFiles/"
 
 
 mvaWeightFiles = cms.vstring(
