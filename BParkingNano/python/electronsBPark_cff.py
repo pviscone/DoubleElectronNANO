@@ -29,8 +29,6 @@ customUpdatedLowPtElectrons = updatedLowPtElectrons.clone(
                                 computePfIso = cms.bool(True), #fix low pt isolation
                                 src = cms.InputTag("customModifiedLowPtElectrons")
                                 )
-modifiedLowPtElectrons.src = cms.InputTag("mySlimmedLPElectronsWithEmbeddedTrigger")
-#updatedLowPtElectrons.src  = cms.InputTag("modifiedLowPtElectrons")
 
 # compute electron seed gain
 seedGainElePF = cms.EDProducer("ElectronSeedGainProducer", src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"))
@@ -49,7 +47,7 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     )
 )
 
-modifiedIDLowPtElectrons.src = cms.InputTag("updatedLowPtElectrons")
+modifiedIDLowPtElectrons.src = cms.InputTag("customUpdatedLowPtElectrons")
 
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("customUpdatedLowPtElectrons"),
