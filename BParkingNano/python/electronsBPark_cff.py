@@ -39,8 +39,7 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("mySlimmedPFElectronsWithEmbeddedTrigger"), #includes trigger matching
     userFloats = cms.PSet(
         ElectronMVAEstimatorRun2BParkRetrainRawValues = cms.InputTag("myelectronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
-    
-    ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues = cms.InputTag("myelectronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues") 
+        ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues = cms.InputTag("myelectronMVAValueMapProducer:ElectronMVAEstimatorRun2RunIIICustomJPsitoEERawValues") 
     ),
     userInts = cms.PSet(
         seedGain = cms.InputTag("seedGainElePF"),
