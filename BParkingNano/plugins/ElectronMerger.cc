@@ -324,7 +324,6 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
    //Add for low pt id
    ele.addUserFloat("ids", -999.);
-   ele.addUserInt("matchedToGenEle", 0); //FIXME temporary for matchedToGenEle tests
 
    // Attempt to match electrons to conversions in "gsfTracksOpenConversions" collection (NO MATCHES EXPECTED)
    ConversionInfo info;

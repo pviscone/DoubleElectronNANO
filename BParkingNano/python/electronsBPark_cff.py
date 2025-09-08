@@ -47,7 +47,14 @@ slimmedPFElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     )
 )
 
-modifiedIDLowPtElectrons.src = cms.InputTag("customUpdatedLowPtElectrons")
+modifiedIDLowPtElectrons = cms.EDProducer(
+    "lowPtIDProducer",
+    src = cms.InputTag("customUpdatedLowPtElectrons"),
+    modelFile  = cms.string("DoubleElectronNANO/BParkingNano/data/LowPtElectrons/electron_id_JPsiToEE2023_10Jun2025_all.root"),
+    rho = cms.InputTag("fixedGridRhoFastjetAll"),
+    isMC = cms.bool(True),
+    deltaR = cms.double(0.03),
+)
 
 slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder",
     src = cms.InputTag("customUpdatedLowPtElectrons"),
@@ -56,7 +63,6 @@ slimmedLowPtElectronsWithUserData = cms.EDProducer("PATElectronUserDataEmbedder"
     ),
     userInts = cms.PSet(
         seedGain = cms.InputTag("seedGainEleLowPt"),
-        matchedToGenEle = cms.InputTag("modifiedIDLowPtElectrons:matchedToGenEle"),
     ),
 )
 
@@ -256,7 +262,6 @@ electronBParkTable = cms.EDProducer("SimplePATElectronFlatTableProducer",
         convExtra = Var("userInt('convExtra')",bool,doc="Flag to indicate if all conversion variables are stored"),
         skipEle = Var("userInt('skipEle')",bool,doc="Is ele skipped (due to small dR or large dZ w.r.t. trigger)?"),
         lowPtID_10Jun2025 = Var("userFloat('ids')", float, doc="new run3 ID, trained on JPsiToEE 2023 events", precision=6),
-        #matchedToGenEle = Var("userInt('matchedToGenEle')", int, doc="matched to gen ele"),
         )
 )
 
