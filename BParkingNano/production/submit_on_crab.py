@@ -15,19 +15,20 @@ config.General.workArea = 'DoubleElectronNANO_{:s}'.format(production_tag)
 
 config.section_('Data')
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/cmst3/group/xee'
+config.Data.outLFNDirBase = '/store/group/cmst3/group/xee' ## Have not gotten the w-access
 
 config.Data.inputDBS = 'global'
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '../test/run_nano_cfg.py'
+config.JobType.psetName = 'BParkingNano/test/run_nano_cfg.py'
 config.JobType.maxJobRuntimeMin = 3000
 config.JobType.maxMemoryMB = 3500
 config.JobType.allowUndistributedCMSSW = True
 
 config.section_('User')
 config.section_('Site')
+# config.Site.storageSite = 'T3_US_CMU'
 config.Site.storageSite = 'T2_CH_CERN'
 
 if __name__ == '__main__':
@@ -46,71 +47,57 @@ if __name__ == '__main__':
           print("Failed submitting task:",cle)
 
   parser = ArgumentParser()
-  parser.add_argument('-y', '--yaml', default = 'samples_Run3.yml', help = 'File with dataset descriptions')
+  parser.add_argument('-y', '--yaml', default = 'BParkingNano/production/samples_VBF_Run3_2023.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
   parser.add_argument('-r', '--lhcRun', type=int, default=3, help = 'Run 2 or 3 (default)')
   parser.add_argument('-yy', '--year', type=int, default=2023, help = 'Year of the dataset')
-  parser.add_argument('-m', '--mode', type=str, default="reco", help= 'Reconstruction mode (reco = apply skim, eff = disable all selections)')
-  parser.add_argument('-s', '--saveAllNanoContent', type=bool, default=False, help= 'Save all nano content (default = False)')
+  parser.add_argument('-m', '--mode', type=str, default="vbf", help= 'reco = apply skim, eff = disable all selections, vbf = apply vbf hlts')
+  parser.add_argument('-s', '--saveAllNanoContent', type=bool, default=True, help= 'Save all nano content (default = True)')
   parser.add_argument('-sr', '--saveRegressionVars', type=bool, default=False, help='Save regression variables (default = False)')
   args = parser.parse_args()
 
   configs = []
   with open(args.yaml) as f:
     doc = yaml.load(f,Loader=yaml.FullLoader) # Parse YAML file
-    common = doc['common'] if 'common' in doc else {'data' : {}, 'mc' : {}}
+    common = doc['common'] if 'common' in doc else {'data' : {}}
 
     # loop over samples
     for sample, info in doc['samples'].items():
-      # Input DBS
-      input_dbs = info['dbs'] if 'dbs' in info else None
-      # Given we have repeated datasets check for different parts
-      parts = info['parts'] if 'parts' in info else [None]
-      for part in parts:
-        name = sample.replace('%d',str(part)) if part is not None else sample
-
-        # filter names according to what we need
-        if not fnmatch(name, args.filter): continue
-        print('submitting', name)
-
+        # Input DBS
+        input_dbs = info['dbs'] if 'dbs' in info else None
         isMC = info['isMC']
+        version = info['version'] if 'version' in info else 'Z'
 
         config.Data.inputDBS = input_dbs if input_dbs is not None else 'global'
+        config.Data.inputDataset = info['dataset']
 
-        config.Data.inputDataset = info['dataset'].replace('%d',str(part)) \
-                                   if part is not None else \
-                                      info['dataset']
+        print(f'submitting -- {sample}')
+        config.General.requestName = sample
 
-        config.General.requestName = name
-        common_branch = 'mc' if isMC else 'data'
         config.Data.splitting = 'FileBased' if isMC else 'LumiBased'
         if not isMC:
-            config.Data.lumiMask = info.get(
-                'lumimask',
-                common[common_branch].get('lumimask', None)
-            )
+            config.Data.lumiMask = common['data']['lumiMask']
         else:
             config.Data.lumiMask = ''
 
-        config.Data.unitsPerJob = info.get(
-            'splitting',
-            common[common_branch].get('splitting', None)
-        )
-        globaltag = info.get(
-            'globaltag',
-            common[common_branch].get('globaltag', None)
-        )
+        config.Data.unitsPerJob = common['data']['splitting']
+
+        # globaltag = info.get(
+        #     'globaltag',
+        #     common[common_branch].get('globaltag', None)
+        # )
 
         config.JobType.pyCfgParams = [
             'isMC={:.0f}'.format(int(isMC)),
-            'reportEvery=1000',
+            'reportEvery=5000',
             'tag={:s}'.format(production_tag),
-            'globalTag={:s}'.format(globaltag),
+            # 'globalTag={:s}'.format(globaltag), This is set in run_nano_cfg.py
             'lhcRun={:.0f}'.format(args.lhcRun),
             'year={:.0f}'.format(args.year),
             'mode={:s}'.format(args.mode),
             'saveAllNanoContent={:.0f}'.format(int(args.saveAllNanoContent)),
             'saveRegressionVars={:.0f}'.format(int(args.saveRegressionVars)),
+            'version={:s}'.format(version)
         ]
 
         ext1 = {False:'data', True:'mc'}
@@ -130,10 +117,11 @@ if __name__ == '__main__':
 
         config.JobType.outputFiles = ['_'.join(output_flags)+'.root']
         config.Data.outLFNDirBase = '/store/group/cmst3/group/xee'
+        # config.Data.outLFNDirBase = '/store/user/mkanemur/LowPT' ## test
 
-        if "HAHM" in name:
+        if "HAHM" in sample:
             config.Data.outLFNDirBase += '/signalSamples/HAHM_DarkPhoton_13p6TeV_Nov2024'
-        elif "Run20" in name:
+        elif "Run20" in sample:
             config.Data.outLFNDirBase += '/data'
         else:
             config.Data.outLFNDirBase += '/backgroundSamples'
@@ -157,4 +145,7 @@ if __name__ == '__main__':
     print("Do you want to submit all task? (y/n)")
     if input().strip().lower() == 'y':
         for c in configs:
+            # p = Process(target = submit, args=(c,))
+            # p.start()
+            # p.join()
             submit(c)
