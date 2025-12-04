@@ -16,45 +16,39 @@ common:
     lhcRun: 3
     tag: '2024VBF' ## produced nanoAOD root filename
     lumiMask: 'https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions24/Cert_Collisions2024_378981_386951_Golden.json'
-
+    splitting: 20
+    
 samples:
-  ## 2024-A check this
-  Run2024A0_v1:
-    dataset: /ParkingVBF0/Run2024A-PromptReco-v1/MINIAOD
-  Run2024A1_v1:
-    dataset: /ParkingVBF1/Run2024A-PromptReco-v1/MINIAOD
-  Run2024A2_v1:
-    dataset: /ParkingVBF2/Run2024A-PromptReco-v1/MINIAOD
-  Run2024A3_v1:
-    dataset: /ParkingVBF3/Run2024A-PromptReco-v1/MINIAOD
-  Run2024A4_v1:
-    dataset: /ParkingVBF4/Run2024A-PromptReco-v1/MINIAOD
-  Run2024A5_v1:
-    dataset: /ParkingVBF5/Run2024A-PromptReco-v1/MINIAOD
-  Run2024A6_v1:
-    dataset: /ParkingVBF6/Run2024A-PromptReco-v1/MINIAOD
-  Run2024A7_v1:
-    dataset: /ParkingVBF7/Run2024A-PromptReco-v1/MINIAOD
+  ## 2024-A
+  ## No HLT_VBF paths were applied to 2024-A parking data -> skip
 
-  ## 2024-B check this
+  ## 2024-B
   Run2024B0_v1:
     dataset: /ParkingVBF0/Run2024B-PromptReco-v1/MINIAOD
+    version: B
   Run2024B1_v1:
     dataset: /ParkingVBF1/Run2024B-PromptReco-v1/MINIAOD
+    version: B
   Run2024B2_v1:
     dataset: /ParkingVBF2/Run2024B-PromptReco-v1/MINIAOD
+    version: B
   Run2024B3_v1:
     dataset: /ParkingVBF3/Run2024B-PromptReco-v1/MINIAOD
+    version: B
   Run2024B4_v1:
     dataset: /ParkingVBF4/Run2024B-PromptReco-v1/MINIAOD
+    version: B
   Run2024B5_v1:
     dataset: /ParkingVBF5/Run2024B-PromptReco-v1/MINIAOD
+    version: B
   Run2024B6_v1:
     dataset: /ParkingVBF6/Run2024B-PromptReco-v1/MINIAOD
+    version: B
   Run2024B7_v1:
     dataset: /ParkingVBF7/Run2024B-PromptReco-v1/MINIAOD
+    version: B
 
-  ## 2024-C check this
+  ## 2024-C
   Run2024C0_MINIv6:
     dataset: /ParkingVBF0/Run2024C-MINIv6NANOv15-v1/MINIAOD
   Run2024C1_MINIv6:
@@ -62,7 +56,7 @@ samples:
   Run2024C2_MINIv6:
     dataset: /ParkingVBF2/Run2024C-MINIv6NANOv15-v1/MINIAOD
   Run2024C3_MINIv6:
-    dataset: /ParkingVBF3/Run2024C-MINIv6NANOv15-v1/MINIAOD
+    dataset: /ParkingVBF3/Run2024C-MINIv6NANOv15-v2/MINIAOD ## cautious: v2, not v1
   Run2024C4_MINIv6:
     dataset: /ParkingVBF4/Run2024C-MINIv6NANOv15-v1/MINIAOD
   Run2024C5_MINIv6:
@@ -195,10 +189,3 @@ samples:
     dataset: /ParkingVBF7/Run2024I-MINIv6NANOv15-v3/MINIAOD
   Run2024I7_MINIv6_2:
     dataset: /ParkingVBF7/Run2024I-MINIv6NANOv15_v2-v2/MINIAOD
-
-
-
-
-
-
-

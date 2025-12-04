@@ -12,7 +12,6 @@ from PhysicsTools.NanoAOD.jetsAK8_cff import *
 from PhysicsTools.NanoAOD.jetMC_cff import *
 from PhysicsTools.NanoAOD.muons_cff import *
 from PhysicsTools.NanoAOD.taus_cff import *
-from PhysicsTools.NanoAOD.boostedTaus_cff import *
 from PhysicsTools.NanoAOD.photons_cff import *
 from PhysicsTools.NanoAOD.globals_cff import *
 from PhysicsTools.NanoAOD.extraflags_cff import *
@@ -47,6 +46,12 @@ from DoubleElectronNANO.BParkingNano.dielectron_cff import *
 # Removing dependency on byVVVLooseDeepTau2018v2p5VSjet, which doesn't work for 2022 preEE mini (v<4) data
 finalTaus.cut=cms.string("pt > 18 && ((tauID('decayModeFindingNewDMs') > 0.5 && (tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') || (tauID('chargedIsoPtSumdR03')+max(0.,tauID('neutralIsoPtSumdR03')-0.072*tauID('puCorrPtSum'))<2.5))) || (?isTauIDAvailable('byUTagCHSVSjetraw')?tauID('byUTagCHSVSjetraw'):-1) > {} || (?isTauIDAvailable('byUTagPUPPIVSjetraw')?tauID('byUTagPUPPIVSjetraw'):-1) > {})".format(0.05, 0.05))
 
+# Removing dependency on byBoostedDeepTau20161718v2p0VSjetraw, byBoostedDeepTau20161718v2p0VSmuraw, byBoostedDeepTau20161718v2p0VSeraw which doesn't work for VBF 2024 era B (miniAOD data excluding MINIv15)
+import PhysicsTools.NanoAOD.boostedTaus_cff as bt
+customBoostedTausTable.toModify(bt.boostedTauTable, variables=cms.PSet(bt._boostedTauVarsBase, bt._boostedTauVarsMVAIso, bt._boostedTauVarsAntiEleMVA))
+customBoostedTausTable.toModify(jetPuppiTable, variables = jetPuppiTable.variables.clone(puIdDisc = None)) # Reproduce all vars except puIdDisc
+customBoostedTausTable.toModify(finalBoostedTaus, cut = cms.string("pt > 25 && tauID('decayModeFindingNewDMs') && (tauID('byVVLooseIsolationMVArun2DBoldDMwLT') || tauID('byVVLooseIsolationMVArun2DBnewDMwLT'))"))
+
 # nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
 nanoSequenceOnlyFullSim = cms.Sequence(electronTriggerObjectBParkTables + l1bits)
 
@@ -58,6 +63,9 @@ nanoSequence = cms.Sequence(nanoMetadata +
 
 nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
                               cms.Sequence(globalTablesMCTask) + cms.Sequence(genWeightsTableTask) + genParticleBParkTables + lheInfoTable)
+
+# In privatly produced signal MC, the scale variations were not added
+allowedNumScaleWeights.toModify(genWeightsTable, allowedNumScaleWeights = cms.vuint32(0))
 
 nanoSequenceMC_extra = cms.Sequence(cms.Sequence(genParticleTask)
                             + cms.Sequence(particleLevelTask)
